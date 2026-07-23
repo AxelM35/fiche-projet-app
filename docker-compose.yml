@@ -1,0 +1,48 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-voyages_scolaires}
+      POSTGRES_USER: ${DB_USER:-voyages_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?la variable DB_PASSWORD doit etre definie dans .env}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-voyages_user} -d ${DB_NAME:-voyages_scolaires}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-voyages_scolaires}
+      DB_USER: ${DB_USER:-voyages_user}
+      DB_PASSWORD: ${DB_PASSWORD:?la variable DB_PASSWORD doit etre definie dans .env}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      ALLOWED_EMAIL_DOMAIN: ${ALLOWED_EMAIL_DOMAIN:-college-sthelier.fr}
+      ROLES_ADMIN: ${ROLES_ADMIN:-amorvan@college-sthelier.fr}
+      ROLES_COMPTA: ${ROLES_COMPTA:-compta@college-sthelier.fr}
+      ROLES_VIESCO: ${ROLES_VIESCO:-viesco@college-sthelier.fr}
+      ROLES_DIRECTION: ${ROLES_DIRECTION:-direction@college-sthelier.fr}
+      MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      MAIL_FROM: ${MAIL_FROM:-noreply@college-sthelier.fr}
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:8080}
+    ports:
+      - "8080:8080"
+
+volumes:
+  db_data:

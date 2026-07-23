@@ -1,0 +1,48 @@
+/* Habillage complementaire a Bootstrap 5 pour le tableau de bord Kanban et
+   le formulaire de fiche projet. */
+
+body {
+    background-color: #f5f6f8;
+}
+
+.kanban-column {
+    min-height: 70vh;
+}
+
+.kanban-body {
+    overflow-y: auto;
+    max-height: 75vh;
+}
+
+.project-card {
+    border-left: 4px solid #6c757d;
+    transition: box-shadow 0.15s ease-in-out;
+}
+
+.project-card:hover {
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+}
+
+.project-card.statut-a-corriger {
+    border-left-color: #dc3545;
+}
+
+.project-card.statut-valide {
+    border-left-color: #198754;
+}
+
+/* Sticky footer du formulaire : reste visible en bas de l'ecran pendant
+   le remplissage d'un long formulaire. */
+.footer-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 1020;
+    background-color: #fff;
+    border-top: 1px solid #dee2e6;
+    padding: 0.75rem 1rem;
+    box-shadow: 0 -0.25rem 0.5rem rgba(0, 0, 0, 0.05);
+}
+
+.carte-formulaire {
+    margin-bottom: 1.5rem;
+}

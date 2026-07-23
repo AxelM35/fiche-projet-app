@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tableau de bord - Voyages Scolaires</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+</head>
+<body>
+
+<nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+<div class="container-fluid px-4">
+
+    <div class="alert alert-success alert-dismissible fade show" role="alert"
+         th:if="${messageSucces}" th:text="${messageSucces}">
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert"
+         th:if="${messageErreur}" th:text="${messageErreur}">
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert"
+         th:if="${erreurRefus}" th:text="${erreurRefus}">
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <h1 class="h4 mb-4">Tableau de bord des voyages scolaires</h1>
+
+    <div class="row g-3 flex-nowrap overflow-auto pb-3">
+        <div class="col-3" th:each="entree : ${tableauDeBord}" style="min-width: 280px;">
+            <div class="card kanban-column shadow-sm">
+                <div class="card-header fw-semibold d-flex justify-content-between align-items-center"
+                     th:classappend="${entree.key.name() == 'VALIDE'} ? 'bg-success text-white' : ''">
+                    <span th:switch="${entree.key.name()}">
+                        <span th:case="'BROUILLON'">Brouillon</span>
+                        <span th:case="'EN_ATTENTE_COMPTA'">En attente Comptabilite</span>
+                        <span th:case="'EN_ATTENTE_VIE_SCOLAIRE'">En attente Vie Scolaire</span>
+                        <span th:case="'EN_ATTENTE_DIRECTION'">En attente Direction</span>
+                        <span th:case="'VALIDE'">Valide</span>
+                    </span>
+                    <span class="badge bg-secondary rounded-pill" th:text="${#lists.size(entree.value)}">0</span>
+                </div>
+
+                <div class="card-body kanban-body">
+                    <p class="text-muted small" th:if="${#lists.isEmpty(entree.value)}">Aucun dossier</p>
+
+                    <div class="card project-card mb-2"
+                         th:each="projet : ${entree.value}"
+                         th:classappend="${projet.statut.name() == 'A_CORRIGER' ? 'statut-a-corriger' : (projet.statut.name() == 'VALIDE' ? 'statut-valide' : '')}">
+                        <div class="card-body p-2">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <a class="fw-semibold text-decoration-none" th:href="@{/projets/{id}(id=${projet.id})}"
+                                   th:text="${projet.nomProjet}">Nom du projet</a>
+                                <span class="badge bg-danger" th:if="${projet.statut.name() == 'A_CORRIGER'}">A corriger</span>
+                            </div>
+                            <div class="small text-muted">
+                                <span th:text="${#temporals.format(projet.dateDepart, 'dd/MM/yyyy')}">01/01/2026</span>
+                                &rarr;
+                                <span th:text="${#temporals.format(projet.dateRetour, 'dd/MM/yyyy')}">05/01/2026</span>
+                            </div>
+                            <div class="small text-muted" th:text="${projet.lieuDepart} + ' -> ' + ${projet.lieuRetour}">Depart -> Retour</div>
+                            <div class="small">Organisateur : <span th:text="${projet.organisateurNom}">Nom</span></div>
+                            <div class="small">Effectif : <span th:text="${projet.effectif}">30</span> eleves</div>
+
+                            <div class="mt-2 d-flex flex-wrap gap-1">
+                                <!-- Brouillon / A corriger : reserve a l'organisateur (ou admin/direction) -->
+                                <div th:if="${(projet.statut.name() == 'BROUILLON' or projet.statut.name() == 'A_CORRIGER')
+                                             and (utilisateurConnecte == projet.organisateurEmail)}"
+                                     class="d-flex gap-1">
+                                    <a class="btn btn-sm btn-outline-primary" th:href="@{/projets/{id}(id=${projet.id})}">Modifier</a>
+                                    <form th:action="@{/projets/{id}/soumettre(id=${projet.id})}" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-primary">Soumettre</button>
+                                    </form>
+                                </div>
+
+                                <!-- Validation comptable -->
+                                <div th:if="${projet.statut.name() == 'EN_ATTENTE_COMPTA'}" sec:authorize="hasRole('COMPTA')" class="d-flex gap-1">
+                                    <form th:action="@{/projets/{id}/valider-compta(id=${projet.id})}" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-success">Valider Budget</button>
+                                    </form>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
+                                            data-bs-target="#modalRefus" th:attr="data-projet-id=${projet.id}">Refuser</button>
+                                </div>
+
+                                <!-- Validation vie scolaire -->
+                                <div th:if="${projet.statut.name() == 'EN_ATTENTE_VIE_SCOLAIRE'}" sec:authorize="hasRole('VIESCO')" class="d-flex gap-1">
+                                    <form th:action="@{/projets/{id}/valider-vie-scolaire(id=${projet.id})}" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-success">Valider Vie Scolaire</button>
+                                    </form>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
+                                            data-bs-target="#modalRefus" th:attr="data-projet-id=${projet.id}">Refuser</button>
+                                </div>
+
+                                <!-- Validation direction -->
+                                <div th:if="${projet.statut.name() == 'EN_ATTENTE_DIRECTION'}" sec:authorize="hasRole('DIRECTION')" class="d-flex gap-1">
+                                    <form th:action="@{/projets/{id}/valider-direction(id=${projet.id})}" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-success">Valider Direction</button>
+                                    </form>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
+                                            data-bs-target="#modalRefus" th:attr="data-projet-id=${projet.id}">Refuser</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fenetre modale unique, reutilisee pour tous les dossiers : le JS ci-dessous
+     redirige dynamiquement son action vers /projets/{id}/refuser au clic. -->
+<div class="modal fade" id="modalRefus" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="formRefus" method="post" th:action="@{/dashboard}">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Motif du refus</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                    <label for="motifRefus" class="form-label">
+                        Merci d'indiquer la raison du refus (elle sera visible par le professeur) :
+                    </label>
+                    <textarea class="form-control" id="motifRefus" name="motifRefus" rows="4" required></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-danger">Confirmer le refus</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:inline="javascript">
+    document.getElementById('modalRefus').addEventListener('show.bs.modal', function (evenement) {
+        const bouton = evenement.relatedTarget;
+        const projetId = bouton.getAttribute('data-projet-id');
+        document.getElementById('formRefus').action = '/projets/' + projetId + '/refuser';
+    });
+</script>
+</body>
+</html>

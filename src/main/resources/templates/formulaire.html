@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${projet.id} != null ? 'Modifier le projet' : 'Nouveau projet'">Fiche projet</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+</head>
+<body>
+
+<nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+<div class="container px-4" style="padding-bottom: 5rem;">
+
+    <div class="alert alert-success alert-dismissible fade show" role="alert"
+         th:if="${messageSucces}" th:text="${messageSucces}">
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Alerte stylisee affichant le motif de refus au professeur -->
+    <div class="alert alert-danger" role="alert" th:if="${statutCourant != null and statutCourant.name() == 'A_CORRIGER'}">
+        <h5 class="alert-heading">Ce dossier doit etre corrige</h5>
+        <p class="mb-0" th:text="${motifRefus}">Motif du refus...</p>
+    </div>
+
+    <h1 class="h4 mb-4" th:text="${projet.id} != null ? 'Fiche projet n°' + ${projet.id} : 'Nouveau projet de voyage scolaire'">Fiche projet</h1>
+
+    <form id="formProjet" method="post"
+          th:action="${projet.id} != null ? @{/projets/{id}(id=${projet.id})} : @{/projets/nouveau}"
+          th:object="${projet}">
+
+        <input type="hidden" th:if="${projet.version} != null" th:field="*{version}">
+
+        <!-- Carte : Le Voyage -->
+        <div class="card carte-formulaire shadow-sm">
+            <div class="card-header fw-semibold">Le Voyage</div>
+            <div class="card-body row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Nom du projet</label>
+                    <input type="text" class="form-control" th:field="*{nomProjet}"
+                           th:classappend="${#fields.hasErrors('nomProjet')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('nomProjet')}" th:errors="*{nomProjet}"></div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Transport</label>
+                    <input type="text" class="form-control" th:field="*{transport}" placeholder="Car, train, avion..."
+                           th:classappend="${#fields.hasErrors('transport')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('transport')}" th:errors="*{transport}"></div>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-control" rows="3" th:field="*{description}"
+                              th:classappend="${#fields.hasErrors('description')} ? 'is-invalid'"></textarea>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Date de depart</label>
+                    <input type="datetime-local" class="form-control" th:field="*{dateDepart}"
+                           th:classappend="${#fields.hasErrors('dateDepart')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('dateDepart')}" th:errors="*{dateDepart}"></div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Lieu de depart</label>
+                    <input type="text" class="form-control" th:field="*{lieuDepart}"
+                           th:classappend="${#fields.hasErrors('lieuDepart')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('lieuDepart')}" th:errors="*{lieuDepart}"></div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Date de retour</label>
+                    <input type="datetime-local" class="form-control" th:field="*{dateRetour}"
+                           th:classappend="${#fields.hasErrors('dateRetour')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('dateRetour')}" th:errors="*{dateRetour}"></div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Lieu de retour</label>
+                    <input type="text" class="form-control" th:field="*{lieuRetour}"
+                           th:classappend="${#fields.hasErrors('lieuRetour')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('lieuRetour')}" th:errors="*{lieuRetour}"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Carte : Le Responsable -->
+        <div class="card carte-formulaire shadow-sm">
+            <div class="card-header fw-semibold">Le Responsable</div>
+            <div class="card-body row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Nom de l'organisateur</label>
+                    <input type="text" class="form-control" th:field="*{organisateurNom}"
+                           th:classappend="${#fields.hasErrors('organisateurNom')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('organisateurNom')}" th:errors="*{organisateurNom}"></div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Email de l'organisateur</label>
+                    <input type="email" class="form-control" th:field="*{organisateurEmail}"
+                           th:classappend="${#fields.hasErrors('organisateurEmail')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('organisateurEmail')}" th:errors="*{organisateurEmail}"></div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Telephone</label>
+                    <input type="text" class="form-control" th:field="*{telephoneOrganisateur}"
+                           th:classappend="${#fields.hasErrors('telephoneOrganisateur')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('telephoneOrganisateur')}" th:errors="*{telephoneOrganisateur}"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Carte : Le Groupe -->
+        <div class="card carte-formulaire shadow-sm">
+            <div class="card-header fw-semibold">Le Groupe</div>
+            <div class="card-body row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Classes concernees</label>
+                    <input type="text" class="form-control" th:field="*{classesConcernees}" placeholder="Ex: 5A, 5B"
+                           th:classappend="${#fields.hasErrors('classesConcernees')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('classesConcernees')}" th:errors="*{classesConcernees}"></div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Effectif eleves</label>
+                    <input type="number" min="1" class="form-control" th:field="*{effectif}"
+                           th:classappend="${#fields.hasErrors('effectif')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('effectif')}" th:errors="*{effectif}"></div>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label">Accompagnateurs</label>
+                    <div id="listeAccompagnateurs">
+                        <div class="input-group mb-2" th:each="accompagnateur : *{accompagnateurs}">
+                            <input type="text" class="form-control" name="accompagnateurs" th:value="${accompagnateur}"
+                                   placeholder="Nom de l'accompagnateur">
+                            <button type="button" class="btn btn-outline-danger" onclick="this.closest('.input-group').remove()">&times;</button>
+                        </div>
+                        <div class="input-group mb-2" th:if="${#lists.isEmpty(projet.accompagnateurs)}">
+                            <input type="text" class="form-control" name="accompagnateurs" placeholder="Nom de l'accompagnateur">
+                            <button type="button" class="btn btn-outline-danger" onclick="this.closest('.input-group').remove()">&times;</button>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="ajouterAccompagnateur()">
+                        + Ajouter un accompagnateur
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Carte : Le Budget -->
+        <div class="card carte-formulaire shadow-sm">
+            <div class="card-header fw-semibold">Le Budget</div>
+            <div class="card-body row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Cout global (€)</label>
+                    <input type="number" step="0.01" min="0" class="form-control" th:field="*{coutGlobal}"
+                           th:classappend="${#fields.hasErrors('coutGlobal')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('coutGlobal')}" th:errors="*{coutGlobal}"></div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Cout par eleve (€)</label>
+                    <input type="number" step="0.01" min="0" class="form-control" th:field="*{coutParEleve}"
+                           th:classappend="${#fields.hasErrors('coutParEleve')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('coutParEleve')}" th:errors="*{coutParEleve}"></div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Subvention (€)</label>
+                    <input type="number" step="0.01" min="0" class="form-control" th:field="*{montantSubvention}"
+                           th:classappend="${#fields.hasErrors('montantSubvention')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('montantSubvention')}" th:errors="*{montantSubvention}"></div>
+                </div>
+
+                <div class="col-12 form-check">
+                    <input type="checkbox" class="form-check-input" id="eligiblePassCulture" th:field="*{eligiblePassCulture}">
+                    <label class="form-check-label" for="eligiblePassCulture">Eligible Pass Culture</label>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <!-- Sticky footer : boutons d'action, hors du formulaire principal pour
+         permettre des actions de workflow independantes (voir attribut form="formProjet"). -->
+    <div class="footer-actions d-flex flex-wrap gap-2 justify-content-between align-items-center">
+        <a class="btn btn-outline-secondary" th:href="@{/dashboard}">&larr; Retour au tableau de bord</a>
+
+        <div class="d-flex flex-wrap gap-2">
+            <!-- Enregistrer : reserve a l'organisateur du dossier tant qu'il est modifiable -->
+            <button type="submit" form="formProjet" class="btn btn-primary"
+                    th:if="${statutCourant == null or statutCourant.name() == 'BROUILLON' or statutCourant.name() == 'A_CORRIGER'}">
+                Enregistrer
+            </button>
+
+            <!-- Soumettre pour validation : uniquement sur un dossier deja enregistre -->
+            <form th:if="${projet.id} != null and (${statutCourant.name() == 'BROUILLON'} or ${statutCourant.name() == 'A_CORRIGER'})"
+                  th:action="@{/projets/{id}/soumettre(id=${projet.id})}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-success">Soumettre pour validation</button>
+            </form>
+
+            <!-- Validation comptable -->
+            <form th:if="${statutCourant} != null and ${statutCourant.name() == 'EN_ATTENTE_COMPTA'}"
+                  sec:authorize="hasRole('COMPTA')"
+                  th:action="@{/projets/{id}/valider-compta(id=${projet.id})}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-success">Valider Budget</button>
+            </form>
+
+            <!-- Validation vie scolaire -->
+            <form th:if="${statutCourant} != null and ${statutCourant.name() == 'EN_ATTENTE_VIE_SCOLAIRE'}"
+                  sec:authorize="hasRole('VIESCO')"
+                  th:action="@{/projets/{id}/valider-vie-scolaire(id=${projet.id})}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-success">Valider Vie Scolaire</button>
+            </form>
+
+            <!-- Validation direction -->
+            <form th:if="${statutCourant} != null and ${statutCourant.name() == 'EN_ATTENTE_DIRECTION'}"
+                  sec:authorize="hasRole('DIRECTION')"
+                  th:action="@{/projets/{id}/valider-direction(id=${projet.id})}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-success">Valider Direction</button>
+            </form>
+
+            <!-- Refuser : disponible a chaque etape de validation en attente -->
+            <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalRefus"
+                    th:if="${statutCourant} != null and (${statutCourant.name() == 'EN_ATTENTE_COMPTA'} or ${statutCourant.name() == 'EN_ATTENTE_VIE_SCOLAIRE'} or ${statutCourant.name() == 'EN_ATTENTE_DIRECTION'})"
+                    sec:authorize="hasAnyRole('COMPTA', 'VIESCO', 'DIRECTION', 'ADMIN')">
+                Refuser
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Fenetre modale de saisie du motif de refus -->
+<div class="modal fade" id="modalRefus" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form th:if="${projet.id} != null" th:action="@{/projets/{id}/refuser(id=${projet.id})}" method="post">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Motif du refus</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                    <label for="motifRefusSaisie" class="form-label">
+                        Merci d'indiquer la raison du refus (elle sera visible par le professeur) :
+                    </label>
+                    <textarea class="form-control" id="motifRefusSaisie" name="motifRefus" rows="4" required></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-danger">Confirmer le refus</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function ajouterAccompagnateur() {
+        const conteneur = document.getElementById('listeAccompagnateurs');
+        const ligne = document.createElement('div');
+        ligne.className = 'input-group mb-2';
+        ligne.innerHTML = '<input type="text" class="form-control" name="accompagnateurs" placeholder="Nom de l\'accompagnateur">'
+            + '<button type="button" class="btn btn-outline-danger" onclick="this.closest(\'.input-group\').remove()">&times;</button>';
+        conteneur.appendChild(ligne);
+    }
+</script>
+</body>
+</html>
