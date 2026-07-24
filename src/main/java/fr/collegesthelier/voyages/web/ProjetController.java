@@ -59,7 +59,7 @@ public class ProjetController {
     @GetMapping("/projets/{id}")
     public String formulaireEdition(@PathVariable Long id, Model model) {
         Projet projet = projetService.trouverParId(id);
-        model.addAttribute("projet", projetService.versDTO(projet));
+        model.addAttribute("projet", projetService.chargerFormulaire(id));
         model.addAttribute("statutCourant", projet.getStatut());
         model.addAttribute("motifRefus", projet.getMotifRefus());
         return "formulaire";

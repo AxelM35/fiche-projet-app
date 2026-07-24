@@ -110,6 +110,19 @@ public class ProjetService {
         return projetRepository.save(projet);
     }
 
+    /**
+     * A utiliser depuis le controleur pour pre-remplir le formulaire
+     * d'edition : charge le projet ET le convertit en DTO au sein d'une
+     * seule et meme transaction. La collection accompagnateurs etant
+     * chargee en lazy, un appel a trouverParId(id) suivi d'un appel
+     * separe a versDTO(projet) echouerait (session Hibernate deja fermee
+     * entre les deux appels transactionnels).
+     */
+    @Transactional(readOnly = true)
+    public ProjetFormDTO chargerFormulaire(Long id) {
+        return versDTO(trouverParId(id));
+    }
+
     public ProjetFormDTO versDTO(Projet projet) {
         ProjetFormDTO dto = new ProjetFormDTO();
         dto.setId(projet.getId());
