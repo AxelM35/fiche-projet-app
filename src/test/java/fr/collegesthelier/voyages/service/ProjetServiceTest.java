@@ -119,20 +119,62 @@ class ProjetServiceTest {
     }
 
     @Test
-    void unRefusEffaceLesDatesDeValidationEtRepasseEnACorriger() {
+    void unRefusParVieScolaireConserveLaValidationComptaDejaObtenue() {
         connecterEnTantQue("martin@college-sthelier.fr", "ROLE_PROF");
         Long id = projetService.creerProjet(dtoValide()).getId();
         projetService.soumettre(id);
 
         connecterEnTantQue("compta@college-sthelier.fr", "ROLE_COMPTA");
         projetService.validerCompta(id);
-        projetService.refuser(id, "Budget trop eleve, merci de revoir le devis.");
+
+        connecterEnTantQue("viesco@college-sthelier.fr", "ROLE_VIESCO");
+        projetService.refuser(id, "Effectif incoherent avec les autorisations de sortie.");
 
         Projet refuse = projetService.trouverParId(id);
         assertThat(refuse.getStatut()).isEqualTo(StatutProjet.A_CORRIGER);
-        assertThat(refuse.getMotifRefus()).isEqualTo("Budget trop eleve, merci de revoir le devis.");
-        assertThat(refuse.getDateValidationProf()).isNull();
-        assertThat(refuse.getDateValidationCompta()).isNull();
+        assertThat(refuse.getMotifRefus()).isEqualTo("Effectif incoherent avec les autorisations de sortie.");
+        // La validation comptable, obtenue avant ce refus, est conservee :
+        // elle ne sera pas redemandee a la resoumission.
+        assertThat(refuse.getDateValidationCompta()).isNotNull();
+        assertThat(refuse.getDateValidationVieScolaire()).isNull();
+    }
+
+    @Test
+    void laResoumissionRepredALEtapeQuiARefuseSansFaireRevaliderComptaDejaValide() {
+        connecterEnTantQue("martin@college-sthelier.fr", "ROLE_PROF");
+        Long id = projetService.creerProjet(dtoValide()).getId();
+        projetService.soumettre(id);
+
+        connecterEnTantQue("compta@college-sthelier.fr", "ROLE_COMPTA");
+        projetService.validerCompta(id);
+        LocalDateTime dateValidationComptaInitiale = projetService.trouverParId(id).getDateValidationCompta();
+
+        connecterEnTantQue("viesco@college-sthelier.fr", "ROLE_VIESCO");
+        projetService.refuser(id, "A revoir.");
+
+        connecterEnTantQue("martin@college-sthelier.fr", "ROLE_PROF");
+        projetService.soumettre(id);
+
+        Projet resoumis = projetService.trouverParId(id);
+        // Reprend directement a Vie Scolaire : pas de retour a Comptabilite.
+        assertThat(resoumis.getStatut()).isEqualTo(StatutProjet.EN_ATTENTE_VIE_SCOLAIRE);
+        assertThat(resoumis.getMotifRefus()).isNull();
+        assertThat(resoumis.getDateValidationCompta()).isEqualTo(dateValidationComptaInitiale);
+    }
+
+    @Test
+    void unRefusDesLaComptabiliteRepredBienAComptabiliteALaResoumission() {
+        connecterEnTantQue("martin@college-sthelier.fr", "ROLE_PROF");
+        Long id = projetService.creerProjet(dtoValide()).getId();
+        projetService.soumettre(id);
+
+        connecterEnTantQue("compta@college-sthelier.fr", "ROLE_COMPTA");
+        projetService.refuser(id, "Devis manquant.");
+
+        connecterEnTantQue("martin@college-sthelier.fr", "ROLE_PROF");
+        projetService.soumettre(id);
+
+        assertThat(projetService.trouverParId(id).getStatut()).isEqualTo(StatutProjet.EN_ATTENTE_COMPTA);
     }
 
     @Test

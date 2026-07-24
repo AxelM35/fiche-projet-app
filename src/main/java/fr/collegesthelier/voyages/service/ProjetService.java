@@ -161,13 +161,29 @@ public class ProjetService {
         }
 
         StatutProjet ancienStatut = projet.getStatut();
-        projet.setStatut(StatutProjet.EN_ATTENTE_COMPTA);
+        projet.setStatut(determinerEtapeDeReprise(projet));
         projet.setDateValidationProf(LocalDateTime.now());
         projet.setMotifRefus(null);
 
         Projet enregistre = projetRepository.save(projet);
         publierEvenement(enregistre, ancienStatut);
         return enregistre;
+    }
+
+    /**
+     * Un premier envoi (aucune validation anterieure) repart de Comptabilite.
+     * La resoumission d'un dossier corrige reprend juste apres la derniere
+     * etape deja validee, sans faire revalider ceux qui avaient deja donne
+     * leur accord avant que le refus n'intervienne plus loin dans le circuit.
+     */
+    private StatutProjet determinerEtapeDeReprise(Projet projet) {
+        if (projet.getDateValidationVieScolaire() != null) {
+            return StatutProjet.EN_ATTENTE_DIRECTION;
+        }
+        if (projet.getDateValidationCompta() != null) {
+            return StatutProjet.EN_ATTENTE_VIE_SCOLAIRE;
+        }
+        return StatutProjet.EN_ATTENTE_COMPTA;
     }
 
     @PreAuthorize("hasAnyRole('COMPTA', 'ADMIN')")
@@ -236,12 +252,13 @@ public class ProjetService {
         projet.setStatut(StatutProjet.A_CORRIGER);
         projet.setMotifRefus(motifRefus);
 
-        // Les validations anterieures sont effacees : le dossier reprend le
-        // circuit depuis le debut une fois corrige et resoumis par le prof.
-        projet.setDateValidationProf(null);
-        projet.setDateValidationCompta(null);
-        projet.setDateValidationVieScolaire(null);
-        projet.setDateValidationDirection(null);
+        // Les validations DEJA obtenues (etapes anterieures a celle qui
+        // refuse) sont conservees : la resoumission (voir
+        // determinerEtapeDeReprise) reprendra directement a l'etape qui a
+        // refuse, sans faire revalider ceux qui avaient deja donne leur
+        // accord. La date de l'etape qui refuse elle-meme n'a jamais ete
+        // renseignee (on ne l'ecrit que lors d'une validation), rien a
+        // effacer pour elle ni pour les etapes suivantes.
 
         Projet enregistre = projetRepository.save(projet);
         publierEvenement(enregistre, ancienStatut);

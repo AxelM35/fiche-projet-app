@@ -18,7 +18,7 @@ Chaque projet de voyage suit un workflow lineaire de validation :
 BROUILLON -> EN_ATTENTE_COMPTA -> EN_ATTENTE_VIE_SCOLAIRE -> EN_ATTENTE_DIRECTION -> VALIDE
 ```
 
-A tout moment durant une etape d'attente, le dossier peut etre **refuse** : il repasse au statut `A_CORRIGER`, le motif est enregistre et les dates de validation anterieures sont effacees. Le professeur corrige puis resoumet le dossier, qui repart du debut du circuit.
+A tout moment durant une etape d'attente, le dossier peut etre **refuse** : il repasse au statut `A_CORRIGER` et le motif est enregistre. Les validations deja obtenues aux etapes anterieures sont conservees : le professeur corrige puis resoumet le dossier, qui reprend directement a l'etape qui a refuse, sans faire revalider ceux qui avaient deja donne leur accord.
 
 Un tableau de bord Kanban (`/dashboard`) affiche les projets regroupes par etape. Chaque fiche projet (`/projets/{id}`) presente le detail du dossier organise en cartes thematiques (Le Voyage, Le Responsable, Le Groupe, Le Budget) avec des actions contextuelles selon le role de l'utilisateur connecte.
 
