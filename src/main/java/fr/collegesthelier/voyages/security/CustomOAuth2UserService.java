@@ -6,12 +6,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
-import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
-import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -20,18 +20,23 @@ import java.util.Locale;
 import java.util.Set;
 
 /**
- * Service d'authentification OAuth2 (Google) :
- * 1. Rejette toute connexion dont l'email n'appartient pas au domaine de
- *    l'etablissement (variable d'environnement ALLOWED_EMAIL_DOMAIN).
- * 2. Attribue les roles RBAC : ROLE_PROF par defaut, puis ROLE_COMPTA /
- *    ROLE_VIESCO / ROLE_DIRECTION / ROLE_ADMIN selon les listes d'emails
- *    configurees dans application.properties. Un utilisateur peut cumuler
- *    plusieurs roles.
+ * Google est enregistre avec le scope "openid" (voir application.properties)
+ * : la connexion emprunte donc le flux OpenID Connect, pas un simple OAuth2.
+ * C'est pourquoi ce service surcharge OidcUserService (et non
+ * DefaultOAuth2UserService, qui ne serait jamais invoque pour un flux OIDC)
+ * et est branche via userInfoEndpoint().oidcUserService(...) dans
+ * SecurityConfig. Il applique :
+ * 1. le filtre de domaine (rejet si l'email n'appartient pas au domaine
+ *    autorise, variable d'environnement ALLOWED_EMAIL_DOMAIN) ;
+ * 2. l'attribution des roles RBAC : ROLE_PROF par defaut, puis
+ *    ROLE_COMPTA / ROLE_VIESCO / ROLE_DIRECTION / ROLE_ADMIN selon les
+ *    listes d'emails configurees. Un utilisateur peut cumuler plusieurs
+ *    roles.
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class CustomOAuth2UserService extends DefaultOAuth2UserService {
+public class CustomOAuth2UserService extends OidcUserService {
 
     private static final String ATTRIBUT_EMAIL = "email";
 
@@ -39,10 +44,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     private final RolesProperties rolesProperties;
 
     @Override
-    public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        OAuth2User oAuth2User = super.loadUser(userRequest);
+    public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
+        OidcUser oidcUser = super.loadUser(userRequest);
 
-        String email = oAuth2User.getAttribute(ATTRIBUT_EMAIL);
+        String email = oidcUser.getAttribute(ATTRIBUT_EMAIL);
         if (email == null || !estDomaineAutorise(email)) {
             log.warn("Connexion refusee pour l'email '{}' : domaine non autorise", email);
             throw new OAuth2AuthenticationException(
@@ -53,7 +58,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         Set<GrantedAuthority> authorities = construireAuthorities(email);
         log.info("Connexion de '{}' avec les roles {}", email, authorities);
 
-        return new DefaultOAuth2User(authorities, oAuth2User.getAttributes(), ATTRIBUT_EMAIL);
+        return new DefaultOidcUser(authorities, oidcUser.getIdToken(), oidcUser.getUserInfo(), ATTRIBUT_EMAIL);
     }
 
     private boolean estDomaineAutorise(String email) {

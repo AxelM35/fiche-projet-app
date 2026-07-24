@@ -31,7 +31,10 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
-                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                        // Google est enregistre avec le scope "openid" : le flux est OIDC,
+                        // donc oidcUserService(...) est le point d'extension a utiliser
+                        // (userService(...) ne serait jamais invoque dans ce cas).
+                        .userInfoEndpoint(userInfo -> userInfo.oidcUserService(customOAuth2UserService))
                         .defaultSuccessUrl("/dashboard", true)
                         .failureUrl("/login?erreur")
                 )
