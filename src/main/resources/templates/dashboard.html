@@ -76,7 +76,7 @@
                                 </div>
 
                                 <!-- Validation comptable -->
-                                <div th:if="${projet.statut.name() == 'EN_ATTENTE_COMPTA'}" sec:authorize="hasRole('COMPTA')" class="d-flex gap-1">
+                                <div th:if="${projet.statut.name() == 'EN_ATTENTE_COMPTA'}" sec:authorize="hasAnyRole('COMPTA', 'ADMIN')" class="d-flex gap-1">
                                     <form th:action="@{/projets/{id}/valider-compta(id=${projet.id})}" method="post" class="d-inline">
                                         <button type="submit" class="btn btn-sm btn-success">Valider Budget</button>
                                     </form>
@@ -85,7 +85,7 @@
                                 </div>
 
                                 <!-- Validation vie scolaire -->
-                                <div th:if="${projet.statut.name() == 'EN_ATTENTE_VIE_SCOLAIRE'}" sec:authorize="hasRole('VIESCO')" class="d-flex gap-1">
+                                <div th:if="${projet.statut.name() == 'EN_ATTENTE_VIE_SCOLAIRE'}" sec:authorize="hasAnyRole('VIESCO', 'ADMIN')" class="d-flex gap-1">
                                     <form th:action="@{/projets/{id}/valider-vie-scolaire(id=${projet.id})}" method="post" class="d-inline">
                                         <button type="submit" class="btn btn-sm btn-success">Valider Vie Scolaire</button>
                                     </form>
@@ -94,7 +94,7 @@
                                 </div>
 
                                 <!-- Validation direction -->
-                                <div th:if="${projet.statut.name() == 'EN_ATTENTE_DIRECTION'}" sec:authorize="hasRole('DIRECTION')" class="d-flex gap-1">
+                                <div th:if="${projet.statut.name() == 'EN_ATTENTE_DIRECTION'}" sec:authorize="hasAnyRole('DIRECTION', 'ADMIN')" class="d-flex gap-1">
                                     <form th:action="@{/projets/{id}/valider-direction(id=${projet.id})}" method="post" class="d-inline">
                                         <button type="submit" class="btn btn-sm btn-success">Valider Direction</button>
                                     </form>

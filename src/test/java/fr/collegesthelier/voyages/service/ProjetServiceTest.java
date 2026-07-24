@@ -103,6 +103,22 @@ class ProjetServiceTest {
     }
 
     @Test
+    void unAdminPeutValiderNimporteQuelleEtapeALaPlaceDuRoleMetier() {
+        connecterEnTantQue("martin@college-sthelier.fr", "ROLE_PROF");
+        Long id = projetService.creerProjet(dtoValide()).getId();
+        projetService.soumettre(id);
+
+        // Un ADMIN peut debloquer un dossier a n'importe quelle etape, sans
+        // avoir a endosser le role metier (COMPTA/VIESCO/DIRECTION).
+        connecterEnTantQue("amorvan@college-sthelier.fr", "ROLE_ADMIN");
+        projetService.validerCompta(id);
+        projetService.validerVieScolaire(id);
+        projetService.validerDirection(id);
+
+        assertThat(projetService.trouverParId(id).getStatut()).isEqualTo(StatutProjet.VALIDE);
+    }
+
+    @Test
     void unRefusEffaceLesDatesDeValidationEtRepasseEnACorriger() {
         connecterEnTantQue("martin@college-sthelier.fr", "ROLE_PROF");
         Long id = projetService.creerProjet(dtoValide()).getId();

@@ -170,7 +170,7 @@ public class ProjetService {
         return enregistre;
     }
 
-    @PreAuthorize("hasRole('COMPTA')")
+    @PreAuthorize("hasAnyRole('COMPTA', 'ADMIN')")
     @Transactional
     public Projet validerCompta(Long id) {
         Projet projet = trouverParId(id);
@@ -187,7 +187,7 @@ public class ProjetService {
         return enregistre;
     }
 
-    @PreAuthorize("hasRole('VIESCO')")
+    @PreAuthorize("hasAnyRole('VIESCO', 'ADMIN')")
     @Transactional
     public Projet validerVieScolaire(Long id) {
         Projet projet = trouverParId(id);
@@ -204,7 +204,7 @@ public class ProjetService {
         return enregistre;
     }
 
-    @PreAuthorize("hasRole('DIRECTION')")
+    @PreAuthorize("hasAnyRole('DIRECTION', 'ADMIN')")
     @Transactional
     public Projet validerDirection(Long id) {
         Projet projet = trouverParId(id);
