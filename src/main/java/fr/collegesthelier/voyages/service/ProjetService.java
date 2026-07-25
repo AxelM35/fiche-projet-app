@@ -1,6 +1,7 @@
 package fr.collegesthelier.voyages.service;
 
 import fr.collegesthelier.voyages.dto.ProjetFormDTO;
+import fr.collegesthelier.voyages.dto.TableauDeBordStatsDTO;
 import fr.collegesthelier.voyages.event.ProjetEvent;
 import fr.collegesthelier.voyages.exception.ProjetNotFoundException;
 import fr.collegesthelier.voyages.exception.TransitionInvalideException;
@@ -18,12 +19,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -79,6 +82,26 @@ public class ProjetService {
                 projetRepository.findByStatutOrderByDateDepartAsc(StatutProjet.VALIDE));
 
         return tableau;
+    }
+
+    /**
+     * Chiffres cles affiches en tuiles au-dessus du Kanban. Calcules a
+     * partir du tableau deja charge (pas de requete supplementaire) : le
+     * budget "engage" ne compte que les projets definitivement VALIDE.
+     */
+    public TableauDeBordStatsDTO calculerStatistiques(Map<StatutProjet, List<Projet>> tableauDeBord) {
+        long totalProjets = tableauDeBord.values().stream().mapToLong(List::size).sum();
+        long projetsValides = tableauDeBord.getOrDefault(StatutProjet.VALIDE, List.of()).size();
+        long projetsEnAttente = tableauDeBord.getOrDefault(StatutProjet.EN_ATTENTE_COMPTA, List.of()).size()
+                + tableauDeBord.getOrDefault(StatutProjet.EN_ATTENTE_VIE_SCOLAIRE, List.of()).size()
+                + tableauDeBord.getOrDefault(StatutProjet.EN_ATTENTE_DIRECTION, List.of()).size();
+
+        BigDecimal budgetTotalEngage = tableauDeBord.getOrDefault(StatutProjet.VALIDE, List.of()).stream()
+                .map(Projet::getCoutGlobal)
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        return new TableauDeBordStatsDTO(totalProjets, projetsValides, projetsEnAttente, budgetTotalEngage);
     }
 
     // -------------------------------------------------------------------

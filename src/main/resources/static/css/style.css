@@ -31,6 +31,94 @@ body {
     border-left-color: #198754;
 }
 
+.project-card {
+    border-radius: 0.5rem;
+    border-top: 0;
+    border-right: 0;
+    border-bottom: 0;
+}
+
+/* Barre de recherche du tableau de bord */
+.search-box {
+    position: relative;
+    min-width: 260px;
+}
+
+.search-box .bi-search {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+}
+
+.search-box input {
+    padding-left: 2.25rem;
+    border-radius: 2rem;
+}
+
+/* Tuiles de statistiques */
+.stat-tile {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: #fff;
+    border-radius: 0.75rem;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.06);
+    height: 100%;
+}
+
+.stat-tile-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.75rem;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+}
+
+.stat-tile-label {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.stat-tile-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+/* Badges de statut sur les cartes projet */
+.badge-statut span {
+    display: inline-block;
+    padding: 0.25em 0.65em;
+    border-radius: 1rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.badge-statut-brouillon {
+    background-color: #e9ecef;
+    color: #495057;
+}
+
+.badge-statut-attente {
+    background-color: #fff3cd;
+    color: #997404;
+}
+
+.badge-statut-valide {
+    background-color: #d1e7dd;
+    color: #0f5132;
+}
+
+.badge-statut-corriger {
+    background-color: #f8d7da;
+    color: #842029;
+}
+
 /* Sticky footer du formulaire : reste visible en bas de l'ecran pendant
    le remplissage d'un long formulaire. */
 .footer-actions {

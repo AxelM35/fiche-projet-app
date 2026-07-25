@@ -43,7 +43,9 @@ public class ProjetController {
 
     @GetMapping("/dashboard")
     public String tableauDeBord(Model model) {
-        model.addAttribute("tableauDeBord", projetService.projetsPourTableauDeBord());
+        var tableauDeBord = projetService.projetsPourTableauDeBord();
+        model.addAttribute("tableauDeBord", tableauDeBord);
+        model.addAttribute("stats", projetService.calculerStatistiques(tableauDeBord));
         model.addAttribute("refus", new RefusFormDTO());
         return "dashboard";
     }

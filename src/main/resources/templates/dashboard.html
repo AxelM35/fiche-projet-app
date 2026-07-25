@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Tableau de bord - Voyages Scolaires</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link th:href="@{/css/style.css}" rel="stylesheet">
 </head>
 <body>
@@ -26,13 +27,59 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 
-    <h1 class="h4 mb-4">Tableau de bord des voyages scolaires</h1>
+    <!-- En-tete : titre + barre de recherche -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <h1 class="h4 mb-0">Tableau de bord des voyages scolaires</h1>
+        <div class="search-box">
+            <i class="bi bi-search"></i>
+            <input type="search" id="rechercheProjet" class="form-control" placeholder="Rechercher un projet...">
+        </div>
+    </div>
+
+    <!-- Tuiles de statistiques -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-lg-3">
+            <div class="stat-tile">
+                <div class="stat-tile-icon bg-primary-subtle text-primary"><i class="bi bi-folder2-open"></i></div>
+                <div>
+                    <div class="stat-tile-label">Total projets</div>
+                    <div class="stat-tile-value" th:text="${stats.totalProjets()}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="stat-tile">
+                <div class="stat-tile-icon bg-warning-subtle text-warning"><i class="bi bi-hourglass-split"></i></div>
+                <div>
+                    <div class="stat-tile-label">En attente de validation</div>
+                    <div class="stat-tile-value" th:text="${stats.projetsEnAttenteDeValidation()}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="stat-tile">
+                <div class="stat-tile-icon bg-success-subtle text-success"><i class="bi bi-check-circle"></i></div>
+                <div>
+                    <div class="stat-tile-label">Projets valides</div>
+                    <div class="stat-tile-value" th:text="${stats.projetsValides()}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="stat-tile">
+                <div class="stat-tile-icon bg-info-subtle text-info"><i class="bi bi-cash-coin"></i></div>
+                <div>
+                    <div class="stat-tile-label">Budget total engage</div>
+                    <div class="stat-tile-value" th:text="${#numbers.formatDecimal(stats.budgetTotalEngage(), 0, 'WHITESPACE', 0, 'POINT')} + ' €'">0 €</div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="row g-3 flex-nowrap overflow-auto pb-3">
-        <div class="col-3" th:each="entree : ${tableauDeBord}" style="min-width: 280px;">
+        <div class="col-3" th:each="entree : ${tableauDeBord}" style="min-width: 300px;">
             <div class="card kanban-column shadow-sm">
-                <div class="card-header fw-semibold d-flex justify-content-between align-items-center"
-                     th:classappend="${entree.key.name() == 'VALIDE'} ? 'bg-success text-white' : ''">
+                <div class="card-header fw-semibold d-flex justify-content-between align-items-center">
                     <span th:switch="${entree.key.name()}">
                         <span th:case="'BROUILLON'">Brouillon</span>
                         <span th:case="'EN_ATTENTE_COMPTA'">En attente Comptabilite</span>
@@ -40,29 +87,45 @@
                         <span th:case="'EN_ATTENTE_DIRECTION'">En attente Direction</span>
                         <span th:case="'VALIDE'">Valide</span>
                     </span>
-                    <span class="badge bg-secondary rounded-pill" th:text="${#lists.size(entree.value)}">0</span>
+                    <span class="badge bg-secondary rounded-pill compteur-colonne" th:text="${#lists.size(entree.value)}">0</span>
                 </div>
 
                 <div class="card-body kanban-body">
-                    <p class="text-muted small" th:if="${#lists.isEmpty(entree.value)}">Aucun dossier</p>
+                    <p class="text-muted small message-vide"
+                       th:classappend="${#lists.isEmpty(entree.value)} ? '' : 'd-none'">Aucun dossier</p>
 
                     <div class="card project-card mb-2"
                          th:each="projet : ${entree.value}"
+                         th:attr="data-nom=${#strings.toLowerCase(projet.nomProjet)}"
                          th:classappend="${projet.statut.name() == 'A_CORRIGER' ? 'statut-a-corriger' : (projet.statut.name() == 'VALIDE' ? 'statut-valide' : '')}">
-                        <div class="card-body p-2">
-                            <div class="d-flex justify-content-between align-items-start">
+                        <div class="card-body p-3">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
                                 <a class="fw-semibold text-decoration-none" th:href="@{/projets/{id}(id=${projet.id})}"
                                    th:text="${projet.nomProjet}">Nom du projet</a>
-                                <span class="badge bg-danger" th:if="${projet.statut.name() == 'A_CORRIGER'}">A corriger</span>
+                                <span class="badge-statut" th:switch="${projet.statut.name()}">
+                                    <span th:case="'BROUILLON'" class="badge-statut-brouillon">Brouillon</span>
+                                    <span th:case="'EN_ATTENTE_COMPTA'" class="badge-statut-attente">En attente</span>
+                                    <span th:case="'EN_ATTENTE_VIE_SCOLAIRE'" class="badge-statut-attente">En attente</span>
+                                    <span th:case="'EN_ATTENTE_DIRECTION'" class="badge-statut-attente">En attente</span>
+                                    <span th:case="'VALIDE'" class="badge-statut-valide">Valide</span>
+                                    <span th:case="'A_CORRIGER'" class="badge-statut-corriger">A corriger</span>
+                                </span>
                             </div>
-                            <div class="small text-muted">
+                            <div class="small text-muted mb-1">
+                                <i class="bi bi-geo-alt"></i>
+                                <span th:text="${projet.lieuDepart} + ' -> ' + ${projet.lieuRetour}">Depart -> Retour</span>
+                            </div>
+                            <div class="small text-muted mb-1">
+                                <i class="bi bi-calendar3"></i>
                                 <span th:text="${#temporals.format(projet.dateDepart, 'dd/MM/yyyy')}">01/01/2026</span>
                                 &rarr;
                                 <span th:text="${#temporals.format(projet.dateRetour, 'dd/MM/yyyy')}">05/01/2026</span>
                             </div>
-                            <div class="small text-muted" th:text="${projet.lieuDepart} + ' -> ' + ${projet.lieuRetour}">Depart -> Retour</div>
-                            <div class="small">Organisateur : <span th:text="${projet.organisateurNom}">Nom</span></div>
-                            <div class="small">Effectif : <span th:text="${projet.effectif}">30</span> eleves</div>
+                            <div class="small mb-1">
+                                <i class="bi bi-person"></i>
+                                <span th:text="${projet.organisateurNom}">Nom</span>
+                                &middot; <span th:text="${projet.effectif}">30</span> eleves
+                            </div>
 
                             <div class="mt-2 d-flex flex-wrap gap-1">
                                 <!-- Brouillon / A corriger : reserve a l'organisateur (ou admin/direction) -->
@@ -141,6 +204,32 @@
         const bouton = evenement.relatedTarget;
         const projetId = bouton.getAttribute('data-projet-id');
         document.getElementById('formRefus').action = '/projets/' + projetId + '/refuser';
+    });
+
+    // Filtrage cote client, par nom de projet, colonne par colonne (sans
+    // aller-retour serveur : le tableau est deja entierement charge).
+    document.getElementById('rechercheProjet').addEventListener('input', function (evenement) {
+        const recherche = evenement.target.value.trim().toLowerCase();
+
+        document.querySelectorAll('.kanban-column').forEach(function (colonne) {
+            let visibles = 0;
+            colonne.querySelectorAll('.project-card').forEach(function (carte) {
+                const correspond = carte.getAttribute('data-nom').includes(recherche);
+                carte.classList.toggle('d-none', !correspond);
+                if (correspond) {
+                    visibles += 1;
+                }
+            });
+
+            const compteur = colonne.querySelector('.compteur-colonne');
+            if (compteur) {
+                compteur.textContent = visibles;
+            }
+            const messageVide = colonne.querySelector('.message-vide');
+            if (messageVide) {
+                messageVide.classList.toggle('d-none', visibles > 0);
+            }
+        });
     });
 </script>
 </body>
