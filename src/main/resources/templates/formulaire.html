@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title th:text="${projet.id} != null ? 'Modifier le projet' : 'Nouveau projet'">Fiche projet</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link th:href="@{/css/style.css}" rel="stylesheet">
 </head>
 <body>
@@ -20,11 +21,21 @@
 
     <!-- Alerte stylisee affichant le motif de refus au professeur -->
     <div class="alert alert-danger" role="alert" th:if="${statutCourant != null and statutCourant.name() == 'A_CORRIGER'}">
-        <h5 class="alert-heading">Ce dossier doit etre corrige</h5>
+        <h5 class="alert-heading"><i class="bi bi-exclamation-triangle me-2"></i>Ce dossier doit etre corrige</h5>
         <p class="mb-0" th:text="${motifRefus}">Motif du refus...</p>
     </div>
 
-    <h1 class="h4 mb-4" th:text="${projet.id} != null ? 'Fiche projet n°' + ${projet.id} : 'Nouveau projet de voyage scolaire'">Fiche projet</h1>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+        <h1 class="h4 mb-0" th:text="${projet.id} != null ? 'Fiche projet n°' + ${projet.id} : 'Nouveau projet de voyage scolaire'">Fiche projet</h1>
+        <span class="badge-statut" th:if="${statutCourant != null}" th:switch="${statutCourant.name()}">
+            <span th:case="'BROUILLON'" class="badge-statut-brouillon">Brouillon</span>
+            <span th:case="'EN_ATTENTE_COMPTA'" class="badge-statut-attente">En attente Comptabilite</span>
+            <span th:case="'EN_ATTENTE_VIE_SCOLAIRE'" class="badge-statut-attente">En attente Vie Scolaire</span>
+            <span th:case="'EN_ATTENTE_DIRECTION'" class="badge-statut-attente">En attente Direction</span>
+            <span th:case="'VALIDE'" class="badge-statut-valide">Valide</span>
+            <span th:case="'A_CORRIGER'" class="badge-statut-corriger">A corriger</span>
+        </span>
+    </div>
 
     <form id="formProjet" method="post"
           th:action="${projet.id} != null ? @{/projets/{id}(id=${projet.id})} : @{/projets/nouveau}"
@@ -34,7 +45,7 @@
 
         <!-- Carte : Le Voyage -->
         <div class="card carte-formulaire shadow-sm">
-            <div class="card-header fw-semibold">Le Voyage</div>
+            <div class="card-header fw-semibold"><i class="bi bi-airplane me-2"></i>Le Voyage</div>
             <div class="card-body row g-3">
                 <div class="col-md-6">
                     <label class="form-label">Nom du projet</label>
@@ -85,7 +96,7 @@
 
         <!-- Carte : Le Responsable -->
         <div class="card carte-formulaire shadow-sm">
-            <div class="card-header fw-semibold">Le Responsable</div>
+            <div class="card-header fw-semibold"><i class="bi bi-person-badge me-2"></i>Le Responsable</div>
             <div class="card-body row g-3">
                 <div class="col-md-4">
                     <label class="form-label">Nom de l'organisateur</label>
@@ -110,7 +121,7 @@
 
         <!-- Carte : Le Groupe -->
         <div class="card carte-formulaire shadow-sm">
-            <div class="card-header fw-semibold">Le Groupe</div>
+            <div class="card-header fw-semibold"><i class="bi bi-people me-2"></i>Le Groupe</div>
             <div class="card-body row g-3">
                 <div class="col-md-6">
                     <label class="form-label">Classes concernees</label>
@@ -147,7 +158,7 @@
 
         <!-- Carte : Le Budget -->
         <div class="card carte-formulaire shadow-sm">
-            <div class="card-header fw-semibold">Le Budget</div>
+            <div class="card-header fw-semibold"><i class="bi bi-cash-coin me-2"></i>Le Budget</div>
             <div class="card-body row g-3">
                 <div class="col-md-4">
                     <label class="form-label">Cout global (€)</label>
@@ -179,7 +190,7 @@
     <!-- Sticky footer : boutons d'action, hors du formulaire principal pour
          permettre des actions de workflow independantes (voir attribut form="formProjet"). -->
     <div class="footer-actions d-flex flex-wrap gap-2 justify-content-between align-items-center">
-        <a class="btn btn-outline-secondary" th:href="@{/dashboard}">&larr; Retour au tableau de bord</a>
+        <a class="btn btn-outline-secondary" th:href="@{/dashboard}"><i class="bi bi-arrow-left me-1"></i>Retour au tableau de bord</a>
 
         <div class="d-flex flex-wrap gap-2">
             <!-- Enregistrer : reserve a l'organisateur du dossier tant qu'il est modifiable -->
