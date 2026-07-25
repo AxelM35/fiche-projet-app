@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <body>
-<nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+<nav th:fragment="navbar" class="navbar navbar-expand-lg top-app-bar mb-4">
     <div class="container-fluid">
         <a class="navbar-brand" th:href="@{/dashboard}">Voyages Scolaires - College Saint-Helier</a>
         <div class="d-flex align-items-center gap-3">
-            <span class="text-white-50 small" th:text="${utilisateurConnecte}">utilisateur@college-sthelier.fr</span>
-            <span class="badge bg-primary" sec:authorize="hasRole('COMPTA')">Comptabilite</span>
-            <span class="badge bg-info text-dark" sec:authorize="hasRole('VIESCO')">Vie Scolaire</span>
-            <span class="badge bg-warning text-dark" sec:authorize="hasRole('DIRECTION')">Direction</span>
-            <span class="badge bg-danger" sec:authorize="hasRole('ADMIN')">Admin</span>
-            <a class="btn btn-outline-light btn-sm" th:href="@{/projets/nouveau}">+ Nouveau projet</a>
+            <span class="text-muted small" th:text="${utilisateurConnecte}">utilisateur@college-sthelier.fr</span>
+            <span class="chip-role chip-role-compta" sec:authorize="hasRole('COMPTA')">Comptabilite</span>
+            <span class="chip-role chip-role-viesco" sec:authorize="hasRole('VIESCO')">Vie Scolaire</span>
+            <span class="chip-role chip-role-direction" sec:authorize="hasRole('DIRECTION')">Direction</span>
+            <span class="chip-role chip-role-admin" sec:authorize="hasRole('ADMIN')">Admin</span>
+            <a class="btn btn-primary btn-sm" th:href="@{/projets/nouveau}"><i class="bi bi-plus-lg me-1"></i>Nouveau projet</a>
             <form th:action="@{/logout}" method="post" class="mb-0">
-                <button type="submit" class="btn btn-outline-secondary btn-sm">Deconnexion</button>
+                <button type="submit" class="btn btn-text btn-sm">Deconnexion</button>
             </form>
         </div>
     </div>
