@@ -1,0 +1,30 @@
+# =========================================================================
+# Etape 1 - Build : compile l'application avec Maven dans un conteneur jetable
+# =========================================================================
+FROM eclipse-temurin:17-jdk-jammy AS build
+WORKDIR /build
+
+# Copie du wrapper Maven en premier pour profiter du cache Docker sur les
+# dependances tant que le pom.xml ne change pas.
+COPY pom.xml .
+COPY .mvn/ .mvn/
+COPY mvnw .
+RUN chmod +x mvnw && ./mvnw -B dependency:go-offline
+
+COPY src ./src
+RUN ./mvnw -B clean package -DskipTests
+
+# =========================================================================
+# Etape 2 - Runtime : image finale legere, sans outils de build
+# =========================================================================
+FROM eclipse-temurin:17-jre-jammy
+WORKDIR /app
+
+# Utilisateur non-root pour l'execution du conteneur (bonne pratique securite)
+RUN groupadd --system voyages && useradd --system --gid voyages voyages
+COPY --from=build /build/target/voyages-scolaires.jar app.jar
+RUN chown voyages:voyages app.jar
+USER voyages
+
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "app.jar"]
