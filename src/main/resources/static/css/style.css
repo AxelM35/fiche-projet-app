@@ -1,41 +1,268 @@
-/* Habillage complementaire a Bootstrap 5 pour le tableau de bord Kanban et
-   le formulaire de fiche projet. */
+/* =========================================================================
+   Habillage Material 3 (M3) au-dessus de Bootstrap 5.
+   L'application reste construite avec les composants Bootstrap (spec
+   d'origine) ; ce fichier retheme les variables CSS de Bootstrap 5.3 et
+   restyle ses composants (boutons, cartes, modales, formulaires) pour
+   suivre le langage visuel Material 3 : formes arrondies, palette de
+   tons (couleur + "container"), elevation douce, typographie Poppins /
+   Roboto.
+   ========================================================================= */
 
-body {
-    background-color: #f5f6f8;
+:root {
+    /* --- Tokens de couleur M3 (palette de reference, theme clair) --- */
+    --md-primary: #6750A4;
+    --md-on-primary: #FFFFFF;
+    --md-primary-container: #EADDFF;
+    --md-on-primary-container: #21005D;
+
+    --md-secondary: #625B71;
+    --md-on-secondary: #FFFFFF;
+    --md-secondary-container: #E8DEF8;
+    --md-on-secondary-container: #1D192B;
+
+    --md-error: #B3261E;
+    --md-on-error: #FFFFFF;
+    --md-error-container: #F9DEDC;
+    --md-on-error-container: #410E0B;
+
+    --md-success: #146C2E;
+    --md-success-container: #D3F8DF;
+    --md-on-success-container: #0A3818;
+
+    --md-warning-container: #FFEDD1;
+    --md-on-warning-container: #7A4B00;
+
+    --md-surface: #FFFBFE;
+    --md-surface-container-low: #F7F2FA;
+    --md-surface-container: #F3EDF7;
+    --md-surface-container-high: #ECE6F0;
+    --md-on-surface: #1C1B1F;
+    --md-on-surface-variant: #49454F;
+    --md-outline: #79747E;
+    --md-outline-variant: #CAC4D0;
+
+    /* --- Retheme des variables Bootstrap 5.3 --- */
+    --bs-body-font-family: 'Roboto', 'Segoe UI', sans-serif;
+    --bs-body-color: var(--md-on-surface);
+    --bs-body-bg: var(--md-surface-container-low);
+    --bs-primary: var(--md-primary);
+    --bs-primary-rgb: 103, 80, 164;
+    --bs-secondary: var(--md-secondary);
+    --bs-secondary-rgb: 98, 91, 113;
+    --bs-success: var(--md-success);
+    --bs-success-rgb: 20, 108, 46;
+    --bs-danger: var(--md-error);
+    --bs-danger-rgb: 179, 38, 30;
+    --bs-border-radius: 1rem;
+    --bs-border-radius-sm: 0.5rem;
+    --bs-border-radius-lg: 1.5rem;
+    --bs-link-color: var(--md-primary);
+    --bs-link-hover-color: var(--md-on-primary-container);
 }
 
+body {
+    font-family: var(--bs-body-font-family);
+    background-color: var(--md-surface-container-low);
+    color: var(--md-on-surface);
+}
+
+/* Titres, en-tetes de carte et libelles forts en Poppins ; le reste en Roboto. */
+h1, h2, h3, h4, h5, h6,
+.navbar-brand,
+.card-header,
+.stat-tile-value,
+.modal-title {
+    font-family: 'Poppins', 'Segoe UI', sans-serif;
+    font-weight: 600;
+}
+
+.btn, .form-label, .badge-statut span, .chip-role {
+    font-family: 'Roboto', 'Segoe UI', sans-serif;
+}
+
+a {
+    color: var(--bs-link-color);
+}
+
+/* -------------------------------------------------------------------
+   Boutons : styles M3 (Filled / Tonal / Outlined / Text), toujours en
+   forme de pilule.
+   ------------------------------------------------------------------- */
+.btn {
+    border-radius: 100px;
+    font-weight: 500;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+    box-shadow: none !important;
+}
+
+.btn-primary {
+    background-color: var(--md-primary);
+    border-color: var(--md-primary);
+    color: var(--md-on-primary);
+}
+
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+    background-color: var(--md-on-primary-container);
+    border-color: var(--md-on-primary-container);
+    color: var(--md-on-primary);
+}
+
+.btn-success {
+    background-color: var(--md-success);
+    border-color: var(--md-success);
+}
+
+.btn-danger {
+    background-color: var(--md-error);
+    border-color: var(--md-error);
+}
+
+/* Tonal : fond teinte primary-container, utilise pour les actions secondaires. */
+.btn-secondary {
+    background-color: var(--md-secondary-container);
+    border-color: var(--md-secondary-container);
+    color: var(--md-on-secondary-container);
+}
+
+.btn-secondary:hover, .btn-secondary:focus {
+    background-color: var(--md-outline-variant);
+    border-color: var(--md-outline-variant);
+    color: var(--md-on-secondary-container);
+}
+
+.btn-outline-primary {
+    color: var(--md-primary);
+    border-color: var(--md-outline);
+}
+
+.btn-outline-primary:hover, .btn-outline-primary:active {
+    background-color: var(--md-primary-container);
+    border-color: var(--md-primary);
+    color: var(--md-on-primary-container);
+}
+
+.btn-outline-secondary {
+    color: var(--md-on-surface-variant);
+    border-color: var(--md-outline);
+}
+
+.btn-outline-secondary:hover {
+    background-color: var(--md-surface-container-high);
+    border-color: var(--md-outline);
+    color: var(--md-on-surface);
+}
+
+.btn-outline-danger {
+    color: var(--md-error);
+    border-color: var(--md-outline);
+}
+
+.btn-outline-danger:hover {
+    background-color: var(--md-error-container);
+    border-color: var(--md-error);
+    color: var(--md-on-error-container);
+}
+
+/* Text button M3 : sans fond ni bordure, utilise pour les actions mineures
+   (ex. "Annuler" dans une modale). */
+.btn-text {
+    background-color: transparent;
+    border: none;
+    color: var(--md-primary);
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+}
+
+.btn-text:hover {
+    background-color: var(--md-surface-container-high);
+    color: var(--md-on-primary-container);
+}
+
+/* -------------------------------------------------------------------
+   Top app bar (navbar) M3 : surface claire plutot que bandeau sombre.
+   ------------------------------------------------------------------- */
+.top-app-bar {
+    background-color: var(--md-surface);
+    border-bottom: 1px solid var(--md-outline-variant);
+    box-shadow: 0 1px 3px rgba(103, 80, 164, 0.08);
+}
+
+.top-app-bar .navbar-brand {
+    color: var(--md-primary);
+    font-size: 1.15rem;
+}
+
+/* Chips de role dans la top app bar (equivalent M3 des anciens badges Bootstrap). */
+.chip-role {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25em 0.85em;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.chip-role-compta {
+    background-color: var(--md-primary-container);
+    color: var(--md-on-primary-container);
+}
+
+.chip-role-viesco {
+    background-color: var(--md-secondary-container);
+    color: var(--md-on-secondary-container);
+}
+
+.chip-role-direction {
+    background-color: var(--md-warning-container);
+    color: var(--md-on-warning-container);
+}
+
+.chip-role-admin {
+    background-color: var(--md-error-container);
+    color: var(--md-on-error-container);
+}
+
+/* -------------------------------------------------------------------
+   Cartes : elevation M3 douce et teintee, formes arrondies larges.
+   ------------------------------------------------------------------- */
 .kanban-column {
     min-height: 70vh;
+    border: none;
+    border-radius: var(--bs-border-radius-lg);
+    box-shadow: 0 1px 3px rgba(103, 80, 164, 0.1), 0 1px 8px rgba(103, 80, 164, 0.06);
+}
+
+.kanban-column > .card-header {
+    background-color: var(--md-surface-container);
+    border-bottom: none;
+    border-radius: var(--bs-border-radius-lg) var(--bs-border-radius-lg) 0 0;
 }
 
 .kanban-body {
     overflow-y: auto;
     max-height: 75vh;
+    background-color: var(--md-surface);
 }
 
 .project-card {
-    border-left: 4px solid #6c757d;
+    border: none;
+    border-left: 4px solid var(--md-outline);
+    border-radius: 0.75rem;
     transition: box-shadow 0.15s ease-in-out;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .project-card:hover {
-    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 3px rgba(103, 80, 164, 0.15), 0 2px 6px rgba(103, 80, 164, 0.12);
 }
 
 .project-card.statut-a-corriger {
-    border-left-color: #dc3545;
+    border-left-color: var(--md-error);
 }
 
 .project-card.statut-valide {
-    border-left-color: #198754;
-}
-
-.project-card {
-    border-radius: 0.5rem;
-    border-top: 0;
-    border-right: 0;
-    border-bottom: 0;
+    border-left-color: var(--md-success);
 }
 
 /* Barre de recherche du tableau de bord */
@@ -49,12 +276,12 @@ body {
     left: 0.75rem;
     top: 50%;
     transform: translateY(-50%);
-    color: #6c757d;
+    color: var(--md-on-surface-variant);
 }
 
 .search-box input {
     padding-left: 2.25rem;
-    border-radius: 2rem;
+    border-radius: 100px;
 }
 
 /* Tuiles de statistiques */
@@ -62,10 +289,10 @@ body {
     display: flex;
     align-items: center;
     gap: 1rem;
-    background: #fff;
-    border-radius: 0.75rem;
+    background: var(--md-surface);
+    border-radius: var(--bs-border-radius-lg);
     padding: 1rem 1.25rem;
-    box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.06);
+    box-shadow: 0 1px 3px rgba(103, 80, 164, 0.1), 0 1px 8px rgba(103, 80, 164, 0.06);
     height: 100%;
 }
 
@@ -75,81 +302,119 @@ body {
     justify-content: center;
     width: 3rem;
     height: 3rem;
-    border-radius: 0.75rem;
+    border-radius: 1rem;
     font-size: 1.4rem;
     flex-shrink: 0;
 }
 
 .stat-tile-label {
     font-size: 0.8rem;
-    color: #6c757d;
+    color: var(--md-on-surface-variant);
 }
 
 .stat-tile-value {
     font-size: 1.5rem;
-    font-weight: 700;
 }
 
-/* Badges de statut sur les cartes projet */
+/* Badges de statut (chips M3) sur les cartes projet */
 .badge-statut span {
     display: inline-block;
-    padding: 0.25em 0.65em;
-    border-radius: 1rem;
+    padding: 0.3em 0.75em;
+    border-radius: 100px;
     font-size: 0.7rem;
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .badge-statut-brouillon {
-    background-color: #e9ecef;
-    color: #495057;
+    background-color: var(--md-surface-container-high);
+    color: var(--md-on-surface-variant);
 }
 
 .badge-statut-attente {
-    background-color: #fff3cd;
-    color: #997404;
+    background-color: var(--md-warning-container);
+    color: var(--md-on-warning-container);
 }
 
 .badge-statut-valide {
-    background-color: #d1e7dd;
-    color: #0f5132;
+    background-color: var(--md-success-container);
+    color: var(--md-on-success-container);
 }
 
 .badge-statut-corriger {
-    background-color: #f8d7da;
-    color: #842029;
+    background-color: var(--md-error-container);
+    color: var(--md-on-error-container);
 }
 
-/* Modale "Refuser" : en-tete teinte pour rappeler le badge A_CORRIGER */
+/* -------------------------------------------------------------------
+   Modales : dialogues M3, coins tres arrondis, pas de bandeau colore
+   plein (seule l'icone porte la couleur d'alerte).
+   ------------------------------------------------------------------- */
+.modal-content {
+    border: none;
+    border-radius: 1.75rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.modal-header {
+    border-bottom: none;
+    padding-bottom: 0.5rem;
+}
+
 .modal-header-danger {
-    background-color: #f8d7da;
-    border-bottom: 1px solid #f1aeb5;
+    background-color: transparent;
+    border-bottom: none;
 }
 
-/* Sticky footer du formulaire : reste visible en bas de l'ecran pendant
-   le remplissage d'un long formulaire. */
+.modal-footer {
+    border-top: none;
+    padding-top: 0.5rem;
+}
+
+/* -------------------------------------------------------------------
+   Formulaire de fiche projet
+   ------------------------------------------------------------------- */
+
+/* Sticky footer : reste visible en bas de l'ecran pendant le remplissage
+   d'un long formulaire. */
 .footer-actions {
     position: sticky;
     bottom: 0;
     z-index: 1020;
-    background-color: #fff;
-    border-top: 1px solid #dee2e6;
+    background-color: var(--md-surface);
+    border-top: 1px solid var(--md-outline-variant);
     padding: 0.75rem 1rem;
-    box-shadow: 0 -0.25rem 0.5rem rgba(0, 0, 0, 0.05);
+    box-shadow: 0 -1px 8px rgba(0, 0, 0, 0.06);
 }
 
 .carte-formulaire {
     margin-bottom: 1.5rem;
     border: none;
-    border-radius: 0.75rem;
-    box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.06);
+    border-radius: var(--bs-border-radius-lg);
+    box-shadow: 0 1px 3px rgba(103, 80, 164, 0.1), 0 1px 8px rgba(103, 80, 164, 0.06);
     overflow: hidden;
 }
 
 .carte-formulaire .card-header {
-    background-color: #fff;
-    border-bottom: 1px solid #eef0f2;
+    background-color: var(--md-surface);
+    border-bottom: 1px solid var(--md-outline-variant);
 }
 
 .carte-formulaire .card-header .bi {
-    color: #6c757d;
+    color: var(--md-primary);
+}
+
+/* Champs de formulaire : anneau de focus dans la couleur primaire M3. */
+.form-control, .form-select {
+    border-radius: 0.5rem;
+    border-color: var(--md-outline-variant);
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--md-primary);
+    box-shadow: 0 0 0 0.2rem rgba(103, 80, 164, 0.15);
+}
+
+.form-check-input:checked {
+    background-color: var(--md-primary);
+    border-color: var(--md-primary);
 }
