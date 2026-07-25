@@ -119,6 +119,12 @@ body {
     color: #842029;
 }
 
+/* Modale "Refuser" : en-tete teinte pour rappeler le badge A_CORRIGER */
+.modal-header-danger {
+    background-color: #f8d7da;
+    border-bottom: 1px solid #f1aeb5;
+}
+
 /* Sticky footer du formulaire : reste visible en bas de l'ecran pendant
    le remplissage d'un long formulaire. */
 .footer-actions {
