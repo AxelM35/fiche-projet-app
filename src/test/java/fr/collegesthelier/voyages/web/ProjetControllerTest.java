@@ -1,13 +1,25 @@
 package fr.collegesthelier.voyages.web;
 
+import fr.collegesthelier.voyages.dto.ProjetFormDTO;
+import fr.collegesthelier.voyages.model.Projet;
+import fr.collegesthelier.voyages.service.ProjetService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.authentication.TestingAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -28,6 +40,19 @@ class ProjetControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private ProjetService projetService;
+
+    private void connecterEnTantQue(String email, String role) {
+        Authentication authentication = new TestingAuthenticationToken(email, null, List.of(new SimpleGrantedAuthority(role)));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
+
+    @AfterEach
+    void nettoyerContexteSecurite() {
+        SecurityContextHolder.clearContext();
+    }
 
     @Test
     @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
@@ -113,5 +138,81 @@ class ProjetControllerTest {
         mockMvc.perform(get(redirectedUrl))
                 .andExpect(status().isOk())
                 .andExpect(view().name("formulaire"));
+    }
+
+    @Test
+    @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
+    void laFicheDunProjetValideAfficheLaVueDeConsultation() throws Exception {
+        Long id = creerEtValiderCompletement();
+
+        mockMvc.perform(get("/projets/{id}", id))
+                .andExpect(status().isOk())
+                .andExpect(view().name("consultation"));
+    }
+
+    @Test
+    @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
+    void dupliquerUnProjetValideCreeUnBrouillonIndependant() throws Exception {
+        Long idOriginal = creerEtValiderCompletement();
+
+        MvcResult duplication = mockMvc.perform(post("/projets/{id}/dupliquer", idOriginal).with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andReturn();
+
+        String redirectedUrl = duplication.getResponse().getRedirectedUrl();
+        assertThat(redirectedUrl).isNotNull().isNotEqualTo("/projets/" + idOriginal);
+
+        // La copie est bien une fiche editable independante, en brouillon.
+        mockMvc.perform(get(redirectedUrl))
+                .andExpect(status().isOk())
+                .andExpect(view().name("formulaire"));
+
+        Projet copie = projetService.trouverParId(Long.valueOf(redirectedUrl.substring(redirectedUrl.lastIndexOf('/') + 1)));
+        assertThat(copie.getNomProjet()).isEqualTo("Voyage a Marseille (copie)");
+        assertThat(copie.getStatut().name()).isEqualTo("BROUILLON");
+        assertThat(copie.getDateValidationProf()).isNull();
+        assertThat(copie.getDateValidationCompta()).isNull();
+        assertThat(copie.getOrganisateurEmail()).isEqualTo("prof@college-sthelier.fr");
+    }
+
+    /**
+     * Fait progresser un projet jusqu'a VALIDE en manipulant directement le
+     * service (bascule de role via SecurityContextHolder, comme dans
+     * ProjetServiceTest), pour tester ensuite le routage HTTP sur ce statut.
+     */
+    private Long creerEtValiderCompletement() throws Exception {
+        ProjetFormDTO dto = new ProjetFormDTO();
+        dto.setNomProjet("Voyage a Marseille");
+        dto.setDateDepart(LocalDateTime.now().plusMonths(1));
+        dto.setDateRetour(LocalDateTime.now().plusMonths(1).plusDays(3));
+        dto.setLieuDepart("College");
+        dto.setLieuRetour("College");
+        dto.setTransport("Car");
+        dto.setOrganisateurNom("M. Prof");
+        dto.setOrganisateurEmail("prof@college-sthelier.fr");
+        dto.setTelephoneOrganisateur("0102030405");
+        dto.setClassesConcernees("6A");
+        dto.setEffectif(28);
+        dto.setCoutGlobal(new BigDecimal("1500"));
+        dto.setCoutParEleve(new BigDecimal("50"));
+        dto.setMontantSubvention(BigDecimal.ZERO);
+
+        Long id = projetService.creerProjet(dto).getId();
+        projetService.soumettre(id);
+
+        connecterEnTantQue("compta@college-sthelier.fr", "ROLE_COMPTA");
+        projetService.validerCompta(id);
+
+        connecterEnTantQue("viesco@college-sthelier.fr", "ROLE_VIESCO");
+        projetService.validerVieScolaire(id);
+
+        connecterEnTantQue("direction@college-sthelier.fr", "ROLE_DIRECTION");
+        projetService.validerDirection(id);
+
+        // Remet le contexte de securite du prof pour la suite du test HTTP,
+        // @WithMockUser ayant ete "ecrase" par les bascules de role ci-dessus.
+        connecterEnTantQue("prof@college-sthelier.fr", "ROLE_PROF");
+
+        return id;
     }
 }

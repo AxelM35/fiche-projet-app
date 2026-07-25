@@ -61,6 +61,14 @@ public class ProjetController {
     @GetMapping("/projets/{id}")
     public String formulaireEdition(@PathVariable Long id, Model model) {
         Projet projet = projetService.trouverParId(id);
+
+        // Un dossier definitivement valide n'est plus modifiable : on affiche
+        // une vue de consultation plutot que le formulaire editable.
+        if (projet.getStatut() == StatutProjet.VALIDE) {
+            model.addAttribute("projet", projetService.chargerConsultation(id));
+            return "consultation";
+        }
+
         model.addAttribute("projet", projetService.chargerFormulaire(id));
         model.addAttribute("statutCourant", projet.getStatut());
         model.addAttribute("motifRefus", projet.getMotifRefus());
@@ -96,6 +104,13 @@ public class ProjetController {
         projetService.modifierProjet(id, dto);
         redirectAttributes.addFlashAttribute("messageSucces", "Les modifications ont ete enregistrees.");
         return "redirect:/projets/" + id;
+    }
+
+    @PostMapping("/projets/{id}/dupliquer")
+    public String dupliquer(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        Projet copie = projetService.dupliquer(id);
+        redirectAttributes.addFlashAttribute("messageSucces", "Le projet a ete duplique en brouillon. Pensez a adapter les classes et les dates.");
+        return "redirect:/projets/" + copie.getId();
     }
 
     @PostMapping("/projets/{id}/soumettre")

@@ -227,7 +227,14 @@
     <!-- Sticky footer : boutons d'action, hors du formulaire principal pour
          permettre des actions de workflow independantes (voir attribut form="formProjet"). -->
     <div class="footer-actions d-flex flex-wrap gap-2 justify-content-between align-items-center">
-        <a class="btn btn-outline-secondary" th:href="@{/dashboard}"><i class="bi bi-arrow-left me-1"></i>Retour au tableau de bord</a>
+        <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-outline-secondary" th:href="@{/dashboard}"><i class="bi bi-arrow-left me-1"></i>Retour au tableau de bord</a>
+
+            <!-- Dupliquer : disponible des que le projet existe deja, quel que soit son statut -->
+            <form th:if="${projet.id} != null" th:action="@{/projets/{id}/dupliquer(id=${projet.id})}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-outline-primary"><i class="bi bi-copy me-1"></i>Dupliquer</button>
+            </form>
+        </div>
 
         <div class="d-flex flex-wrap gap-2">
             <!-- Enregistrer : reserve a l'organisateur du dossier tant qu'il est modifiable -->

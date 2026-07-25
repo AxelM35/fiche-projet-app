@@ -1,5 +1,6 @@
 package fr.collegesthelier.voyages.service;
 
+import fr.collegesthelier.voyages.dto.ProjetConsultationDTO;
 import fr.collegesthelier.voyages.dto.ProjetFormDTO;
 import fr.collegesthelier.voyages.dto.TableauDeBordStatsDTO;
 import fr.collegesthelier.voyages.event.ProjetEvent;
@@ -134,6 +135,51 @@ public class ProjetService {
     }
 
     /**
+     * Cree une copie en BROUILLON d'un projet existant (utile pour decliner
+     * le meme voyage sur plusieurs classes ou dates). Les champs d'audit du
+     * workflow ne sont jamais copies : la copie demarre son propre cycle de
+     * validation depuis zero. L'organisateur est repointe vers l'utilisateur
+     * qui duplique (et non celui du projet source), pour qu'il puisse
+     * immediatement modifier et soumettre sa copie.
+     */
+    @PreAuthorize("hasRole('PROF')")
+    @Transactional
+    public Projet dupliquer(Long id) {
+        Projet original = trouverParId(id);
+
+        Projet copie = new Projet();
+        copie.setNomProjet(original.getNomProjet() + " (copie)");
+        copie.setDescription(original.getDescription());
+        copie.setDateDepart(original.getDateDepart());
+        copie.setDateRetour(original.getDateRetour());
+        copie.setLieuDepart(original.getLieuDepart());
+        copie.setLieuRetour(original.getLieuRetour());
+        copie.setTransport(original.getTransport());
+        copie.setOrganismeNom(original.getOrganismeNom());
+        copie.setOrganismeTelephone(original.getOrganismeTelephone());
+        copie.setOrganismeEmail(original.getOrganismeEmail());
+        copie.setOrganisateurNom(original.getOrganisateurNom());
+        copie.setOrganisateurEmail(emailUtilisateurConnecteOuOriginal(original));
+        copie.setTelephoneOrganisateur(original.getTelephoneOrganisateur());
+        copie.setClassesConcernees(original.getClassesConcernees());
+        copie.setEffectif(original.getEffectif());
+        copie.setAccompagnateurs(new ArrayList<>(original.getAccompagnateurs()));
+        copie.setCoutGlobal(original.getCoutGlobal());
+        copie.setCoutParEleve(original.getCoutParEleve());
+        copie.setMontantSubvention(original.getMontantSubvention());
+        copie.setEligiblePassCulture(original.getEligiblePassCulture());
+        copie.setCommentaire(original.getCommentaire());
+        copie.setStatut(StatutProjet.BROUILLON);
+
+        return projetRepository.save(copie);
+    }
+
+    private String emailUtilisateurConnecteOuOriginal(Projet original) {
+        String emailConnecte = emailUtilisateurConnecte();
+        return emailConnecte != null ? emailConnecte : original.getOrganisateurEmail();
+    }
+
+    /**
      * A utiliser depuis le controleur pour pre-remplir le formulaire
      * d'edition : charge le projet ET le convertit en DTO au sein d'une
      * seule et meme transaction. La collection accompagnateurs etant
@@ -144,6 +190,44 @@ public class ProjetService {
     @Transactional(readOnly = true)
     public ProjetFormDTO chargerFormulaire(Long id) {
         return versDTO(trouverParId(id));
+    }
+
+    /**
+     * Vue en lecture seule d'un projet valide (voir ProjetConsultationDTO) :
+     * meme precaution transactionnelle que chargerFormulaire pour la
+     * collection accompagnateurs.
+     */
+    @Transactional(readOnly = true)
+    public ProjetConsultationDTO chargerConsultation(Long id) {
+        Projet projet = trouverParId(id);
+        return new ProjetConsultationDTO(
+                projet.getId(),
+                projet.getNomProjet(),
+                projet.getDescription(),
+                projet.getDateDepart(),
+                projet.getDateRetour(),
+                projet.getLieuDepart(),
+                projet.getLieuRetour(),
+                projet.getTransport(),
+                projet.getOrganismeNom(),
+                projet.getOrganismeTelephone(),
+                projet.getOrganismeEmail(),
+                projet.getOrganisateurNom(),
+                projet.getOrganisateurEmail(),
+                projet.getTelephoneOrganisateur(),
+                projet.getClassesConcernees(),
+                projet.getEffectif(),
+                new ArrayList<>(projet.getAccompagnateurs()),
+                projet.getCoutGlobal(),
+                projet.getCoutParEleve(),
+                projet.getMontantSubvention(),
+                Boolean.TRUE.equals(projet.getEligiblePassCulture()),
+                projet.getCommentaire(),
+                projet.getStatut(),
+                projet.getDateValidationProf(),
+                projet.getDateValidationCompta(),
+                projet.getDateValidationVieScolaire(),
+                projet.getDateValidationDirection());
     }
 
     public ProjetFormDTO versDTO(Projet projet) {
