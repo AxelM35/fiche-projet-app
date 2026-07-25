@@ -157,6 +157,9 @@ public class ProjetService {
         dto.setLieuDepart(projet.getLieuDepart());
         dto.setLieuRetour(projet.getLieuRetour());
         dto.setTransport(projet.getTransport());
+        dto.setOrganismeNom(projet.getOrganismeNom());
+        dto.setOrganismeTelephone(projet.getOrganismeTelephone());
+        dto.setOrganismeEmail(projet.getOrganismeEmail());
         dto.setOrganisateurNom(projet.getOrganisateurNom());
         dto.setOrganisateurEmail(projet.getOrganisateurEmail());
         dto.setTelephoneOrganisateur(projet.getTelephoneOrganisateur());
@@ -167,6 +170,7 @@ public class ProjetService {
         dto.setCoutParEleve(projet.getCoutParEleve());
         dto.setMontantSubvention(projet.getMontantSubvention());
         dto.setEligiblePassCulture(Boolean.TRUE.equals(projet.getEligiblePassCulture()));
+        dto.setCommentaire(projet.getCommentaire());
         return dto;
     }
 
@@ -300,6 +304,9 @@ public class ProjetService {
         cible.setLieuDepart(dto.getLieuDepart());
         cible.setLieuRetour(dto.getLieuRetour());
         cible.setTransport(dto.getTransport());
+        cible.setOrganismeNom(dto.getOrganismeNom());
+        cible.setOrganismeTelephone(dto.getOrganismeTelephone());
+        cible.setOrganismeEmail(dto.getOrganismeEmail());
         cible.setOrganisateurNom(dto.getOrganisateurNom());
         cible.setOrganisateurEmail(dto.getOrganisateurEmail());
         cible.setTelephoneOrganisateur(dto.getTelephoneOrganisateur());
@@ -319,6 +326,7 @@ public class ProjetService {
         cible.setCoutParEleve(dto.getCoutParEleve());
         cible.setMontantSubvention(dto.getMontantSubvention());
         cible.setEligiblePassCulture(dto.isEligiblePassCulture());
+        cible.setCommentaire(dto.getCommentaire());
     }
 
     private void publierEvenement(Projet projet, StatutProjet ancienStatut) {

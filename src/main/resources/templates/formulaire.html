@@ -91,6 +91,32 @@
                            th:classappend="${#fields.hasErrors('lieuRetour')} ? 'is-invalid'">
                     <div class="invalid-feedback" th:if="${#fields.hasErrors('lieuRetour')}" th:errors="*{lieuRetour}"></div>
                 </div>
+
+                <div class="col-12">
+                    <hr class="my-2">
+                    <h6 class="text-muted mb-0">
+                        <i class="bi bi-building me-1"></i>Coordonnees de l'organisme ou du referent
+                        <span class="fw-normal fst-italic">(facultatif)</span>
+                    </h6>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Nom</label>
+                    <input type="text" class="form-control" th:field="*{organismeNom}"
+                           th:classappend="${#fields.hasErrors('organismeNom')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('organismeNom')}" th:errors="*{organismeNom}"></div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Telephone du contact</label>
+                    <input type="text" class="form-control" th:field="*{organismeTelephone}"
+                           th:classappend="${#fields.hasErrors('organismeTelephone')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('organismeTelephone')}" th:errors="*{organismeTelephone}"></div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Email du contact</label>
+                    <input type="email" class="form-control" th:field="*{organismeEmail}"
+                           th:classappend="${#fields.hasErrors('organismeEmail')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('organismeEmail')}" th:errors="*{organismeEmail}"></div>
+                </div>
             </div>
         </div>
 
@@ -183,6 +209,17 @@
                     <input type="checkbox" class="form-check-input" id="eligiblePassCulture" th:field="*{eligiblePassCulture}">
                     <label class="form-check-label" for="eligiblePassCulture">Eligible Pass Culture</label>
                 </div>
+            </div>
+        </div>
+
+        <!-- Carte : Commentaire -->
+        <div class="card carte-formulaire shadow-sm">
+            <div class="card-header fw-semibold"><i class="bi bi-chat-left-text me-2"></i>Commentaire</div>
+            <div class="card-body">
+                <textarea class="form-control" rows="4" th:field="*{commentaire}"
+                          placeholder="Remarque libre sur ce dossier..."
+                          th:classappend="${#fields.hasErrors('commentaire')} ? 'is-invalid'"></textarea>
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('commentaire')}" th:errors="*{commentaire}"></div>
             </div>
         </div>
     </form>

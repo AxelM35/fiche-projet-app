@@ -57,6 +57,17 @@ public class ProjetFormDTO {
     @NotBlank(message = "Le moyen de transport est obligatoire.")
     private String transport;
 
+    // --- Organisme ou referent externe (facultatif) ---
+    @Size(max = 255, message = "Le nom de l'organisme ne doit pas depasser 255 caracteres.")
+    private String organismeNom;
+
+    @Pattern(regexp = "^$|^[0-9+ .-]{6,20}$", message = "Le format du telephone est invalide.")
+    private String organismeTelephone;
+
+    @Email(message = "L'email de l'organisme doit etre une adresse valide.")
+    @Size(max = 255, message = "L'email de l'organisme ne doit pas depasser 255 caracteres.")
+    private String organismeEmail;
+
     // --- Organisateur ---
     @NotBlank(message = "Le nom de l'organisateur est obligatoire.")
     private String organisateurNom;
@@ -97,4 +108,8 @@ public class ProjetFormDTO {
     private BigDecimal montantSubvention = BigDecimal.ZERO;
 
     private boolean eligiblePassCulture;
+
+    // --- Commentaire libre (facultatif) ---
+    @Size(max = 5000, message = "Le commentaire ne doit pas depasser 5000 caracteres.")
+    private String commentaire;
 }

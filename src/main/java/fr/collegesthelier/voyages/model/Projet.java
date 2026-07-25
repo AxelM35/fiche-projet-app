@@ -56,6 +56,11 @@ public class Projet {
     private String lieuRetour;
     private String transport;
 
+    // --- Organisme ou referent externe (optionnel) ---
+    private String organismeNom;
+    private String organismeTelephone;
+    private String organismeEmail;
+
     // --- Organisateur ---
     private String organisateurNom;
     private String organisateurEmail;
@@ -81,6 +86,10 @@ public class Projet {
     private BigDecimal montantSubvention;
 
     private Boolean eligiblePassCulture = Boolean.FALSE;
+
+    // --- Commentaire libre ---
+    @Column(columnDefinition = "TEXT")
+    private String commentaire;
 
     // --- Workflow (audit) ---
     @Enumerated(EnumType.STRING)

@@ -68,6 +68,31 @@ class ProjetServiceTest {
     }
 
     @Test
+    void lesChampsOrganismeEtCommentaireSontFacultatifsEtBienPersistesQuandRenseignes() {
+        connecterEnTantQue("martin@college-sthelier.fr", "ROLE_PROF");
+
+        // Facultatifs : la creation reussit sans eux (dtoValide() ne les renseigne pas).
+        Projet sansOrganisme = projetService.creerProjet(dtoValide());
+        assertThat(sansOrganisme.getOrganismeNom()).isNull();
+        assertThat(sansOrganisme.getCommentaire()).isNull();
+
+        // Quand ils sont renseignes, l'aller-retour DTO <-> Entite les conserve.
+        ProjetFormDTO dto = dtoValide();
+        dto.setOrganismeNom("Voyages Culture Plus");
+        dto.setOrganismeTelephone("0102030405");
+        dto.setOrganismeEmail("contact@voyages-culture-plus.fr");
+        dto.setCommentaire("Prevoir un accueil adapte pour un eleve en fauteuil.");
+
+        Long id = projetService.creerProjet(dto).getId();
+        ProjetFormDTO releve = projetService.chargerFormulaire(id);
+
+        assertThat(releve.getOrganismeNom()).isEqualTo("Voyages Culture Plus");
+        assertThat(releve.getOrganismeTelephone()).isEqualTo("0102030405");
+        assertThat(releve.getOrganismeEmail()).isEqualTo("contact@voyages-culture-plus.fr");
+        assertThat(releve.getCommentaire()).isEqualTo("Prevoir un accueil adapte pour un eleve en fauteuil.");
+    }
+
+    @Test
     void leWorkflowLineaireCompletFaitProgresserLeStatutEtHorodateChaqueEtape() {
         connecterEnTantQue("martin@college-sthelier.fr", "ROLE_PROF");
         Projet projet = projetService.creerProjet(dtoValide());
