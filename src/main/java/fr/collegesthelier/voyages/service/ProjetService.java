@@ -224,6 +224,7 @@ public class ProjetService {
                 Boolean.TRUE.equals(projet.getEligiblePassCulture()),
                 projet.getCommentaire(),
                 projet.getStatut(),
+                projet.getMotifRefus(),
                 projet.getDateValidationProf(),
                 projet.getDateValidationCompta(),
                 projet.getDateValidationVieScolaire(),

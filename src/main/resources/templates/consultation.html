@@ -27,7 +27,14 @@
             Fiche projet n°<span th:text="${projet.id}">1</span>
             <span class="text-muted fs-6 fw-normal">(lecture seule)</span>
         </h1>
-        <span class="badge-statut"><span class="badge-statut-valide">Valide</span></span>
+        <span class="badge-statut" th:switch="${projet.statut.name()}">
+            <span th:case="'BROUILLON'" class="badge-statut-brouillon">Brouillon</span>
+            <span th:case="'EN_ATTENTE_COMPTA'" class="badge-statut-attente">En attente (Comptabilite)</span>
+            <span th:case="'EN_ATTENTE_VIE_SCOLAIRE'" class="badge-statut-attente">En attente (Vie Scolaire)</span>
+            <span th:case="'EN_ATTENTE_DIRECTION'" class="badge-statut-attente">En attente (Direction)</span>
+            <span th:case="'VALIDE'" class="badge-statut-valide">Valide</span>
+            <span th:case="'A_CORRIGER'" class="badge-statut-corriger">A corriger</span>
+        </span>
     </div>
 
     <!-- Carte : Le Voyage -->
@@ -152,6 +159,14 @@
         <div class="card-header fw-semibold"><i class="bi bi-chat-left-text me-2"></i>Commentaire</div>
         <div class="card-body">
             <p class="mb-0" style="white-space: pre-wrap;" th:text="${projet.commentaire}">-</p>
+        </div>
+    </div>
+
+    <!-- Carte : Motif du refus (dossier renvoye pour correction) -->
+    <div class="card carte-formulaire shadow-sm" th:if="${projet.statut.name() == 'A_CORRIGER'}">
+        <div class="card-header fw-semibold"><i class="bi bi-exclamation-triangle text-danger me-2"></i>Motif du refus</div>
+        <div class="card-body">
+            <p class="mb-0" style="white-space: pre-wrap;" th:text="${projet.motifRefus}">-</p>
         </div>
     </div>
 

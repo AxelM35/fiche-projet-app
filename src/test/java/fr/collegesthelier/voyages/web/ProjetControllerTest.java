@@ -141,6 +141,40 @@ class ProjetControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "secretariat@college-sthelier.fr", authorities = "ROLE_LECTURE_SEULE")
+    void unUtilisateurEnLectureSeuleVoitLaConsultationMemeSurUnBrouillon() throws Exception {
+        connecterEnTantQue("prof@college-sthelier.fr", "ROLE_PROF");
+        Long id = projetService.creerProjet(dtoBase()).getId();
+
+        // La bascule de role ci-dessus (necessaire pour creer le projet en
+        // tant que prof) a "ecrase" le contexte pose par @WithMockUser : on
+        // le restaure avant la requete HTTP, comme dans creerEtValiderCompletement().
+        connecterEnTantQue("secretariat@college-sthelier.fr", "ROLE_LECTURE_SEULE");
+        mockMvc.perform(get("/projets/{id}", id))
+                .andExpect(status().isOk())
+                .andExpect(view().name("consultation"));
+    }
+
+    private ProjetFormDTO dtoBase() {
+        ProjetFormDTO dto = new ProjetFormDTO();
+        dto.setNomProjet("Voyage a Barcelone");
+        dto.setDateDepart(LocalDateTime.now().plusMonths(1));
+        dto.setDateRetour(LocalDateTime.now().plusMonths(1).plusDays(3));
+        dto.setLieuDepart("College");
+        dto.setLieuRetour("College");
+        dto.setTransport("Car");
+        dto.setOrganisateurNom("M. Prof");
+        dto.setOrganisateurEmail("prof@college-sthelier.fr");
+        dto.setTelephoneOrganisateur("0102030405");
+        dto.setClassesConcernees("6A");
+        dto.setEffectif(28);
+        dto.setCoutGlobal(new BigDecimal("1500"));
+        dto.setCoutParEleve(new BigDecimal("50"));
+        dto.setMontantSubvention(BigDecimal.ZERO);
+        return dto;
+    }
+
+    @Test
     @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
     void laFicheDunProjetValideAfficheLaVueDeConsultation() throws Exception {
         Long id = creerEtValiderCompletement();

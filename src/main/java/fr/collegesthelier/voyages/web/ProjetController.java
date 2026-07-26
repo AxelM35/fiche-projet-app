@@ -7,6 +7,8 @@ import fr.collegesthelier.voyages.model.StatutProjet;
 import fr.collegesthelier.voyages.service.ProjetService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
@@ -59,12 +61,14 @@ public class ProjetController {
     }
 
     @GetMapping("/projets/{id}")
-    public String formulaireEdition(@PathVariable Long id, Model model) {
+    public String formulaireEdition(@PathVariable Long id, Model model, Authentication authentication) {
         Projet projet = projetService.trouverParId(id);
 
-        // Un dossier definitivement valide n'est plus modifiable : on affiche
-        // une vue de consultation plutot que le formulaire editable.
-        if (projet.getStatut() == StatutProjet.VALIDE) {
+        // Un dossier definitivement valide n'est plus modifiable, et un
+        // observateur en lecture seule ne doit jamais voir un formulaire
+        // editable (meme sans bouton actif) : dans les deux cas, on affiche
+        // la vue de consultation plutot que le formulaire.
+        if (projet.getStatut() == StatutProjet.VALIDE || estEnLectureSeule(authentication)) {
             model.addAttribute("projet", projetService.chargerConsultation(id));
             return "consultation";
         }
@@ -73,6 +77,12 @@ public class ProjetController {
         model.addAttribute("statutCourant", projet.getStatut());
         model.addAttribute("motifRefus", projet.getMotifRefus());
         return "formulaire";
+    }
+
+    private boolean estEnLectureSeule(Authentication authentication) {
+        return authentication != null && authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch("ROLE_LECTURE_SEULE"::equals);
     }
 
     @PostMapping("/projets/nouveau")
