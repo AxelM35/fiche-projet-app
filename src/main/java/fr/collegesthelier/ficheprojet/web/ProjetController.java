@@ -1,11 +1,13 @@
 package fr.collegesthelier.ficheprojet.web;
 
+import fr.collegesthelier.ficheprojet.dto.CommentaireFormDTO;
 import fr.collegesthelier.ficheprojet.dto.LienDriveFormDTO;
 import fr.collegesthelier.ficheprojet.dto.ProjetFormDTO;
 import fr.collegesthelier.ficheprojet.dto.ReaffectationFormDTO;
 import fr.collegesthelier.ficheprojet.dto.RefusFormDTO;
 import fr.collegesthelier.ficheprojet.model.Projet;
 import fr.collegesthelier.ficheprojet.model.StatutProjet;
+import fr.collegesthelier.ficheprojet.service.CommentaireService;
 import fr.collegesthelier.ficheprojet.service.PdfExportService;
 import fr.collegesthelier.ficheprojet.service.ProjetService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -41,6 +43,7 @@ public class ProjetController {
 
     private final ProjetService projetService;
     private final PdfExportService pdfExportService;
+    private final CommentaireService commentaireService;
 
     @GetMapping("/")
     public String racine() {
@@ -71,6 +74,11 @@ public class ProjetController {
         model.addAttribute("etapesWorkflow", construireEtapesWorkflow(projet.getStatut(), calculerEtapeCourante(projet)));
         model.addAttribute("peutModifierLienDrive", projetService.peutGererLienDrive(projet));
         model.addAttribute("lienDriveForm", lienDriveFormPreRempli(projet));
+
+        model.addAttribute("commentaires", commentaireService.lister(id));
+        model.addAttribute("commentaireForm", new CommentaireFormDTO());
+        model.addAttribute("peutCommenter", projetService.peutGererLienDrive(projet));
+        model.addAttribute("emailUtilisateurConnecte", authentication != null ? authentication.getName() : null);
 
         // Un dossier definitivement valide n'est plus modifiable (sauf par un
         // Admin, correction exceptionnelle apres coup), et un observateur en
@@ -131,6 +139,41 @@ public class ProjetController {
 
         projetService.modifierLienDrive(id, dto.getLienDrive());
         redirectAttributes.addFlashAttribute("messageSucces", "Le lien du dossier Drive a été mis à jour.");
+        return "redirect:/projets/" + id;
+    }
+
+    @PostMapping("/projets/{id}/commentaires")
+    public String ajouterCommentaire(@PathVariable Long id, @Valid @ModelAttribute("commentaireForm") CommentaireFormDTO dto,
+                                      BindingResult bindingResult, RedirectAttributes redirectAttributes) {
+        if (bindingResult.hasErrors()) {
+            redirectAttributes.addFlashAttribute("messageErreur", "Le commentaire ne peut pas être vide.");
+            return "redirect:/projets/" + id;
+        }
+
+        commentaireService.ajouter(id, dto.getTexte());
+        redirectAttributes.addFlashAttribute("messageSucces", "Commentaire ajouté.");
+        return "redirect:/projets/" + id;
+    }
+
+    @PostMapping("/projets/{id}/commentaires/{commentaireId}/modifier")
+    public String modifierCommentaire(@PathVariable Long id, @PathVariable Long commentaireId,
+                                       @Valid @ModelAttribute("commentaireForm") CommentaireFormDTO dto,
+                                       BindingResult bindingResult, RedirectAttributes redirectAttributes) {
+        if (bindingResult.hasErrors()) {
+            redirectAttributes.addFlashAttribute("messageErreur", "Le commentaire ne peut pas être vide.");
+            return "redirect:/projets/" + id;
+        }
+
+        commentaireService.modifier(commentaireId, dto.getTexte());
+        redirectAttributes.addFlashAttribute("messageSucces", "Commentaire modifié.");
+        return "redirect:/projets/" + id;
+    }
+
+    @PostMapping("/projets/{id}/commentaires/{commentaireId}/supprimer")
+    public String supprimerCommentaire(@PathVariable Long id, @PathVariable Long commentaireId,
+                                        RedirectAttributes redirectAttributes) {
+        commentaireService.supprimer(commentaireId);
+        redirectAttributes.addFlashAttribute("messageSucces", "Commentaire supprimé.");
         return "redirect:/projets/" + id;
     }
 

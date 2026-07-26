@@ -9,6 +9,7 @@ import fr.collegesthelier.ficheprojet.exception.ProjetNotFoundException;
 import fr.collegesthelier.ficheprojet.exception.TransitionInvalideException;
 import fr.collegesthelier.ficheprojet.model.Projet;
 import fr.collegesthelier.ficheprojet.model.StatutProjet;
+import fr.collegesthelier.ficheprojet.repository.CommentaireRepository;
 import fr.collegesthelier.ficheprojet.repository.ProjetRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -53,6 +54,7 @@ public class ProjetService {
     private final ApplicationEventPublisher eventPublisher;
     private final JournalService journalService;
     private final GoogleDriveService googleDriveService;
+    private final CommentaireRepository commentaireRepository;
 
     // -------------------------------------------------------------------
     // Lecture
@@ -517,6 +519,7 @@ public class ProjetService {
         Projet projet = trouverParId(id);
         Long projetId = projet.getId();
         String nomProjet = projet.getNomProjet();
+        commentaireRepository.deleteByProjetId(projetId);
         projetRepository.delete(projet);
         journalService.enregistrer("Suppression définitive", projetId, nomProjet, null);
     }

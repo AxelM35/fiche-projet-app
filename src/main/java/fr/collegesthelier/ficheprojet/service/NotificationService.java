@@ -2,6 +2,7 @@ package fr.collegesthelier.ficheprojet.service;
 
 import fr.collegesthelier.ficheprojet.config.NotificationProperties;
 import fr.collegesthelier.ficheprojet.config.RolesProperties;
+import fr.collegesthelier.ficheprojet.event.CommentaireEvent;
 import fr.collegesthelier.ficheprojet.event.ProjetEvent;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -89,6 +90,26 @@ public class NotificationService {
                     evenement.getMotifRefus(), urlDossier(evenement.getProjetId()));
             default -> log.debug("Aucune notification prevue pour le statut {}", evenement.getNouveauStatut());
         }
+    }
+
+    /**
+     * Notifie les autres participants du fil de commentaires (voir
+     * CommentaireService.ajouter) qu'un nouveau message a ete poste :
+     * uniquement ceux qui ont deja ecrit dans ce fil, jamais l'auteur du
+     * nouveau commentaire lui-meme (deja filtre en amont).
+     */
+    @Async("mailExecutor")
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void surNouveauCommentaire(CommentaireEvent evenement) {
+        if (!notificationToggleService.sontActives()) {
+            log.info("Notifications desactivees (interrupteur admin) : email non envoye pour le commentaire sur le projet {}",
+                    evenement.getProjetId());
+            return;
+        }
+        notifier(evenement.getDestinataires(),
+                "Nouveau commentaire : " + evenement.getNomProjet(),
+                evenement.getAuteurEmail() + " a ajouté un commentaire sur le dossier \"" + evenement.getNomProjet() + "\".",
+                null, urlDossier(evenement.getProjetId()));
     }
 
     /**

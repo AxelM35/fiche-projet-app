@@ -230,6 +230,8 @@
             </form>
         </div>
     </div>
+
+    <div th:replace="~{fragments/commentaires :: commentaires(${projet.id}, ${commentaires}, ${commentaireForm}, ${peutCommenter}, ${emailUtilisateurConnecte})}"></div>
 </div>
 
 <!-- Sticky footer : retour + duplication (aucune autre action possible, le dossier est valide) -->

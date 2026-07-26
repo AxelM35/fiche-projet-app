@@ -278,6 +278,24 @@ class ProjetControllerTest {
                         org.hamcrest.Matchers.containsString("fiche-projet-" + id + ".pdf")));
     }
 
+    /**
+     * L'organisateur peut publier un commentaire depuis la fiche, et le fil
+     * l'affiche ensuite sur la page.
+     */
+    @Test
+    @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
+    void publierUnCommentaireLaffichEEnsuiteSurLaFiche() throws Exception {
+        Long id = projetService.creerProjet(dtoBase()).getId();
+
+        mockMvc.perform(post("/projets/{id}/commentaires", id).with(csrf()).param("texte", "Merci de vérifier le budget"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(view().name("redirect:/projets/" + id));
+
+        mockMvc.perform(get("/projets/{id}", id))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Merci de vérifier le budget")));
+    }
+
     private ProjetFormDTO dtoBase() {
         ProjetFormDTO dto = new ProjetFormDTO();
         dto.setNomProjet("Voyage a Barcelone");
