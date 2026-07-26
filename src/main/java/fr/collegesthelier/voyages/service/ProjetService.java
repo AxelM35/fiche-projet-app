@@ -52,6 +52,7 @@ public class ProjetService {
     private final ProjetRepository projetRepository;
     private final ApplicationEventPublisher eventPublisher;
     private final JournalService journalService;
+    private final GoogleDriveService googleDriveService;
 
     // -------------------------------------------------------------------
     // Lecture
@@ -138,8 +139,22 @@ public class ProjetService {
         copierDtoVersEntite(dto, projet);
         projet.setStatut(StatutProjet.BROUILLON);
         Projet enregistre = projetRepository.save(projet);
+        creerDossierDriveSiActive(enregistre);
         journalService.enregistrer("Creation", enregistre.getId(), enregistre.getNomProjet(), null);
         return enregistre;
+    }
+
+    /**
+     * Tentative best-effort de creation automatique du dossier Drive du
+     * projet (voir GoogleDriveService, jamais bloquant : un echec ou une
+     * integration desactivee laisse simplement le lien vide, saisissable a
+     * la main ensuite).
+     */
+    private void creerDossierDriveSiActive(Projet projet) {
+        googleDriveService.creerDossierProjet(projet.getId(), projet.getNomProjet()).ifPresent(lien -> {
+            projet.setLienDrive(lien);
+            projetRepository.save(projet);
+        });
     }
 
     @PreAuthorize("hasRole('PROF')")
@@ -208,6 +223,7 @@ public class ProjetService {
         copie.setStatut(StatutProjet.BROUILLON);
 
         Projet enregistree = projetRepository.save(copie);
+        creerDossierDriveSiActive(enregistree);
         journalService.enregistrer("Duplication (depuis #" + original.getId() + ")",
                 enregistree.getId(), enregistree.getNomProjet(), null);
         return enregistree;
