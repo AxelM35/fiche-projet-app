@@ -150,19 +150,56 @@ public class ProjetController {
                             BindingResult bindingResult, Model model, RedirectAttributes redirectAttributes) {
         validerCoherenceDates(dto, bindingResult);
         if (bindingResult.hasErrors()) {
-            Projet projetExistant = projetService.trouverParId(id);
-            model.addAttribute("statutCourant", projetExistant.getStatut());
-            model.addAttribute("motifRefus", projetExistant.getMotifRefus());
-            model.addAttribute("etapesWorkflow",
-                    construireEtapesWorkflow(projetExistant.getStatut(), calculerEtapeCourante(projetExistant)));
-            model.addAttribute("peutModifierLienDrive", projetService.peutGererLienDrive(projetExistant));
-            model.addAttribute("lienDriveForm", lienDriveFormPreRempli(projetExistant));
+            remplirModelPourErreurFormulaire(model, projetService.trouverParId(id));
             return "formulaire";
         }
 
         projetService.modifierProjet(id, dto);
         redirectAttributes.addFlashAttribute("messageSucces", "Les modifications ont ete enregistrees.");
         return "redirect:/projets/" + id;
+    }
+
+    /**
+     * Enregistre les modifications en cours (identique a modifier()) puis
+     * redirige vers le recapitulatif plutot que vers la fiche : la relecture
+     * avant soumission porte ainsi exactement sur ce qui vient d'etre
+     * sauvegarde, meme si l'organisateur a tape des changements sans passer
+     * par "Enregistrer" au prealable (voir le bouton "Soumettre pour
+     * validation" dans formulaire.html, qui poste ici via formaction).
+     */
+    @PostMapping("/projets/{id}/preparer-soumission")
+    public String preparerSoumission(@PathVariable Long id, @Valid @ModelAttribute("projet") ProjetFormDTO dto,
+                                      BindingResult bindingResult, Model model) {
+        validerCoherenceDates(dto, bindingResult);
+        if (bindingResult.hasErrors()) {
+            remplirModelPourErreurFormulaire(model, projetService.trouverParId(id));
+            return "formulaire";
+        }
+
+        projetService.modifierProjet(id, dto);
+        return "redirect:/projets/" + id + "/recapitulatif";
+    }
+
+    @GetMapping("/projets/{id}/recapitulatif")
+    public String recapitulatifSoumission(@PathVariable Long id, Model model) {
+        Projet projet = projetService.trouverParId(id);
+        if (projet.getStatut() != StatutProjet.BROUILLON && projet.getStatut() != StatutProjet.A_CORRIGER) {
+            // Deja engage dans le circuit (ou valide) : plus rien a relire avant
+            // soumission, on revient simplement sur la fiche.
+            return "redirect:/projets/" + id;
+        }
+
+        model.addAttribute("projet", projetService.chargerConsultation(id));
+        return "recapitulatif";
+    }
+
+    private void remplirModelPourErreurFormulaire(Model model, Projet projetExistant) {
+        model.addAttribute("statutCourant", projetExistant.getStatut());
+        model.addAttribute("motifRefus", projetExistant.getMotifRefus());
+        model.addAttribute("etapesWorkflow",
+                construireEtapesWorkflow(projetExistant.getStatut(), calculerEtapeCourante(projetExistant)));
+        model.addAttribute("peutModifierLienDrive", projetService.peutGererLienDrive(projetExistant));
+        model.addAttribute("lienDriveForm", lienDriveFormPreRempli(projetExistant));
     }
 
     @PostMapping("/projets/{id}/dupliquer")
