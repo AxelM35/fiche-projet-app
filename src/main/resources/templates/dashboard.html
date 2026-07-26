@@ -87,7 +87,7 @@
             <div class="stat-tile">
                 <div class="stat-tile-icon bg-success-subtle text-success"><i class="bi bi-check-circle"></i></div>
                 <div>
-                    <div class="stat-tile-label">Projets valides</div>
+                    <div class="stat-tile-label">Projets validés</div>
                     <div class="stat-tile-value" th:text="${stats.projetsValides()}">0</div>
                 </div>
             </div>
@@ -112,7 +112,7 @@
                         <span th:case="'EN_ATTENTE_COMPTA'">En attente Comptabilité</span>
                         <span th:case="'EN_ATTENTE_VIE_SCOLAIRE'">En attente Vie Scolaire</span>
                         <span th:case="'EN_ATTENTE_DIRECTION'">En attente Direction</span>
-                        <span th:case="'VALIDE'">Valide</span>
+                        <span th:case="'VALIDE'">Validé</span>
                     </span>
                     <span class="badge bg-secondary rounded-pill compteur-colonne" th:text="${#lists.size(entree.value)}">0</span>
                 </div>
