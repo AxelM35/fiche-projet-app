@@ -43,6 +43,12 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- Endpoint de sante (/actuator/health) pour le monitoring du conteneur -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
         <!-- Migrations de schema versionnees (remplace ddl-auto=update) -->
         <dependency>
             <groupId>org.flywaydb</groupId>
