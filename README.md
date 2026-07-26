@@ -31,7 +31,11 @@ Tout utilisateur Google authentifie avec une adresse du domaine autorise recoit 
 - `ROLE_DIRECTION` : validation finale
 - `ROLE_ADMIN` : administration
 
-Un utilisateur peut cumuler plusieurs roles.
+Un utilisateur peut cumuler plusieurs roles, à une exception près : un email
+inscrit dans `ROLES_LECTURE_SEULE` reçoit `ROLE_LECTURE_SEULE` **à la place**
+de `ROLE_PROF` (jamais les deux). Ce rôle est destiné à un observateur (ex.
+secrétariat) qui consulte tous les dossiers sans jamais pouvoir en créer,
+modifier ou valider un seul.
 
 ## Demarrage local avec Docker Compose
 

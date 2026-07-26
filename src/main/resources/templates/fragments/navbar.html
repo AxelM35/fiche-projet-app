@@ -10,7 +10,8 @@
             <span class="chip-role chip-role-viesco" sec:authorize="hasRole('VIESCO')">Vie Scolaire</span>
             <span class="chip-role chip-role-direction" sec:authorize="hasRole('DIRECTION')">Direction</span>
             <span class="chip-role chip-role-admin" sec:authorize="hasRole('ADMIN')">Admin</span>
-            <a class="btn btn-primary btn-sm" th:href="@{/projets/nouveau}"><i class="bi bi-plus-lg me-1"></i>Nouveau projet</a>
+            <span class="chip-role chip-role-lecture-seule" sec:authorize="hasRole('LECTURE_SEULE')">Lecture seule</span>
+            <a class="btn btn-primary btn-sm" sec:authorize="hasRole('PROF')" th:href="@{/projets/nouveau}"><i class="bi bi-plus-lg me-1"></i>Nouveau projet</a>
             <form th:action="@{/logout}" method="post" class="mb-0">
                 <button type="submit" class="btn btn-text btn-sm">Deconnexion</button>
             </form>

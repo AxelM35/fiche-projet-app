@@ -32,6 +32,10 @@ import java.util.Set;
  *    ROLE_COMPTA / ROLE_VIESCO / ROLE_DIRECTION / ROLE_ADMIN selon les
  *    listes d'emails configurees. Un utilisateur peut cumuler plusieurs
  *    roles.
+ *    Exception : un email figurant dans la liste "lecture seule" recoit
+ *    ROLE_LECTURE_SEULE a la place de ROLE_PROF (jamais les deux), pour
+ *    un observateur (ex. secretariat) qui doit tout consulter sans jamais
+ *    pouvoir creer ni soumettre de dossier.
  */
 @Slf4j
 @Service
@@ -73,8 +77,13 @@ public class CustomOAuth2UserService extends OidcUserService {
         String emailNormalise = email.toLowerCase(Locale.ROOT);
         Set<GrantedAuthority> authorities = new HashSet<>();
 
-        // Tout utilisateur autorise a se connecter recoit le role de base.
-        authorities.add(new SimpleGrantedAuthority("ROLE_PROF"));
+        // Tout utilisateur autorise a se connecter recoit le role de base,
+        // sauf s'il est inscrit comme simple observateur (lecture seule).
+        if (figureDansListe(rolesProperties.getLectureSeule(), emailNormalise)) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_LECTURE_SEULE"));
+        } else {
+            authorities.add(new SimpleGrantedAuthority("ROLE_PROF"));
+        }
 
         if (figureDansListe(rolesProperties.getCompta(), emailNormalise)) {
             authorities.add(new SimpleGrantedAuthority("ROLE_COMPTA"));
