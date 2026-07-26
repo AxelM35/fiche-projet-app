@@ -210,7 +210,7 @@ class ProjetControllerTest {
                         .param("lieuRetour", "Collège Exemple")
                         .param("transport", "Avion")
                         .param("organisateurNom", "Mme Petit")
-                        .param("organisateurEmail", "petit@exemple.fr")
+                        .param("organisateurEmail", "prof@exemple.fr")
                         .param("telephoneOrganisateur", "0102030405")
                         .param("classesConcernees", "3A")
                         .param("effectif", "20")
@@ -240,6 +240,27 @@ class ProjetControllerTest {
         // tant que prof) a "ecrase" le contexte pose par @WithMockUser : on
         // le restaure avant la requete HTTP, comme dans creerEtValiderCompletement().
         connecterEnTantQue("secretariat@exemple.fr", "ROLE_LECTURE_SEULE");
+        mockMvc.perform(get("/projets/{id}", id))
+                .andExpect(status().isOk())
+                .andExpect(view().name("consultation"));
+    }
+
+    /**
+     * Regression : avant correctif, un Prof qui n'etait ni l'organisateur du
+     * dossier ni un role de validation recevait quand meme le formulaire
+     * editable (champs non verrouilles) d'un dossier d'un collegue, alors que
+     * l'enregistrement aurait de toute facon ete refuse cote service
+     * (verifierDroitModification). Seule la consultation doit s'afficher.
+     */
+    @Test
+    @WithMockUser(username = "prof@exemple.fr", authorities = "ROLE_PROF")
+    void unProfNonOrganisateurVoitLaConsultationSurLeDossierDunCollegue() throws Exception {
+        connecterEnTantQue("collegue@exemple.fr", "ROLE_PROF");
+        ProjetFormDTO dto = dtoBase();
+        dto.setOrganisateurEmail("collegue@exemple.fr");
+        Long id = projetService.creerProjet(dto).getId();
+
+        connecterEnTantQue("prof@exemple.fr", "ROLE_PROF");
         mockMvc.perform(get("/projets/{id}", id))
                 .andExpect(status().isOk())
                 .andExpect(view().name("consultation"));
