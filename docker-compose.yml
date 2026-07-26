@@ -3,15 +3,15 @@ services:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${DB_NAME:-voyages_scolaires}
-      POSTGRES_USER: ${DB_USER:-voyages_user}
+      POSTGRES_DB: ${DB_NAME:-fiche_projet}
+      POSTGRES_USER: ${DB_USER:-fiche_projet_user}
       POSTGRES_PASSWORD: ${DB_PASSWORD:?la variable DB_PASSWORD doit etre definie dans .env}
     volumes:
       - db_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-voyages_user} -d ${DB_NAME:-voyages_scolaires}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-fiche_projet_user} -d ${DB_NAME:-fiche_projet}"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -30,8 +30,8 @@ services:
     environment:
       DB_HOST: db
       DB_PORT: 5432
-      DB_NAME: ${DB_NAME:-voyages_scolaires}
-      DB_USER: ${DB_USER:-voyages_user}
+      DB_NAME: ${DB_NAME:-fiche_projet}
+      DB_USER: ${DB_USER:-fiche_projet_user}
       DB_PASSWORD: ${DB_PASSWORD:?la variable DB_PASSWORD doit etre definie dans .env}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
@@ -74,8 +74,8 @@ services:
       - ./backups:/backups
     environment:
       POSTGRES_HOST: db
-      POSTGRES_DB: ${DB_NAME:-voyages_scolaires}
-      POSTGRES_USER: ${DB_USER:-voyages_user}
+      POSTGRES_DB: ${DB_NAME:-fiche_projet}
+      POSTGRES_USER: ${DB_USER:-fiche_projet_user}
       POSTGRES_PASSWORD: ${DB_PASSWORD:?la variable DB_PASSWORD doit etre definie dans .env}
       SCHEDULE: ${BACKUP_SCHEDULE:-@daily}
       BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS:-7}
