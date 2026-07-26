@@ -58,7 +58,7 @@ Idées à évaluer, aucune n'est engagée — à trier selon la valeur perçue.
 - **Archivage par année scolaire** : avec les années qui s'accumulent, prévoir un filtre/archivage pour ne pas alourdir le tableau de bord (actuellement pas de pagination ni de filtre par année).
 - **Relances automatiques** : email de rappel si un dossier reste bloqué plus de N jours à une étape (compta/vie scolaire/direction qui oublie de traiter).
 - **Fil de commentaires** sur un dossier plutôt qu'un unique motif de refus, pour permettre des échanges (ex : la direction demande une précision sans forcément refuser).
-- ✅ **Rôle lecture seule** (ex. secrétariat) qui peut consulter tous les dossiers sans droit de validation — fait (`ROLE_LECTURE_SEULE`, liste d'emails `ROLES_LECTURE_SEULE`, vide par défaut).
+- ✅ **Rôle lecture seule** (ex. secrétariat) qui peut consulter tous les dossiers sans droit de validation — fait (`ROLE_LECTURE_SEULE`, liste d'emails `ROLES_LECTURE_SEULE`, vide par défaut). Un tel utilisateur voit toujours la vue de consultation (jamais le formulaire éditable), quel que soit le statut du dossier, avec le motif de refus affiché si `A_CORRIGER`.
 - **Statistiques consolidées** : budget total engagé par année/par classe, taux de refus par étape, délai moyen de traitement par rôle seulement pour le rôle Admin
 - **Filtres avancés sur le dashboard** : par classe, par période, par organisateur (aujourd'hui recherche client simple uniquement).
 - **Dashboard Admin** : Créer un dashboard Admin pour pouvoir modifier des paramètres directement dans l'application (modification des rôles, ajout/retrait d'adresse mail, suppression de projet, archivage des années précédentes et autres fonctions utiles à discuter avec le client).

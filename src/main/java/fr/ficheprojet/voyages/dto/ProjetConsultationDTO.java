@@ -7,10 +7,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Vue en lecture seule d'un projet valide. Contrairement a ProjetFormDTO,
- * jamais lie a un formulaire entrant : il peut donc exposer sans risque les
- * champs d'audit du workflow (statut, dates de validation) qui n'ont rien a
- * faire dans un objet bindable depuis une requete POST.
+ * Vue en lecture seule d'un projet (utilisee pour les dossiers VALIDE, et
+ * pour n'importe quel statut consulte par un utilisateur ROLE_LECTURE_SEULE).
+ * Contrairement a ProjetFormDTO, jamais lie a un formulaire entrant : il peut
+ * donc exposer sans risque les champs d'audit du workflow (statut, dates de
+ * validation, motif de refus) qui n'ont rien a faire dans un objet bindable
+ * depuis une requete POST.
  */
 public record ProjetConsultationDTO(
         Long id,
@@ -36,6 +38,7 @@ public record ProjetConsultationDTO(
         boolean eligiblePassCulture,
         String commentaire,
         StatutProjet statut,
+        String motifRefus,
         LocalDateTime dateValidationProf,
         LocalDateTime dateValidationCompta,
         LocalDateTime dateValidationVieScolaire,
