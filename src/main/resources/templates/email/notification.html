@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${titre}">Notification</title>
+</head>
+<!--
+    Email transactionnel : mise en page par tables et styles exclusivement
+    inline (les clients mail, Outlook en tete, ignorent ou suppriment les
+    balises <style> et les polices web externes), pas de dependance a
+    style.css ni aux CDN utilises par le reste de l'application.
+-->
+<body style="margin:0; padding:0; background-color:#F3EDF7;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#F3EDF7; padding:24px 0; font-family:Arial, Helvetica, sans-serif;">
+    <tr>
+        <td align="center">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px; background-color:#FFFFFF; border-radius:16px; overflow:hidden;">
+                <tr>
+                    <td style="background-color:#6750A4; padding:20px 32px;">
+                        <span style="color:#FFFFFF; font-size:18px; font-weight:bold;">Voyages Scolaires - College Saint-Helier</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding:32px;">
+                        <h1 style="margin:0 0 16px; font-size:20px; color:#1C1B1F;" th:text="${titre}">Titre</h1>
+                        <p style="margin:0 0 16px; font-size:15px; line-height:1.5; color:#1C1B1F; white-space:pre-line;" th:text="${message}">Message</p>
+
+                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+                               th:if="${motifRefus != null}" style="margin:0 0 20px; background-color:#F9DEDC; border-radius:8px;">
+                            <tr>
+                                <td style="padding:12px 16px; font-size:14px; color:#410E0B;">
+                                    <strong>Motif :</strong> <span th:text="${motifRefus}">Motif du refus</span>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <table role="presentation" cellpadding="0" cellspacing="0" th:if="${lienDossier != null}">
+                            <tr>
+                                <td style="border-radius:100px; background-color:#6750A4;">
+                                    <a th:href="${lienDossier}"
+                                       style="display:inline-block; padding:12px 24px; color:#FFFFFF; text-decoration:none; font-size:14px; font-weight:bold; border-radius:100px;">
+                                        Consulter le dossier
+                                    </a>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding:16px 32px; background-color:#F7F2FA;">
+                        <p style="margin:0; font-size:12px; color:#49454F; line-height:1.4;">
+                            Cet email est envoye automatiquement par l'application de gestion des voyages scolaires
+                            du College Saint-Helier. Merci de ne pas y repondre.
+                        </p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

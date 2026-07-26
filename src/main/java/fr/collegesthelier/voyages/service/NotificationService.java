@@ -3,20 +3,28 @@ package fr.collegesthelier.voyages.service;
 import fr.collegesthelier.voyages.config.NotificationProperties;
 import fr.collegesthelier.voyages.config.RolesProperties;
 import fr.collegesthelier.voyages.event.ProjetEvent;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.MailPreparationException;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 import java.util.List;
+import java.util.Locale;
 
 /**
- * Envoie les emails de notification a chaque changement de statut.
+ * Envoie les emails de notification a chaque changement de statut, au
+ * format HTML (template Thymeleaf email/notification.html) avec repli en
+ * texte brut pour les clients mail qui ne rendent pas le HTML.
  * <p>
  * - @TransactionalEventListener(AFTER_COMMIT) : l'email ne part que si la
  *   transaction qui a change le statut a bien ete validee (pas de
@@ -34,6 +42,7 @@ public class NotificationService {
     private final RolesProperties rolesProperties;
     private final NotificationProperties notificationProperties;
     private final NotificationToggleService notificationToggleService;
+    private final TemplateEngine templateEngine;
 
     @Async("mailExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -47,25 +56,24 @@ public class NotificationService {
             switch (evenement.getNouveauStatut()) {
                 case EN_ATTENTE_COMPTA -> notifier(rolesProperties.getCompta(),
                         "Nouveau dossier a valider : " + evenement.getNomProjet(),
-                        "Le dossier \"" + evenement.getNomProjet() + "\" attend votre validation comptable."
-                                + lienDossier(evenement.getProjetId()));
+                        "Le dossier \"" + evenement.getNomProjet() + "\" attend votre validation comptable.",
+                        null, urlDossier(evenement.getProjetId()));
                 case EN_ATTENTE_VIE_SCOLAIRE -> notifier(rolesProperties.getViesco(),
                         "Nouveau dossier a valider : " + evenement.getNomProjet(),
-                        "Le dossier \"" + evenement.getNomProjet() + "\" a ete valide par la comptabilite et attend votre validation."
-                                + lienDossier(evenement.getProjetId()));
+                        "Le dossier \"" + evenement.getNomProjet() + "\" a ete valide par la comptabilite et attend votre validation.",
+                        null, urlDossier(evenement.getProjetId()));
                 case EN_ATTENTE_DIRECTION -> notifier(rolesProperties.getDirection(),
                         "Nouveau dossier a valider : " + evenement.getNomProjet(),
-                        "Le dossier \"" + evenement.getNomProjet() + "\" attend la validation finale de la direction."
-                                + lienDossier(evenement.getProjetId()));
+                        "Le dossier \"" + evenement.getNomProjet() + "\" attend la validation finale de la direction.",
+                        null, urlDossier(evenement.getProjetId()));
                 case VALIDE -> notifier(List.of(evenement.getOrganisateurEmail()),
                         "Dossier valide : " + evenement.getNomProjet(),
-                        "Bonne nouvelle : votre dossier \"" + evenement.getNomProjet() + "\" a ete valide par la direction."
-                                + lienDossier(evenement.getProjetId()));
+                        "Bonne nouvelle : votre dossier \"" + evenement.getNomProjet() + "\" a ete valide par la direction.",
+                        null, urlDossier(evenement.getProjetId()));
                 case A_CORRIGER -> notifier(List.of(evenement.getOrganisateurEmail()),
                         "Dossier a corriger : " + evenement.getNomProjet(),
-                        "Votre dossier \"" + evenement.getNomProjet() + "\" a ete refuse et necessite des corrections.\n"
-                                + "Motif : " + evenement.getMotifRefus()
-                                + lienDossier(evenement.getProjetId()));
+                        "Votre dossier \"" + evenement.getNomProjet() + "\" a ete refuse et necessite des corrections.",
+                        evenement.getMotifRefus(), urlDossier(evenement.getProjetId()));
                 default -> log.debug("Aucune notification prevue pour le statut {}", evenement.getNouveauStatut());
             }
         } catch (RuntimeException e) {
@@ -76,13 +84,13 @@ public class NotificationService {
         }
     }
 
-    private void notifier(List<String> destinataires, String sujet, String corps) {
+    private void notifier(List<String> destinataires, String sujet, String message, String motifRefus, String lienDossier) {
         if (destinataires == null || destinataires.isEmpty()) {
             log.warn("Aucun destinataire configure pour la notification : {}", sujet);
             return;
         }
 
-        mailSender.send(construireMessage(destinataires, sujet, corps));
+        mailSender.send(construireMessage(destinataires, sujet, message, motifRefus, lienDossier));
     }
 
     /**
@@ -94,19 +102,51 @@ public class NotificationService {
     public void envoyerEmailTest(String destinataire) {
         mailSender.send(construireMessage(List.of(destinataire), "Email de test - Voyages Scolaires",
                 "Ceci est un email de test envoye depuis le dashboard admin de l'application "
-                        + "Voyages Scolaires, pour verifier la configuration SMTP."));
+                        + "Voyages Scolaires, pour verifier la configuration SMTP.",
+                null, null));
     }
 
-    private SimpleMailMessage construireMessage(List<String> destinataires, String sujet, String corps) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(notificationProperties.getEmailExpediteur());
-        message.setTo(destinataires.toArray(new String[0]));
-        message.setSubject(sujet);
-        message.setText(corps);
-        return message;
+    private MimeMessage construireMessage(List<String> destinataires, String sujet, String message,
+                                           String motifRefus, String lienDossier) {
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+            helper.setFrom(notificationProperties.getEmailExpediteur());
+            helper.setTo(destinataires.toArray(new String[0]));
+            helper.setSubject(sujet);
+            helper.setText(construireTexteBrut(message, motifRefus, lienDossier),
+                    construireHtml(sujet, message, motifRefus, lienDossier));
+            return mimeMessage;
+        } catch (MessagingException e) {
+            // MimeMessageHelper leve une exception checked que JavaMailSender.send(...)
+            // n'attend pas : on la convertit en MailException (comme le fait deja
+            // Spring en interne) pour que les catch existants (AdminController,
+            // surChangementDeStatut ci-dessus) continuent de fonctionner sans changement.
+            throw new MailPreparationException("Echec de la preparation de l'email : " + sujet, e);
+        }
     }
 
-    private String lienDossier(Long projetId) {
-        return "\n\nConsulter le dossier : " + notificationProperties.getUrlApplication() + "/projets/" + projetId;
+    private String construireHtml(String titre, String message, String motifRefus, String lienDossier) {
+        Context contexte = new Context(Locale.FRENCH);
+        contexte.setVariable("titre", titre);
+        contexte.setVariable("message", message);
+        contexte.setVariable("motifRefus", motifRefus);
+        contexte.setVariable("lienDossier", lienDossier);
+        return templateEngine.process("email/notification", contexte);
+    }
+
+    private String construireTexteBrut(String message, String motifRefus, String lienDossier) {
+        StringBuilder texte = new StringBuilder(message);
+        if (motifRefus != null) {
+            texte.append("\n\nMotif : ").append(motifRefus);
+        }
+        if (lienDossier != null) {
+            texte.append("\n\nConsulter le dossier : ").append(lienDossier);
+        }
+        return texte.toString();
+    }
+
+    private String urlDossier(Long projetId) {
+        return notificationProperties.getUrlApplication() + "/projets/" + projetId;
     }
 }

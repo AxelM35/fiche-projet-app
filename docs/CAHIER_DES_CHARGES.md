@@ -22,7 +22,7 @@ Ce qui est nécessaire avant un vrai lancement, par thème.
 
 ### 2.1 Emails
 - [ ] Tester l'envoi réel avec un serveur SMTP (jamais fait en conditions réelles) — vérifier délivrabilité, SPF/DKIM si domaine propre.
-- [ ] Passer de `SimpleMailMessage` (texte brut) à des emails HTML (`MimeMessage` + template Thymeleaf), plus lisibles et à l'image de l'appli.
+- [x] Emails HTML : `NotificationService` construit desormais un `MimeMessage` (multipart texte brut + HTML) via `MimeMessageHelper`, rendu par le template Thymeleaf `templates/email/notification.html` (mise en page par tables, styles inline uniquement — pas de dépendance à `style.css` ni aux CDN, pour la compatibilité Outlook/Gmail). Couvre les 5 notifications de workflow et l'email de test admin ; motif de refus mis en évidence, bouton "Consulter le dossier" masqué si aucun lien (email de test). Testé via `EmailTemplateTest` (rendu du template) — **l'envoi réel avec un vrai client mail reste à valider par toi** (rendu visuel Gmail/Outlook), voir point precedent.
 
 ### 2.2 Configuration réelle
 - [ ] `ALLOWED_EMAIL_DOMAIN` → `college-sthelier.fr`.
