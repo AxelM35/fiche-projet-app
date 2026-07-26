@@ -22,7 +22,7 @@ Ce qui est nécessaire avant un vrai lancement, par thème.
 
 ### 2.1 Emails
 - [ ] Tester l'envoi réel avec un serveur SMTP (jamais fait en conditions réelles) — vérifier délivrabilité, SPF/DKIM si domaine propre.
-- [ ] *(optionnel mais recommandé)* Passer de `SimpleMailMessage` (texte brut) à des emails HTML (`MimeMessage` + template Thymeleaf), plus lisibles et à l'image de l'appli.
+- [ ] Passer de `SimpleMailMessage` (texte brut) à des emails HTML (`MimeMessage` + template Thymeleaf), plus lisibles et à l'image de l'appli.
 
 ### 2.2 Configuration réelle
 - [ ] `ALLOWED_EMAIL_DOMAIN` → `college-sthelier.fr`.
@@ -35,7 +35,7 @@ Ce qui est nécessaire avant un vrai lancement, par thème.
 - [ ] Migration vers Flyway : écrire une migration baseline correspondant au schéma actuel généré par `ddl-auto=update`, puis désactiver l'auto-DDL.
 - [ ] Stratégie de sauvegarde PostgreSQL (`pg_dump` planifié, rétention, **test de restauration réel** — une sauvegarde jamais restaurée n'est pas fiable).
 - [ ] Absence de CI actuellement (`.github/workflows` n'existe pas) : mettre en place une Action GitHub qui lance `./mvnw test` sur chaque push/PR, pour ne pas dépendre uniquement des tests locaux.
-- [ ] *(optionnel)* Exposer un endpoint de santé (`spring-boot-starter-actuator` `/actuator/health`) pour le monitoring du conteneur.
+- [ ] Exposer un endpoint de santé (`spring-boot-starter-actuator` `/actuator/health`) pour le monitoring du conteneur.
 
 ### 2.4 Revue de sécurité
 - [ ] Revue complète avant mise en ligne (headers HTTP : CSP, HSTS, X-Frame-Options ; limitation du taux de tentatives de login ; scan des dépendances — Dependabot ou OWASP dependency-check).
@@ -51,24 +51,22 @@ Ce qui est nécessaire avant un vrai lancement, par thème.
 
 Idées à évaluer, aucune n'est engagée — à trier selon la valeur perçue.
 
-- **Pièces jointes** : devis fournisseur, autorisation parentale type, RIB, attestation d'assurance. C'est souvent le vrai point de friction d'un workflow papier/Sheets → à fort impact perçu, mais pose la question du stockage (disque local du conteneur ? bucket S3-compatible ? Google Drive via l'API, cohérent avec l'écosystème Google déjà utilisé pour l'auth ?).
+- **Pièces jointes** : devis fournisseur, autorisation parentale type, RIB, attestation d'assurance. C'est souvent le vrai point de friction d'un workflow papier/Sheets → à fort impact perçu, mais pose la question du stockage (disque local du conteneur ? bucket S3-compatible ? Google Drive via l'API, cohérent avec l'écosystème Google déjà utilisé pour l'auth ?). Le prototype en Google AppScript permettait de créer un dossier dans un Google Drive pour que chaque utilisateur puisse mettre des fichiers utiles. Voir avec le client comment transposer cette feature en conservant l'API Google.
 - **Export / impression** : générer un PDF récapitulatif de la fiche validée (utile pour les archives papier de l'établissement ou l'inspection académique).
 - **Historique d'audit complet** : aujourd'hui seules 4 dates de validation sont conservées ; un vrai journal d'événements (qui a fait quoi, quand, avec quel commentaire) donnerait une traçabilité plus fine, utile en cas de litige ou de question a posteriori.
 - **Archivage par année scolaire** : avec les années qui s'accumulent, prévoir un filtre/archivage pour ne pas alourdir le tableau de bord (actuellement pas de pagination ni de filtre par année).
 - **Relances automatiques** : email de rappel si un dossier reste bloqué plus de N jours à une étape (compta/vie scolaire/direction qui oublie de traiter).
 - **Fil de commentaires** sur un dossier plutôt qu'un unique motif de refus, pour permettre des échanges (ex : la direction demande une précision sans forcément refuser).
 - **Rôle lecture seule** (ex. secrétariat) qui peut consulter tous les dossiers sans droit de validation.
-- **Vue calendrier** des voyages validés (et export iCal vers Google Calendar, cohérent avec l'écosystème Google).
-- **Statistiques consolidées** : budget total engagé par année/par classe, taux de refus par étape, délai moyen de traitement par rôle.
+- **Statistiques consolidées** : budget total engagé par année/par classe, taux de refus par étape, délai moyen de traitement par rôle seulement pour le rôle Admin
 - **Filtres avancés sur le dashboard** : par classe, par période, par organisateur (aujourd'hui recherche client simple uniquement).
+- **Dashboard Admin** : Créer un dashboard Admin pour pouvoir modifier des paramètres directement dans l'application (modification des rôles, ajout/retrait d'adresse mail, suppression de projet, archivage des années précédentes et autres fonctions utiles à discuter avec le client).
 
 ## 4. Pistes UX/UI
 
 - **Couleurs officielles du collège** (déjà cité en §2.5, mais c'est autant un sujet UI que technique).
 - **Stepper visuel du workflow** sur la fiche projet (1-2-3-4 avec étape courante mise en évidence), en complément du badge de statut actuel — rendrait la progression plus lisible pour l'organisateur.
 - **Écran récapitulatif avant soumission** : relire les infos clés avant de passer en `EN_ATTENTE_COMPTA`, pour éviter les allers-retours.
-- **Accessibilité (RGAA)** : contrastes, `aria-label`, navigation clavier complète — pertinent pour un établissement public/privé sous contrat, potentiellement une obligation selon le statut.
-- **Mode sombre**, cohérent avec la palette de tons M3 déjà en place (les variables `--md-*` s'y prêtent bien).
 - **Responsive mobile** : vérifier spécifiquement le rendu du Kanban 5 colonnes sur petit écran (probable besoin de scroll horizontal ou de vue liste alternative).
 - **Feedback visuel** sur les actions asynchrones (spinner sur les boutons de validation/refus le temps de la requête).
 - **Aide contextuelle** pour les nouveaux professeurs à la première connexion (tooltip ou courte visite guidée expliquant le workflow).
@@ -78,17 +76,15 @@ Idées à évaluer, aucune n'est engagée — à trier selon la valeur perçue.
 | Phase | Contenu | Objectif |
 |---|---|---|
 | **1 — Bloquant avant mise en prod** | HTTPS, Flyway, config réelle (domaine/rôles/OAuth prod), sauvegardes PostgreSQL testées, revue de sécurité, test SMTP réel | Rendre le déploiement actuel fiable et sûr |
-| **2 — Confort de lancement** | CI (tests auto), couleurs officielles, emails HTML, stepper visuel du workflow | Finitions avant l'ouverture aux utilisateurs réels |
-| **3 — Itératif post-lancement** | Pièces jointes, export PDF, historique d'audit, calendrier, relances automatiques, filtres avancés | Amélioration continue selon les retours terrain |
+| **2 — Confort** | CI (tests auto), couleurs officielles, emails HTML, stepper visuel du workflow | Finitions avant l'ouverture aux utilisateurs réels |
+| **3 — Itératif avant le lancement** | Pièces jointes, export PDF, historique d'audit, calendrier, relances automatiques, filtres avancés | Amélioration continue selon les retours terrain |
 
 ## 6. Questions ouvertes (besoin de ta décision)
 
-1. Le collège a-t-il des couleurs officielles/une charte graphique à utiliser à la place du violet M3 générique ?
-2. Pièces jointes : si on les ajoute un jour, préférence de stockage — disque du serveur, bucket compatible S3, ou Google Drive via API (vu l'écosystème Google déjà en place) ?
-3. Volumétrie attendue (nombre de voyages/an) — utile pour dimensionner archivage et pagination du dashboard.
-4. Un rôle "lecture seule" (secrétariat, autre) est-il pertinent à moyen terme ?
-5. Le statut de l'établissement impose-t-il des obligations d'accessibilité (RGAA) à respecter formellement ?
+1. Le collège a-t-il des couleurs officielles/une charte graphique à utiliser à la place du violet M3 générique ? --> Oui à  confirmer avec le client pour les couleurs exactes.
+2. Pièces jointes : si on les ajoute un jour, préférence de stockage — disque du serveur, bucket compatible S3, ou Google Drive via API (vu l'écosystème Google déjà en place) ? --> Google Drive via API
+3. Volumétrie attendue (nombre de voyages/an) — utile pour dimensionner archivage et pagination du dashboard. --> une cinquantaine par an
+4. Un rôle "lecture seule" (secrétariat, autre) est-il pertinent à moyen terme ? --> Oui
+5. Le statut de l'établissement impose-t-il des obligations d'accessibilité (RGAA) à respecter formellement ? --> Non, faire au mieux
 
 ---
-
-*Document à itérer : dis-moi ce que tu veux garder, écarter, reformuler ou prioriser différemment avant qu'on attaque quoi que ce soit.*
