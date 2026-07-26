@@ -1,6 +1,6 @@
 # fiche-projet-app
 
-Application web de gestion et de validation des voyages scolaires du College Saint-Helier, en remplacement du workflow historique base sur Google Sheets.
+Fiche Projet numerique : application web de gestion et de validation des projets de voyages scolaires du College Saint-Helier, en remplacement du workflow historique base sur Google Sheets.
 
 ## Stack technique
 
@@ -78,8 +78,8 @@ Les tests d'integration utilisent une base H2 en memoire (voir `src/test/resourc
 ## Architecture
 
 ```
-src/main/java/fr/collegesthelier/voyages/
-├── VoyagesApplication.java     Point d'entree Spring Boot
+src/main/java/fr/collegesthelier/ficheprojet/
+├── FicheProjetApplication.java Point d'entree Spring Boot
 ├── config/                     Securite (SecurityConfig), Async, proprietes (@ConfigurationProperties)
 ├── security/                   CustomOAuth2UserService (authentification + RBAC)
 ├── model/                      Entite JPA Projet, enum StatutProjet

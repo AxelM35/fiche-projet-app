@@ -27,10 +27,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Utilisateur non-root pour l'execution du conteneur (bonne pratique securite)
-RUN groupadd --system voyages && useradd --system --gid voyages voyages
-COPY --from=build /build/target/voyages-scolaires.jar app.jar
-RUN chown voyages:voyages app.jar
-USER voyages
+RUN groupadd --system ficheprojet && useradd --system --gid ficheprojet ficheprojet
+COPY --from=build /build/target/fiche-projet.jar app.jar
+RUN chown ficheprojet:ficheprojet app.jar
+USER ficheprojet
 
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \

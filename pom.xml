@@ -12,10 +12,10 @@
     </parent>
 
     <groupId>fr.collegesthelier</groupId>
-    <artifactId>voyages-scolaires</artifactId>
+    <artifactId>fiche-projet</artifactId>
     <version>1.0.0</version>
     <name>fiche-projet-app</name>
-    <description>Gestion et validation des voyages scolaires du College Saint-Helier</description>
+    <description>Fiche Projet numerique - Gestion et validation des projets de voyages scolaires du College Saint-Helier</description>
 
     <properties>
         <java.version>17</java.version>
@@ -130,7 +130,7 @@
     </dependencies>
 
     <build>
-        <finalName>voyages-scolaires</finalName>
+        <finalName>fiche-projet</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

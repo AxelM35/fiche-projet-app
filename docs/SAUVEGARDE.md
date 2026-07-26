@@ -58,8 +58,8 @@ sur une base temporaire, sans toucher à la base réelle.
 2. Démarrer un PostgreSQL jetable sur un autre port :
    ```bash
    docker run --rm -d --name pg-test-restore \
-     -e POSTGRES_DB=voyages_scolaires \
-     -e POSTGRES_USER=voyages_user \
+     -e POSTGRES_DB=fiche_projet \
+     -e POSTGRES_USER=fiche_projet_user \
      -e POSTGRES_PASSWORD=test \
      -p 5433:5432 \
      postgres:16-alpine
@@ -67,13 +67,13 @@ sur une base temporaire, sans toucher à la base réelle.
 
 3. Restaurer le dump dedans (adapter le nom de fichier) :
    ```bash
-   gunzip -c backups/daily/voyages_scolaires-*.sql.gz | \
-     docker exec -i pg-test-restore psql -U voyages_user -d voyages_scolaires
+   gunzip -c backups/daily/fiche_projet-*.sql.gz | \
+     docker exec -i pg-test-restore psql -U fiche_projet_user -d fiche_projet
    ```
 
 4. Vérifier que les données sont bien là :
    ```bash
-   docker exec -it pg-test-restore psql -U voyages_user -d voyages_scolaires -c "SELECT count(*) FROM projets;"
+   docker exec -it pg-test-restore psql -U fiche_projet_user -d fiche_projet -c "SELECT count(*) FROM projets;"
    ```
 
 5. Nettoyer :
@@ -90,8 +90,8 @@ Sur la base réelle, en cas de perte de données :
 
 ```bash
 docker compose stop app
-gunzip -c backups/daily/voyages_scolaires-<date>.sql.gz | \
-  docker compose exec -T db psql -U voyages_user -d voyages_scolaires
+gunzip -c backups/daily/fiche_projet-<date>.sql.gz | \
+  docker compose exec -T db psql -U fiche_projet_user -d fiche_projet
 docker compose start app
 ```
 
