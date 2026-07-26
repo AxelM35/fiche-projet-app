@@ -63,7 +63,7 @@ Idées à évaluer, aucune n'est engagée — à trier selon la valeur perçue.
 - **Filtres avancés sur le dashboard** : par classe, par période, par organisateur (aujourd'hui recherche client simple uniquement).
 - **Dashboard Admin** : Créer un dashboard Admin pour pouvoir modifier des paramètres directement dans l'application (modification des rôles, ajout/retrait d'adresse mail, suppression de projet, archivage des années précédentes et autres fonctions utiles à discuter avec le client).
   - ✅ **Gestion des rôles** (`/admin/roles`) : un Admin ajoute/retire des attributions de rôle par email, sans redémarrage. Stocké en base (table `role_attributions`, migration `V2`), en complément des listes `.env` (jamais en remplacement — `ROLES_ADMIN` reste le filet de sécurité contre un verrouillage total). Page réservée à `ROLE_ADMIN` y compris côté contrôleur (contrairement au reste de l'appli, en lecture ouverte à tous).
-  - ⬜ Suppression / archivage de projet : bouton "Gérer" → "Archiver" ou "Supprimer" avec confirmation (les deux options sont voulues). Pas encore fait.
+  - ✅ **Suppression / archivage de projet** : bouton "..." (admin, sur chaque carte du dashboard) → modale "Archiver" (réversible, retire du tableau de bord) ou "Supprimer définitivement" (irréversible, avec confirmation JS). Page `/admin/archives` pour retrouver et désarchiver/supprimer les dossiers archivés. Nouveau champ `Projet.archive` (migration `V3`), indépendant du statut de workflow.
   - ⬜ Autres fonctions à discuter avec le client.
 
 ## 4. Pistes UX/UI

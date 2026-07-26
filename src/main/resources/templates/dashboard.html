@@ -105,14 +105,22 @@
                             <div class="d-flex justify-content-between align-items-start mb-2">
                                 <a class="fw-semibold text-decoration-none" th:href="@{/projets/{id}(id=${projet.id})}"
                                    th:text="${projet.nomProjet}">Nom du projet</a>
-                                <span class="badge-statut" th:switch="${projet.statut.name()}">
-                                    <span th:case="'BROUILLON'" class="badge-statut-brouillon">Brouillon</span>
-                                    <span th:case="'EN_ATTENTE_COMPTA'" class="badge-statut-attente">En attente</span>
-                                    <span th:case="'EN_ATTENTE_VIE_SCOLAIRE'" class="badge-statut-attente">En attente</span>
-                                    <span th:case="'EN_ATTENTE_DIRECTION'" class="badge-statut-attente">En attente</span>
-                                    <span th:case="'VALIDE'" class="badge-statut-valide">Valide</span>
-                                    <span th:case="'A_CORRIGER'" class="badge-statut-corriger">A corriger</span>
-                                </span>
+                                <div class="d-flex align-items-center gap-1">
+                                    <span class="badge-statut" th:switch="${projet.statut.name()}">
+                                        <span th:case="'BROUILLON'" class="badge-statut-brouillon">Brouillon</span>
+                                        <span th:case="'EN_ATTENTE_COMPTA'" class="badge-statut-attente">En attente</span>
+                                        <span th:case="'EN_ATTENTE_VIE_SCOLAIRE'" class="badge-statut-attente">En attente</span>
+                                        <span th:case="'EN_ATTENTE_DIRECTION'" class="badge-statut-attente">En attente</span>
+                                        <span th:case="'VALIDE'" class="badge-statut-valide">Valide</span>
+                                        <span th:case="'A_CORRIGER'" class="badge-statut-corriger">A corriger</span>
+                                    </span>
+                                    <button type="button" class="btn btn-sm btn-link text-muted p-0" sec:authorize="hasRole('ADMIN')"
+                                            data-bs-toggle="modal" data-bs-target="#modalGererProjet"
+                                            th:attr="data-projet-id=${projet.id},data-projet-nom=${projet.nomProjet}"
+                                            title="Gerer ce dossier (archiver / supprimer)">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                </div>
                             </div>
                             <div class="small text-muted mb-1">
                                 <i class="bi bi-geo-alt"></i>
@@ -201,12 +209,49 @@
     </div>
 </div>
 
+<!-- Fenetre modale de gestion admin (archiver / supprimer), reutilisee pour
+     tous les dossiers : le JS ci-dessous adapte dynamiquement les actions
+     des deux formulaires au clic sur le bouton "..." d'une carte. -->
+<div class="modal fade" id="modalGererProjet" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Gerer le dossier <span id="gererProjetNom" class="fw-semibold"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted small mb-0">
+                    Archiver retire le dossier du tableau de bord sans le supprimer (recuperable depuis
+                    l'administration). Supprimer l'efface definitivement et sans retour possible.
+                </p>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <form id="formArchiverProjet" method="post">
+                    <button type="submit" class="btn btn-outline-secondary"><i class="bi bi-archive me-1"></i>Archiver</button>
+                </form>
+                <form id="formSupprimerProjet" method="post"
+                      onsubmit="return confirm('Supprimer definitivement ce dossier ? Cette action est irreversible.');">
+                    <button type="submit" class="btn btn-danger"><i class="bi bi-trash me-1"></i>Supprimer definitivement</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script th:inline="javascript">
     document.getElementById('modalRefus').addEventListener('show.bs.modal', function (evenement) {
         const bouton = evenement.relatedTarget;
         const projetId = bouton.getAttribute('data-projet-id');
         document.getElementById('formRefus').action = '/projets/' + projetId + '/refuser';
+    });
+
+    document.getElementById('modalGererProjet').addEventListener('show.bs.modal', function (evenement) {
+        const bouton = evenement.relatedTarget;
+        const projetId = bouton.getAttribute('data-projet-id');
+        document.getElementById('gererProjetNom').textContent = bouton.getAttribute('data-projet-nom');
+        document.getElementById('formArchiverProjet').action = '/projets/' + projetId + '/archiver';
+        document.getElementById('formSupprimerProjet').action = '/projets/' + projetId + '/supprimer';
     });
 
     // Filtrage cote client, par nom de projet, colonne par colonne (sans

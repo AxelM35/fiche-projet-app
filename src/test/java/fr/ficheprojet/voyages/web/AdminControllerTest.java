@@ -40,4 +40,19 @@ class AdminControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("admin-roles"));
     }
+
+    @Test
+    @WithMockUser(username = "prof@exemple.fr", authorities = "ROLE_PROF")
+    void unProfNAccedePasALaPageDesArchives() throws Exception {
+        mockMvc.perform(get("/admin/archives"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "amorvan@exemple.fr", authorities = {"ROLE_PROF", "ROLE_ADMIN"})
+    void unAdminAccedeALaPageDesArchives() throws Exception {
+        mockMvc.perform(get("/admin/archives"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin-archives"));
+    }
 }

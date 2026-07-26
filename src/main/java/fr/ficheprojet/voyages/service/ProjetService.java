@@ -62,27 +62,38 @@ public class ProjetService {
      * Regroupe les projets par colonne du tableau de bord Kanban. Les
      * dossiers "A_CORRIGER" apparaissent dans la colonne Brouillon (c'est au
      * professeur de les retravailler avant de les resoumettre) ; leur statut
-     * propre reste affiche dans la vue pour les distinguer visuellement.
+     * propre reste affiche dans la vue pour les distinguer visuellement. Les
+     * dossiers archives (Admin) n'apparaissent jamais ici, quel que soit leur
+     * statut : voir listerArchives() pour les retrouver.
      */
     @Transactional(readOnly = true)
     public Map<StatutProjet, List<Projet>> projetsPourTableauDeBord() {
         Map<StatutProjet, List<Projet>> tableau = new LinkedHashMap<>();
 
         List<Projet> brouillons = new ArrayList<>(
-                projetRepository.findByStatutOrderByDateDepartAsc(StatutProjet.BROUILLON));
-        brouillons.addAll(projetRepository.findByStatutOrderByDateDepartAsc(StatutProjet.A_CORRIGER));
+                projetRepository.findByStatutAndArchiveFalseOrderByDateDepartAsc(StatutProjet.BROUILLON));
+        brouillons.addAll(projetRepository.findByStatutAndArchiveFalseOrderByDateDepartAsc(StatutProjet.A_CORRIGER));
 
         tableau.put(StatutProjet.BROUILLON, brouillons);
         tableau.put(StatutProjet.EN_ATTENTE_COMPTA,
-                projetRepository.findByStatutOrderByDateDepartAsc(StatutProjet.EN_ATTENTE_COMPTA));
+                projetRepository.findByStatutAndArchiveFalseOrderByDateDepartAsc(StatutProjet.EN_ATTENTE_COMPTA));
         tableau.put(StatutProjet.EN_ATTENTE_VIE_SCOLAIRE,
-                projetRepository.findByStatutOrderByDateDepartAsc(StatutProjet.EN_ATTENTE_VIE_SCOLAIRE));
+                projetRepository.findByStatutAndArchiveFalseOrderByDateDepartAsc(StatutProjet.EN_ATTENTE_VIE_SCOLAIRE));
         tableau.put(StatutProjet.EN_ATTENTE_DIRECTION,
-                projetRepository.findByStatutOrderByDateDepartAsc(StatutProjet.EN_ATTENTE_DIRECTION));
+                projetRepository.findByStatutAndArchiveFalseOrderByDateDepartAsc(StatutProjet.EN_ATTENTE_DIRECTION));
         tableau.put(StatutProjet.VALIDE,
-                projetRepository.findByStatutOrderByDateDepartAsc(StatutProjet.VALIDE));
+                projetRepository.findByStatutAndArchiveFalseOrderByDateDepartAsc(StatutProjet.VALIDE));
 
         return tableau;
+    }
+
+    /**
+     * Dossiers archives par un Admin (retires du tableau de bord mais
+     * toujours en base, recuperables via desarchiver()).
+     */
+    @Transactional(readOnly = true)
+    public List<Projet> listerArchives() {
+        return projetRepository.findByArchiveTrueOrderByDateDepartDesc();
     }
 
     /**
@@ -375,6 +386,35 @@ public class ProjetService {
         Projet enregistre = projetRepository.save(projet);
         publierEvenement(enregistre, ancienStatut);
         return enregistre;
+    }
+
+    // -------------------------------------------------------------------
+    // Administration (Admin) : archivage et suppression, independants du
+    // workflow de validation - un dossier peut etre archive/supprime quel
+    // que soit son statut.
+    // -------------------------------------------------------------------
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
+    public void archiver(Long id) {
+        Projet projet = trouverParId(id);
+        projet.setArchive(true);
+        projetRepository.save(projet);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
+    public void desarchiver(Long id) {
+        Projet projet = trouverParId(id);
+        projet.setArchive(false);
+        projetRepository.save(projet);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
+    public void supprimerDefinitivement(Long id) {
+        Projet projet = trouverParId(id);
+        projetRepository.delete(projet);
     }
 
     // -------------------------------------------------------------------
