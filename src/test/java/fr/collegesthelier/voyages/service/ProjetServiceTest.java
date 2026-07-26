@@ -1,6 +1,7 @@
 package fr.collegesthelier.voyages.service;
 
 import fr.collegesthelier.voyages.dto.ProjetFormDTO;
+import fr.collegesthelier.voyages.exception.ProjetNotFoundException;
 import fr.collegesthelier.voyages.exception.TransitionInvalideException;
 import fr.collegesthelier.voyages.model.Projet;
 import fr.collegesthelier.voyages.model.StatutProjet;
@@ -243,6 +244,44 @@ class ProjetServiceTest {
         assertThatThrownBy(() -> projetService.creerProjet(dtoValide())).isInstanceOf(AccessDeniedException.class);
         assertThatThrownBy(() -> projetService.validerCompta(id)).isInstanceOf(AccessDeniedException.class);
         assertThatThrownBy(() -> projetService.dupliquer(id)).isInstanceOf(AccessDeniedException.class);
+    }
+
+    @Test
+    void unProfNePeutNiArchiverNiSupprimerUnDossier() {
+        connecterEnTantQue("martin@college-sthelier.fr", "ROLE_PROF");
+        Long id = projetService.creerProjet(dtoValide()).getId();
+
+        assertThatThrownBy(() -> projetService.archiver(id)).isInstanceOf(AccessDeniedException.class);
+        assertThatThrownBy(() -> projetService.supprimerDefinitivement(id)).isInstanceOf(AccessDeniedException.class);
+    }
+
+    @Test
+    void unAdminPeutArchiverUnDossierQuiDisparaitDuTableauDeBordEtLeDesarchiver() {
+        connecterEnTantQue("martin@college-sthelier.fr", "ROLE_PROF");
+        Long id = projetService.creerProjet(dtoValide()).getId();
+
+        connecterEnTantQue("amorvan@college-sthelier.fr", "ROLE_ADMIN");
+        projetService.archiver(id);
+
+        assertThat(projetService.projetsPourTableauDeBord().get(StatutProjet.BROUILLON))
+                .extracting(Projet::getId).doesNotContain(id);
+        assertThat(projetService.listerArchives()).extracting(Projet::getId).contains(id);
+
+        projetService.desarchiver(id);
+        assertThat(projetService.projetsPourTableauDeBord().get(StatutProjet.BROUILLON))
+                .extracting(Projet::getId).contains(id);
+        assertThat(projetService.listerArchives()).extracting(Projet::getId).doesNotContain(id);
+    }
+
+    @Test
+    void unAdminPeutSupprimerDefinitivementUnDossier() {
+        connecterEnTantQue("martin@college-sthelier.fr", "ROLE_PROF");
+        Long id = projetService.creerProjet(dtoValide()).getId();
+
+        connecterEnTantQue("amorvan@college-sthelier.fr", "ROLE_ADMIN");
+        projetService.supprimerDefinitivement(id);
+
+        assertThatThrownBy(() -> projetService.trouverParId(id)).isInstanceOf(ProjetNotFoundException.class);
     }
 
     @Test

@@ -104,6 +104,12 @@ public class Projet {
     private LocalDateTime dateValidationVieScolaire;
     private LocalDateTime dateValidationDirection;
 
+    // --- Archivage (Admin) : retire le dossier du tableau de bord sans le
+    // supprimer, independamment de son statut de workflow. Reversible
+    // (desarchiver), contrairement a une suppression definitive.
+    @Column(nullable = false)
+    private boolean archive = false;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

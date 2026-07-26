@@ -3,6 +3,7 @@ package fr.collegesthelier.voyages.web;
 import fr.collegesthelier.voyages.config.RolesProperties;
 import fr.collegesthelier.voyages.dto.RoleAttributionFormDTO;
 import fr.collegesthelier.voyages.model.RoleMetier;
+import fr.collegesthelier.voyages.service.ProjetService;
 import fr.collegesthelier.voyages.service.RoleAdminService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,10 +22,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Dashboard admin : gestion des attributions de roles. Reserve a ROLE_ADMIN
- * au niveau du controleur (et non seulement du service) car il expose la
- * liste des emails par role a toute personne qui en devinerait l'URL,
- * contrairement au reste de l'application ou les donnees des dossiers sont
+ * Dashboard admin : gestion des attributions de roles et des dossiers
+ * archives. Reserve a ROLE_ADMIN au niveau du controleur (et non seulement
+ * du service) car il expose des donnees (emails par role, dossiers retires
+ * du tableau de bord) a toute personne qui en devinerait l'URL, contrairement
+ * au reste de l'application ou les donnees des dossiers actifs sont
  * volontairement consultables par tout utilisateur authentifie.
  */
 @Controller
@@ -34,6 +36,13 @@ public class AdminController {
 
     private final RoleAdminService roleAdminService;
     private final RolesProperties rolesProperties;
+    private final ProjetService projetService;
+
+    @GetMapping("/admin/archives")
+    public String archives(Model model) {
+        model.addAttribute("projetsArchives", projetService.listerArchives());
+        return "admin-archives";
+    }
 
     @GetMapping("/admin/roles")
     public String rolesAdmin(Model model) {

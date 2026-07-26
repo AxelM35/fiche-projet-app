@@ -8,7 +8,9 @@ import java.util.List;
 
 public interface ProjetRepository extends JpaRepository<Projet, Long> {
 
-    List<Projet> findByStatutOrderByDateDepartAsc(StatutProjet statut);
+    List<Projet> findByStatutAndArchiveFalseOrderByDateDepartAsc(StatutProjet statut);
+
+    List<Projet> findByArchiveTrueOrderByDateDepartDesc();
 
     List<Projet> findByOrganisateurEmailIgnoreCaseOrderByIdDesc(String organisateurEmail);
 }

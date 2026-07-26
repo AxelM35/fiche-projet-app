@@ -5,6 +5,7 @@ import fr.collegesthelier.voyages.dto.RefusFormDTO;
 import fr.collegesthelier.voyages.model.Projet;
 import fr.collegesthelier.voyages.model.StatutProjet;
 import fr.collegesthelier.voyages.service.ProjetService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -142,6 +143,28 @@ public class ProjetController {
         projetService.validerDirection(id);
         redirectAttributes.addFlashAttribute("messageSucces", "Le dossier a ete valide definitivement.");
         return "redirect:/dashboard";
+    }
+
+    @PostMapping("/projets/{id}/archiver")
+    public String archiver(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        projetService.archiver(id);
+        redirectAttributes.addFlashAttribute("messageSucces", "Le dossier a ete archive.");
+        return "redirect:/dashboard";
+    }
+
+    @PostMapping("/projets/{id}/desarchiver")
+    public String desarchiver(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        projetService.desarchiver(id);
+        redirectAttributes.addFlashAttribute("messageSucces", "Le dossier a ete desarchive.");
+        return "redirect:/admin/archives";
+    }
+
+    @PostMapping("/projets/{id}/supprimer")
+    public String supprimer(@PathVariable Long id, HttpServletRequest request, RedirectAttributes redirectAttributes) {
+        projetService.supprimerDefinitivement(id);
+        redirectAttributes.addFlashAttribute("messageSucces", "Le dossier a ete supprime definitivement.");
+        String referer = request.getHeader("Referer");
+        return "redirect:" + (referer != null && referer.contains("/admin/archives") ? "/admin/archives" : "/dashboard");
     }
 
     @PostMapping("/projets/{id}/refuser")
