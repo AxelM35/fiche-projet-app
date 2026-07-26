@@ -68,7 +68,7 @@ Idées à évaluer, aucune n'est engagée — à trier selon la valeur perçue.
   - ✅ **Dossiers bloqués** (`/admin/dossiers-bloques`) : dossiers en attente de validation triés du plus ancien au plus récent, avec le nombre de jours d'attente (calculé à partir des dates de validation déjà existantes, pas de nouveau champ) — pour relancer manuellement en attendant d'éventuelles relances automatiques.
   - ✅ **Réaffectation d'organisateur** (Admin, sur la fiche projet) : change l'organisateur d'un dossier sans toucher au statut ni aux validations déjà obtenues.
   - ✅ **Modification d'un dossier `VALIDE`** : un Admin peut désormais rouvrir et corriger un dossier déjà validé (les autres rôles restent bloqués) ; tracé dans le journal d'audit.
-  - ⬜ Recherche admin avancée (tous statuts + archivés) et export CSV.
+  - ✅ **Recherche admin avancée** (`/admin/recherche`) : par nom, organisateur, classe, statut, archivage (tous statuts et archivés confondus, contrairement au dashboard). **Export CSV** (`/admin/recherche/export.csv`) des résultats filtrés.
   - ⬜ Email de test SMTP + interrupteur temporaire des notifications.
   - ⬜ Tableau "santé" (dernière sauvegarde, nombre de dossiers, version) + sauvegarde à la demande.
   - ⬜ Autres fonctions à discuter avec le client.

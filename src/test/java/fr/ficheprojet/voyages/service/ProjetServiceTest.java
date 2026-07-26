@@ -350,6 +350,25 @@ class ProjetServiceTest {
     }
 
     @Test
+    void laRechercheAdminTrouveUnDossierArchiveInvisibleDuTableauDeBord() {
+        connecterEnTantQue("martin@exemple.fr", "ROLE_PROF");
+        ProjetFormDTO dto = dtoValide();
+        dto.setNomProjet("Voyage a Kyoto");
+        dto.setClassesConcernees("3B");
+        Long id = projetService.creerProjet(dto).getId();
+
+        connecterEnTantQue("amorvan@exemple.fr", "ROLE_ADMIN");
+        projetService.archiver(id);
+
+        assertThat(projetService.rechercherPourAdmin("kyoto", null, null, null, null))
+                .extracting(Projet::getId).contains(id);
+        assertThat(projetService.rechercherPourAdmin(null, null, "3B", null, true))
+                .extracting(Projet::getId).contains(id);
+        assertThat(projetService.rechercherPourAdmin(null, null, null, null, false))
+                .extracting(Projet::getId).doesNotContain(id);
+    }
+
+    @Test
     void chaqueActionMajeureLaisseUneTraceDansLeJournalDaudit() {
         connecterEnTantQue("martin@exemple.fr", "ROLE_PROF");
         Long id = projetService.creerProjet(dtoValide()).getId();
