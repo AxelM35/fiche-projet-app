@@ -1,6 +1,7 @@
 package fr.collegesthelier.voyages.config;
 
 import fr.collegesthelier.voyages.security.CustomOAuth2UserService;
+import fr.collegesthelier.voyages.security.LoginRateLimitingFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,6 +10,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.header.writers.StaticHeadersWriter;
+import org.springframework.security.web.session.DisableEncodeUrlFilter;
 
 /**
  * Configuration de la securite web : authentification exclusivement via
@@ -27,6 +29,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                // Tout au debut du filter chain : rejette les requetes en exces avant
+                // tout traitement de securite (session, CSRF...) sur les routes
+                // d'authentification (voir LoginRateLimitingFilter).
+                .addFilterBefore(new LoginRateLimitingFilter(), DisableEncodeUrlFilter.class)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/css/**", "/js/**", "/webjars/**", "/error", "/login", "/login/**",
                                 "/oauth2/**").permitAll()
