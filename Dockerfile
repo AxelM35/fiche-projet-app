@@ -1,7 +1,7 @@
 # =========================================================================
 # Etape 1 - Build : compile l'application avec Maven dans un conteneur jetable
 # =========================================================================
-FROM eclipse-temurin:17-jdk-jammy AS build
+FROM eclipse-temurin:25-jdk-jammy AS build
 WORKDIR /build
 
 # Copie du wrapper Maven en premier pour profiter du cache Docker sur les
@@ -17,7 +17,7 @@ RUN ./mvnw -B clean package -DskipTests
 # =========================================================================
 # Etape 2 - Runtime : image finale legere, sans outils de build
 # =========================================================================
-FROM eclipse-temurin:17-jre-jammy
+FROM eclipse-temurin:25-jre-jammy
 WORKDIR /app
 
 # curl : necessaire uniquement pour le HEALTHCHECK ci-dessous (interroge
