@@ -64,9 +64,24 @@ public class AdminController {
     }
 
     @GetMapping("/admin/archives")
-    public String archives(Model model) {
-        model.addAttribute("projetsArchives", projetService.listerArchives());
+    public String archives(@RequestParam(required = false) String anneeScolaire, Model model) {
+        model.addAttribute("projetsArchives", projetService.listerArchives(anneeScolaire));
+        model.addAttribute("anneeScolaire", anneeScolaire);
+        model.addAttribute("anneesScolairesDesArchives", projetService.listerAnneesScolairesDesArchives());
+        model.addAttribute("anneesScolairesDesDossiersValides", projetService.listerAnneesScolairesDesDossiersValidesActifs());
         return "admin-archives";
+    }
+
+    /**
+     * Archivage groupe (Admin) : archive en une fois tous les dossiers
+     * VALIDE non deja archives d'une annee scolaire donnee.
+     */
+    @PostMapping("/admin/archives/archiver-annee")
+    public String archiverAnnee(@RequestParam String anneeScolaire, RedirectAttributes redirectAttributes) {
+        int nombreArchive = projetService.archiverDossiersValidesDeLAnneeScolaire(anneeScolaire);
+        redirectAttributes.addFlashAttribute("messageSucces",
+                nombreArchive + " dossier(s) validé(s) de l'année scolaire " + anneeScolaire + " archivé(s).");
+        return "redirect:/admin/archives";
     }
 
     @GetMapping("/admin/dossiers-bloques")
@@ -120,15 +135,18 @@ public class AdminController {
                              @RequestParam(required = false) String classe,
                              @RequestParam(required = false) String statut,
                              @RequestParam(required = false) String archive,
+                             @RequestParam(required = false) String anneeScolaire,
                              Model model) {
         model.addAttribute("resultats", projetService.rechercherPourAdmin(
-                nom, organisateur, classe, statutOuNull(statut), archiveOuNull(archive)));
+                nom, organisateur, classe, statutOuNull(statut), archiveOuNull(archive), anneeScolaire));
         model.addAttribute("nom", nom);
         model.addAttribute("organisateur", organisateur);
         model.addAttribute("classe", classe);
         model.addAttribute("statut", statut);
         model.addAttribute("archive", archive);
+        model.addAttribute("anneeScolaire", anneeScolaire);
         model.addAttribute("statuts", StatutProjet.values());
+        model.addAttribute("anneesScolaires", projetService.listerAnneesScolaires());
         return "admin-recherche";
     }
 
@@ -138,9 +156,10 @@ public class AdminController {
                              @RequestParam(required = false) String classe,
                              @RequestParam(required = false) String statut,
                              @RequestParam(required = false) String archive,
+                             @RequestParam(required = false) String anneeScolaire,
                              HttpServletResponse response) throws IOException {
         List<Projet> resultats = projetService.rechercherPourAdmin(
-                nom, organisateur, classe, statutOuNull(statut), archiveOuNull(archive));
+                nom, organisateur, classe, statutOuNull(statut), archiveOuNull(archive), anneeScolaire);
 
         response.setContentType("text/csv; charset=UTF-8");
         response.setHeader("Content-Disposition", "attachment; filename=projets.csv");

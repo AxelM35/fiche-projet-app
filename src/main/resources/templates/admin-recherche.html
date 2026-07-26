@@ -49,10 +49,18 @@
                         <option value="archive" th:selected="${archive == 'archive'}">Archivés seulement</option>
                     </select>
                 </div>
+                <div class="col-md-2">
+                    <label class="form-label">Année scolaire</label>
+                    <select class="form-select" name="anneeScolaire">
+                        <option value="" th:selected="${anneeScolaire == null or anneeScolaire.isEmpty()}">Toutes</option>
+                        <option th:each="annee : ${anneesScolaires}" th:value="${annee}" th:text="${annee}"
+                                th:selected="${anneeScolaire == annee}"></option>
+                    </select>
+                </div>
                 <div class="col-12 d-flex gap-2">
                     <button type="submit" class="btn btn-primary"><i class="bi bi-search me-1"></i>Rechercher</button>
                     <a class="btn btn-outline-secondary"
-                       th:href="@{/admin/recherche/export.csv(nom=${nom},organisateur=${organisateur},classe=${classe},statut=${statut},archive=${archive})}">
+                       th:href="@{/admin/recherche/export.csv(nom=${nom},organisateur=${organisateur},classe=${classe},statut=${statut},archive=${archive},anneeScolaire=${anneeScolaire})}">
                         <i class="bi bi-download me-1"></i>Exporter en CSV
                     </a>
                 </div>

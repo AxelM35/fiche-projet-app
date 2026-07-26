@@ -24,6 +24,37 @@
 
     <h1 class="h4 mb-4"><i class="bi bi-archive me-2"></i>Dossiers archivés</h1>
 
+    <!-- Archivage groupe : archive en une fois tous les dossiers valides d'une annee scolaire -->
+    <div class="card carte-formulaire shadow-sm mb-3" th:unless="${#lists.isEmpty(anneesScolairesDesDossiersValides)}">
+        <div class="card-body">
+            <form method="post" th:action="@{/admin/archives/archiver-annee}" class="row g-3 align-items-end"
+                  data-confirm="Archiver tous les dossiers validés de cette année scolaire ?">
+                <div class="col-md-4">
+                    <label class="form-label">Archiver tous les dossiers validés de l'année scolaire</label>
+                    <select class="form-select" name="anneeScolaire" required>
+                        <option th:each="annee : ${anneesScolairesDesDossiersValides}" th:value="${annee}" th:text="${annee}"></option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-outline-primary"><i class="bi bi-archive me-1"></i>Archiver cette année</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Filtre par annee scolaire -->
+    <form method="get" th:action="@{/admin/archives}" class="row g-3 align-items-end mb-3"
+          th:unless="${#lists.isEmpty(anneesScolairesDesArchives)}">
+        <div class="col-md-4">
+            <label class="form-label">Filtrer par année scolaire</label>
+            <select class="form-select" name="anneeScolaire" onchange="this.form.submit()">
+                <option value="" th:selected="${anneeScolaire == null or anneeScolaire.isEmpty()}">Toutes</option>
+                <option th:each="annee : ${anneesScolairesDesArchives}" th:value="${annee}" th:text="${annee}"
+                        th:selected="${anneeScolaire == annee}"></option>
+            </select>
+        </div>
+    </form>
+
     <p class="text-muted" th:if="${#lists.isEmpty(projetsArchives)}">Aucun dossier archivé.</p>
 
     <div class="card carte-formulaire shadow-sm" th:unless="${#lists.isEmpty(projetsArchives)}">
