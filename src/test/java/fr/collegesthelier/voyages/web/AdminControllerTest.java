@@ -55,4 +55,27 @@ class AdminControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("admin-archives"));
     }
+
+    @Test
+    @WithMockUser(username = "amorvan@college-sthelier.fr", authorities = {"ROLE_PROF", "ROLE_ADMIN"})
+    void unAdminAccedeALaPageDesDossiersBloques() throws Exception {
+        mockMvc.perform(get("/admin/dossiers-bloques"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin-dossiers-bloques"));
+    }
+
+    @Test
+    @WithMockUser(username = "amorvan@college-sthelier.fr", authorities = {"ROLE_PROF", "ROLE_ADMIN"})
+    void unAdminAccedeAuJournalDaudit() throws Exception {
+        mockMvc.perform(get("/admin/journal"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin-journal"));
+    }
+
+    @Test
+    @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
+    void unProfNAccedePasAuJournalDaudit() throws Exception {
+        mockMvc.perform(get("/admin/journal"))
+                .andExpect(status().isForbidden());
+    }
 }

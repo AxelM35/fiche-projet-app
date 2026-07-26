@@ -3,6 +3,7 @@ package fr.collegesthelier.voyages.web;
 import fr.collegesthelier.voyages.config.RolesProperties;
 import fr.collegesthelier.voyages.dto.RoleAttributionFormDTO;
 import fr.collegesthelier.voyages.model.RoleMetier;
+import fr.collegesthelier.voyages.service.JournalService;
 import fr.collegesthelier.voyages.service.ProjetService;
 import fr.collegesthelier.voyages.service.RoleAdminService;
 import jakarta.validation.Valid;
@@ -37,11 +38,24 @@ public class AdminController {
     private final RoleAdminService roleAdminService;
     private final RolesProperties rolesProperties;
     private final ProjetService projetService;
+    private final JournalService journalService;
 
     @GetMapping("/admin/archives")
     public String archives(Model model) {
         model.addAttribute("projetsArchives", projetService.listerArchives());
         return "admin-archives";
+    }
+
+    @GetMapping("/admin/dossiers-bloques")
+    public String dossiersBloques(Model model) {
+        model.addAttribute("dossiersBloques", projetService.listerDossiersBloques());
+        return "admin-dossiers-bloques";
+    }
+
+    @GetMapping("/admin/journal")
+    public String journal(Model model) {
+        model.addAttribute("entrees", journalService.listerRecentes());
+        return "admin-journal";
     }
 
     @GetMapping("/admin/roles")

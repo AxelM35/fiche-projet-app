@@ -1,5 +1,6 @@
 package fr.collegesthelier.voyages.service;
 
+import fr.collegesthelier.voyages.dto.ProjetBloqueDTO;
 import fr.collegesthelier.voyages.dto.ProjetConsultationDTO;
 import fr.collegesthelier.voyages.dto.ProjetFormDTO;
 import fr.collegesthelier.voyages.dto.TableauDeBordStatsDTO;
@@ -21,11 +22,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -47,6 +51,7 @@ public class ProjetService {
 
     private final ProjetRepository projetRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final JournalService journalService;
 
     // -------------------------------------------------------------------
     // Lecture
@@ -127,22 +132,37 @@ public class ProjetService {
         Projet projet = new Projet();
         copierDtoVersEntite(dto, projet);
         projet.setStatut(StatutProjet.BROUILLON);
-        return projetRepository.save(projet);
+        Projet enregistre = projetRepository.save(projet);
+        journalService.enregistrer("Creation", enregistre.getId(), enregistre.getNomProjet(), null);
+        return enregistre;
     }
 
     @PreAuthorize("hasRole('PROF')")
     @Transactional
     public Projet modifierProjet(Long id, ProjetFormDTO dto) {
         Projet projet = trouverParId(id);
+        boolean estAdmin = possedeRole("ROLE_ADMIN");
 
-        if (projet.getStatut() != StatutProjet.BROUILLON && projet.getStatut() != StatutProjet.A_CORRIGER) {
+        boolean modifiable = projet.getStatut() == StatutProjet.BROUILLON
+                || projet.getStatut() == StatutProjet.A_CORRIGER
+                || (projet.getStatut() == StatutProjet.VALIDE && estAdmin);
+        if (!modifiable) {
             throw new TransitionInvalideException("Ce dossier est deja engage dans le circuit de validation et ne peut plus etre modifie.");
         }
         verifierDroitModification(projet);
         verifierVersion(projet, dto.getVersion());
 
         copierDtoVersEntite(dto, projet);
-        return projetRepository.save(projet);
+        Projet enregistre = projetRepository.save(projet);
+
+        // Un dossier VALIDE ne peut etre modifie que par un Admin (correction
+        // exceptionnelle apres coup) : cas assez sensible pour meriter sa
+        // propre entree de journal, distincte d'une simple modification de
+        // brouillon par son organisateur.
+        String action = (projet.getStatut() == StatutProjet.VALIDE && estAdmin)
+                ? "Modification (admin, dossier deja valide)" : "Modification";
+        journalService.enregistrer(action, enregistre.getId(), enregistre.getNomProjet(), null);
+        return enregistre;
     }
 
     /**
@@ -182,7 +202,10 @@ public class ProjetService {
         copie.setCommentaire(original.getCommentaire());
         copie.setStatut(StatutProjet.BROUILLON);
 
-        return projetRepository.save(copie);
+        Projet enregistree = projetRepository.save(copie);
+        journalService.enregistrer("Duplication (depuis #" + original.getId() + ")",
+                enregistree.getId(), enregistree.getNomProjet(), null);
+        return enregistree;
     }
 
     private String emailUtilisateurConnecteOuOriginal(Projet original) {
@@ -289,7 +312,8 @@ public class ProjetService {
         projet.setMotifRefus(null);
 
         Projet enregistre = projetRepository.save(projet);
-        publierEvenement(enregistre, ancienStatut);
+        publierEvenement(enregistre, ancienStatut,
+                ancienStatut == StatutProjet.A_CORRIGER ? "Resoumission" : "Soumission", null);
         return enregistre;
     }
 
@@ -322,7 +346,7 @@ public class ProjetService {
         projet.setDateValidationCompta(LocalDateTime.now());
 
         Projet enregistre = projetRepository.save(projet);
-        publierEvenement(enregistre, ancienStatut);
+        publierEvenement(enregistre, ancienStatut, "Validation Comptabilite", null);
         return enregistre;
     }
 
@@ -339,7 +363,7 @@ public class ProjetService {
         projet.setDateValidationVieScolaire(LocalDateTime.now());
 
         Projet enregistre = projetRepository.save(projet);
-        publierEvenement(enregistre, ancienStatut);
+        publierEvenement(enregistre, ancienStatut, "Validation Vie Scolaire", null);
         return enregistre;
     }
 
@@ -356,7 +380,7 @@ public class ProjetService {
         projet.setDateValidationDirection(LocalDateTime.now());
 
         Projet enregistre = projetRepository.save(projet);
-        publierEvenement(enregistre, ancienStatut);
+        publierEvenement(enregistre, ancienStatut, "Validation Direction (finale)", null);
         return enregistre;
     }
 
@@ -384,7 +408,7 @@ public class ProjetService {
         // effacer pour elle ni pour les etapes suivantes.
 
         Projet enregistre = projetRepository.save(projet);
-        publierEvenement(enregistre, ancienStatut);
+        publierEvenement(enregistre, ancienStatut, "Refus", motifRefus);
         return enregistre;
     }
 
@@ -400,6 +424,7 @@ public class ProjetService {
         Projet projet = trouverParId(id);
         projet.setArchive(true);
         projetRepository.save(projet);
+        journalService.enregistrer("Archivage", projet.getId(), projet.getNomProjet(), null);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -408,13 +433,93 @@ public class ProjetService {
         Projet projet = trouverParId(id);
         projet.setArchive(false);
         projetRepository.save(projet);
+        journalService.enregistrer("Desarchivage", projet.getId(), projet.getNomProjet(), null);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public void supprimerDefinitivement(Long id) {
         Projet projet = trouverParId(id);
+        Long projetId = projet.getId();
+        String nomProjet = projet.getNomProjet();
         projetRepository.delete(projet);
+        journalService.enregistrer("Suppression definitive", projetId, nomProjet, null);
+    }
+
+    /**
+     * Reaffecte un dossier a un autre organisateur (ex. professeur ayant
+     * quitte l'etablissement en cours d'annee). N'affecte que l'identite de
+     * l'organisateur, jamais le statut ni les dates de validation deja
+     * obtenues.
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
+    public void reaffecterOrganisateur(Long id, String nouvelEmail, String nouveauNom) {
+        Projet projet = trouverParId(id);
+        String ancienEmail = projet.getOrganisateurEmail();
+        projet.setOrganisateurEmail(nouvelEmail);
+        projet.setOrganisateurNom(nouveauNom);
+        projetRepository.save(projet);
+        journalService.enregistrer("Reaffectation organisateur", projet.getId(), projet.getNomProjet(),
+                "De " + ancienEmail + " vers " + nouvelEmail);
+    }
+
+    /**
+     * Dossiers en attente de validation depuis longtemps, tries du plus
+     * ancien au plus recent, pour permettre une relance manuelle. La date
+     * d'entree dans le statut courant se deduit des dates de validation deja
+     * enregistrees (pas de champ dedie necessaire).
+     */
+    @Transactional(readOnly = true)
+    public List<ProjetBloqueDTO> listerDossiersBloques() {
+        List<ProjetBloqueDTO> resultat = new ArrayList<>();
+        for (StatutProjet statut : List.of(StatutProjet.EN_ATTENTE_COMPTA,
+                StatutProjet.EN_ATTENTE_VIE_SCOLAIRE, StatutProjet.EN_ATTENTE_DIRECTION)) {
+            for (Projet projet : projetRepository.findByStatutAndArchiveFalseOrderByDateDepartAsc(statut)) {
+                LocalDateTime depuis = dateEntreeDansStatutCourant(projet);
+                long jours = depuis != null ? Duration.between(depuis, LocalDateTime.now()).toDays() : 0;
+                resultat.add(new ProjetBloqueDTO(projet.getId(), projet.getNomProjet(), statut, depuis, jours,
+                        projet.getOrganisateurNom(), projet.getOrganisateurEmail()));
+            }
+        }
+        resultat.sort(Comparator.comparingLong(ProjetBloqueDTO::joursEnAttente).reversed());
+        return resultat;
+    }
+
+    private LocalDateTime dateEntreeDansStatutCourant(Projet projet) {
+        return switch (projet.getStatut()) {
+            case EN_ATTENTE_COMPTA -> projet.getDateValidationProf();
+            case EN_ATTENTE_VIE_SCOLAIRE -> projet.getDateValidationCompta();
+            case EN_ATTENTE_DIRECTION -> projet.getDateValidationVieScolaire();
+            default -> null;
+        };
+    }
+
+    /**
+     * Recherche libre pour le dashboard admin : tous statuts confondus, y
+     * compris les dossiers archives (jamais visibles depuis le tableau de
+     * bord principal). Filtrage en memoire plutot qu'une requete dynamique :
+     * la volumetrie attendue (quelques dizaines de projets par an) le
+     * permet largement, pour une implementation bien plus simple.
+     */
+    @Transactional(readOnly = true)
+    public List<Projet> rechercherPourAdmin(String nom, String organisateur, String classe,
+                                             StatutProjet statut, Boolean archive) {
+        return projetRepository.findAll().stream()
+                .filter(p -> contient(p.getNomProjet(), nom))
+                .filter(p -> contient(p.getOrganisateurNom(), organisateur) || contient(p.getOrganisateurEmail(), organisateur))
+                .filter(p -> contient(p.getClassesConcernees(), classe))
+                .filter(p -> statut == null || p.getStatut() == statut)
+                .filter(p -> archive == null || p.isArchive() == archive)
+                .sorted(Comparator.comparing(Projet::getId).reversed())
+                .collect(Collectors.toList());
+    }
+
+    private boolean contient(String valeur, String recherche) {
+        if (recherche == null || recherche.isBlank()) {
+            return true;
+        }
+        return valeur != null && valeur.toLowerCase(Locale.ROOT).contains(recherche.toLowerCase(Locale.ROOT));
     }
 
     // -------------------------------------------------------------------
@@ -454,10 +559,11 @@ public class ProjetService {
         cible.setCommentaire(dto.getCommentaire());
     }
 
-    private void publierEvenement(Projet projet, StatutProjet ancienStatut) {
+    private void publierEvenement(Projet projet, StatutProjet ancienStatut, String action, String detailJournal) {
         eventPublisher.publishEvent(new ProjetEvent(
                 projet.getId(), projet.getNomProjet(), projet.getOrganisateurEmail(),
                 ancienStatut, projet.getStatut(), projet.getMotifRefus()));
+        journalService.enregistrer(action, projet.getId(), projet.getNomProjet(), detailJournal);
     }
 
     /**

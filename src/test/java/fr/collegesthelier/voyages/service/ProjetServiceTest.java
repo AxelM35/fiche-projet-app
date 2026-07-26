@@ -3,6 +3,7 @@ package fr.collegesthelier.voyages.service;
 import fr.collegesthelier.voyages.dto.ProjetFormDTO;
 import fr.collegesthelier.voyages.exception.ProjetNotFoundException;
 import fr.collegesthelier.voyages.exception.TransitionInvalideException;
+import fr.collegesthelier.voyages.model.JournalEntree;
 import fr.collegesthelier.voyages.model.Projet;
 import fr.collegesthelier.voyages.model.StatutProjet;
 import org.junit.jupiter.api.AfterEach;
@@ -19,6 +20,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,6 +39,9 @@ class ProjetServiceTest {
 
     @Autowired
     private ProjetService projetService;
+
+    @Autowired
+    private JournalService journalService;
 
     private ProjetFormDTO dtoValide() {
         ProjetFormDTO dto = new ProjetFormDTO();
@@ -58,8 +63,11 @@ class ProjetServiceTest {
         return dto;
     }
 
-    private void connecterEnTantQue(String email, String role) {
-        Authentication authentication = new TestingAuthenticationToken(email, null, List.of(new SimpleGrantedAuthority(role)));
+    private void connecterEnTantQue(String email, String... roles) {
+        List<SimpleGrantedAuthority> authorities = Arrays.stream(roles)
+                .map(SimpleGrantedAuthority::new)
+                .toList();
+        Authentication authentication = new TestingAuthenticationToken(email, null, authorities);
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
@@ -282,6 +290,81 @@ class ProjetServiceTest {
         projetService.supprimerDefinitivement(id);
 
         assertThatThrownBy(() -> projetService.trouverParId(id)).isInstanceOf(ProjetNotFoundException.class);
+    }
+
+    @Test
+    void seulUnAdminPeutModifierUnDossierDejaValide() {
+        connecterEnTantQue("martin@college-sthelier.fr", "ROLE_PROF");
+        Long id = projetService.creerProjet(dtoValide()).getId();
+        projetService.soumettre(id);
+        connecterEnTantQue("compta@college-sthelier.fr", "ROLE_COMPTA");
+        projetService.validerCompta(id);
+        connecterEnTantQue("viesco@college-sthelier.fr", "ROLE_VIESCO");
+        projetService.validerVieScolaire(id);
+        connecterEnTantQue("direction@college-sthelier.fr", "ROLE_DIRECTION");
+        projetService.validerDirection(id);
+        Projet valide = projetService.trouverParId(id);
+
+        // Un prof (meme organisateur) ne peut plus toucher a un dossier valide.
+        connecterEnTantQue("martin@college-sthelier.fr", "ROLE_PROF");
+        ProjetFormDTO dto = dtoValide();
+        dto.setVersion(valide.getVersion());
+        dto.setNomProjet("Tentative de modification par le prof");
+        assertThatThrownBy(() -> projetService.modifierProjet(id, dto)).isInstanceOf(TransitionInvalideException.class);
+
+        // Un admin, si : correction exceptionnelle apres validation. Un
+        // admin recoit aussi ROLE_PROF en production (CustomOAuth2UserService) :
+        // modifierProjet() l'exige au niveau @PreAuthorize.
+        connecterEnTantQue("amorvan@college-sthelier.fr", "ROLE_ADMIN", "ROLE_PROF");
+        dto.setNomProjet("Correction admin post-validation");
+        projetService.modifierProjet(id, dto);
+        assertThat(projetService.trouverParId(id).getNomProjet()).isEqualTo("Correction admin post-validation");
+    }
+
+    @Test
+    void unAdminPeutReaffecterLOrganisateurDunDossier() {
+        connecterEnTantQue("martin@college-sthelier.fr", "ROLE_PROF");
+        Long id = projetService.creerProjet(dtoValide()).getId();
+
+        connecterEnTantQue("amorvan@college-sthelier.fr", "ROLE_ADMIN");
+        projetService.reaffecterOrganisateur(id, "remplacant@college-sthelier.fr", "Mme Remplacante");
+
+        Projet projet = projetService.trouverParId(id);
+        assertThat(projet.getOrganisateurEmail()).isEqualTo("remplacant@college-sthelier.fr");
+        assertThat(projet.getOrganisateurNom()).isEqualTo("Mme Remplacante");
+    }
+
+    @Test
+    void unDossierSoumisApparaitDansLesDossiersBloquesAvecSonAncienneteEnJours() {
+        connecterEnTantQue("martin@college-sthelier.fr", "ROLE_PROF");
+        Long id = projetService.creerProjet(dtoValide()).getId();
+        projetService.soumettre(id);
+
+        assertThat(projetService.listerDossiersBloques())
+                .filteredOn(dossier -> dossier.id().equals(id))
+                .singleElement()
+                .satisfies(dossier -> {
+                    assertThat(dossier.statut()).isEqualTo(StatutProjet.EN_ATTENTE_COMPTA);
+                    assertThat(dossier.joursEnAttente()).isGreaterThanOrEqualTo(0);
+                });
+    }
+
+    @Test
+    void chaqueActionMajeureLaisseUneTraceDansLeJournalDaudit() {
+        connecterEnTantQue("martin@college-sthelier.fr", "ROLE_PROF");
+        Long id = projetService.creerProjet(dtoValide()).getId();
+        projetService.soumettre(id);
+
+        connecterEnTantQue("amorvan@college-sthelier.fr", "ROLE_ADMIN");
+        projetService.archiver(id);
+        projetService.desarchiver(id);
+
+        List<String> actions = journalService.listerRecentes().stream()
+                .filter(entree -> id.equals(entree.getProjetId()))
+                .map(JournalEntree::getAction)
+                .toList();
+
+        assertThat(actions).contains("Creation", "Soumission", "Archivage", "Desarchivage");
     }
 
     @Test

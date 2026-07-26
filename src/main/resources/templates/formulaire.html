@@ -21,6 +21,10 @@
          th:if="${messageSucces}" th:text="${messageSucces}">
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert"
+         th:if="${messageErreur}" th:text="${messageErreur}">
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
 
     <!-- Alerte stylisee affichant le motif de refus au professeur -->
     <div class="alert alert-danger" role="alert" th:if="${statutCourant != null and statutCourant.name() == 'A_CORRIGER'}">
@@ -38,6 +42,26 @@
             <span th:case="'VALIDE'" class="badge-statut-valide">Valide</span>
             <span th:case="'A_CORRIGER'" class="badge-statut-corriger">A corriger</span>
         </span>
+    </div>
+
+    <!-- Reaffectation d'organisateur : reservee a l'Admin (ex. professeur ayant quitte l'etablissement) -->
+    <div class="card carte-formulaire shadow-sm" th:if="${projet.id} != null" sec:authorize="hasRole('ADMIN')">
+        <div class="card-header fw-semibold"><i class="bi bi-person-gear me-2"></i>Reaffecter l'organisateur (Admin)</div>
+        <div class="card-body">
+            <form th:action="@{/projets/{id}/reaffecter-organisateur(id=${projet.id})}" th:object="${reaffectation}" method="post" class="row g-3 align-items-end">
+                <div class="col-md-5">
+                    <label class="form-label" for="organisateurNomReaffectation">Nom</label>
+                    <input type="text" class="form-control" id="organisateurNomReaffectation" th:field="*{organisateurNom}" th:placeholder="${projet.organisateurNom}">
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label" for="organisateurEmailReaffectation">Email</label>
+                    <input type="email" class="form-control" id="organisateurEmailReaffectation" th:field="*{organisateurEmail}" th:placeholder="${projet.organisateurEmail}">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-outline-primary w-100">Reaffecter</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <form id="formProjet" method="post"
@@ -240,9 +264,11 @@
         </div>
 
         <div class="d-flex flex-wrap gap-2">
-            <!-- Enregistrer : reserve a l'organisateur du dossier tant qu'il est modifiable -->
+            <!-- Enregistrer : reserve a l'organisateur du dossier tant qu'il est modifiable.
+                 Un dossier VALIDE n'atteint ce formulaire (au lieu de consultation.html) que
+                 pour un Admin (voir ProjetController.formulaireEdition), d'ou ce cas ajoute ici. -->
             <button type="submit" form="formProjet" class="btn btn-primary" sec:authorize="hasRole('PROF')"
-                    th:if="${statutCourant == null or statutCourant.name() == 'BROUILLON' or statutCourant.name() == 'A_CORRIGER'}">
+                    th:if="${statutCourant == null or statutCourant.name() == 'BROUILLON' or statutCourant.name() == 'A_CORRIGER' or statutCourant.name() == 'VALIDE'}">
                 Enregistrer
             </button>
 

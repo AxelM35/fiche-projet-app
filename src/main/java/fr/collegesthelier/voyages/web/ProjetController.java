@@ -1,6 +1,7 @@
 package fr.collegesthelier.voyages.web;
 
 import fr.collegesthelier.voyages.dto.ProjetFormDTO;
+import fr.collegesthelier.voyages.dto.ReaffectationFormDTO;
 import fr.collegesthelier.voyages.dto.RefusFormDTO;
 import fr.collegesthelier.voyages.model.Projet;
 import fr.collegesthelier.voyages.model.StatutProjet;
@@ -58,11 +59,13 @@ public class ProjetController {
     public String formulaireEdition(@PathVariable Long id, Model model, Authentication authentication) {
         Projet projet = projetService.trouverParId(id);
 
-        // Un dossier definitivement valide n'est plus modifiable, et un
-        // observateur en lecture seule ne doit jamais voir un formulaire
-        // editable (meme sans bouton actif) : dans les deux cas, on affiche
-        // la vue de consultation plutot que le formulaire.
-        if (projet.getStatut() == StatutProjet.VALIDE || estEnLectureSeule(authentication)) {
+        // Un dossier definitivement valide n'est plus modifiable (sauf par un
+        // Admin, correction exceptionnelle apres coup), et un observateur en
+        // lecture seule ne doit jamais voir un formulaire editable (meme sans
+        // bouton actif) : dans ces cas, on affiche la consultation plutot que
+        // le formulaire.
+        boolean estValide = projet.getStatut() == StatutProjet.VALIDE;
+        if ((estValide && !possedeRole(authentication, "ROLE_ADMIN")) || estEnLectureSeule(authentication)) {
             model.addAttribute("projet", projetService.chargerConsultation(id));
             return "consultation";
         }
@@ -70,13 +73,32 @@ public class ProjetController {
         model.addAttribute("projet", projetService.chargerFormulaire(id));
         model.addAttribute("statutCourant", projet.getStatut());
         model.addAttribute("motifRefus", projet.getMotifRefus());
+        model.addAttribute("reaffectation", new ReaffectationFormDTO());
         return "formulaire";
     }
 
     private boolean estEnLectureSeule(Authentication authentication) {
+        return possedeRole(authentication, "ROLE_LECTURE_SEULE");
+    }
+
+    private boolean possedeRole(Authentication authentication, String role) {
         return authentication != null && authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .anyMatch("ROLE_LECTURE_SEULE"::equals);
+                .anyMatch(role::equals);
+    }
+
+    @PostMapping("/projets/{id}/reaffecter-organisateur")
+    public String reaffecterOrganisateur(@PathVariable Long id,
+                                          @Valid @ModelAttribute("reaffectation") ReaffectationFormDTO dto,
+                                          BindingResult bindingResult, RedirectAttributes redirectAttributes) {
+        if (bindingResult.hasErrors()) {
+            redirectAttributes.addFlashAttribute("messageErreur", "Email ou nom du nouvel organisateur invalide.");
+            return "redirect:/projets/" + id;
+        }
+
+        projetService.reaffecterOrganisateur(id, dto.getOrganisateurEmail(), dto.getOrganisateurNom());
+        redirectAttributes.addFlashAttribute("messageSucces", "Le dossier a ete reaffecte.");
+        return "redirect:/projets/" + id;
     }
 
     @PostMapping("/projets/nouveau")
