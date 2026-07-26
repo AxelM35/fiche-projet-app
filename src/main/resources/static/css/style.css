@@ -521,3 +521,37 @@ a {
     width: 100%;
     max-width: 24rem;
 }
+
+/* -------------------------------------------------------------------
+   Utilitaires remplacant les style="..." inline (CSP script-src/style-src
+   sans 'unsafe-inline' : voir SecurityConfig).
+   ------------------------------------------------------------------- */
+
+/* Pages avec le sticky footer-actions (formulaire, consultation,
+   recapitulatif) : marge basse plus large pour ne pas passer sous le footer. */
+.pb-footer-sticky {
+    padding-bottom: 5rem;
+}
+
+/* Pages admin sans sticky footer : marge basse standard. */
+.pb-page {
+    padding-bottom: 3rem;
+}
+
+/* Texte libre (description, commentaire, motif de refus) : conserve les
+   sauts de ligne saisis par l'utilisateur. */
+.text-pre-wrap {
+    white-space: pre-wrap;
+}
+
+/* Tuile "sante" admin : valeurs plus longues (version, date) que les
+   compteurs numeriques, taille reduite pour rester lisible sur une ligne. */
+.stat-value-compact {
+    font-size: 1.1rem;
+}
+
+/* Colonne kanban du tableau de bord : largeur minimale pour rester lisible
+   quand le nombre de colonnes force un defilement horizontal. */
+.kanban-col {
+    min-width: 300px;
+}

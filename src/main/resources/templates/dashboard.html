@@ -80,7 +80,7 @@
     </div>
 
     <div class="row g-3 flex-nowrap overflow-auto pb-3">
-        <div class="col-3" th:each="entree : ${tableauDeBord}" style="min-width: 300px;">
+        <div class="col-3 kanban-col" th:each="entree : ${tableauDeBord}">
             <div class="card kanban-column shadow-sm">
                 <div class="card-header fw-semibold d-flex justify-content-between align-items-center">
                     <span th:switch="${entree.key.name()}">
@@ -230,7 +230,7 @@
                     <button type="submit" class="btn btn-outline-secondary"><i class="bi bi-archive me-1"></i>Archiver</button>
                 </form>
                 <form id="formSupprimerProjet" method="post"
-                      onsubmit="return confirm('Supprimer definitivement ce dossier ? Cette action est irreversible.');">
+                      data-confirm="Supprimer definitivement ce dossier ? Cette action est irreversible.">
                     <button type="submit" class="btn btn-danger"><i class="bi bi-trash me-1"></i>Supprimer definitivement</button>
                 </form>
             </div>
@@ -239,46 +239,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script th:inline="javascript">
-    document.getElementById('modalRefus').addEventListener('show.bs.modal', function (evenement) {
-        const bouton = evenement.relatedTarget;
-        const projetId = bouton.getAttribute('data-projet-id');
-        document.getElementById('formRefus').action = '/projets/' + projetId + '/refuser';
-    });
-
-    document.getElementById('modalGererProjet').addEventListener('show.bs.modal', function (evenement) {
-        const bouton = evenement.relatedTarget;
-        const projetId = bouton.getAttribute('data-projet-id');
-        document.getElementById('gererProjetNom').textContent = bouton.getAttribute('data-projet-nom');
-        document.getElementById('formArchiverProjet').action = '/projets/' + projetId + '/archiver';
-        document.getElementById('formSupprimerProjet').action = '/projets/' + projetId + '/supprimer';
-    });
-
-    // Filtrage cote client, par nom de projet, colonne par colonne (sans
-    // aller-retour serveur : le tableau est deja entierement charge).
-    document.getElementById('rechercheProjet').addEventListener('input', function (evenement) {
-        const recherche = evenement.target.value.trim().toLowerCase();
-
-        document.querySelectorAll('.kanban-column').forEach(function (colonne) {
-            let visibles = 0;
-            colonne.querySelectorAll('.project-card').forEach(function (carte) {
-                const correspond = carte.getAttribute('data-nom').includes(recherche);
-                carte.classList.toggle('d-none', !correspond);
-                if (correspond) {
-                    visibles += 1;
-                }
-            });
-
-            const compteur = colonne.querySelector('.compteur-colonne');
-            if (compteur) {
-                compteur.textContent = visibles;
-            }
-            const messageVide = colonne.querySelector('.message-vide');
-            if (messageVide) {
-                messageVide.classList.toggle('d-none', visibles > 0);
-            }
-        });
-    });
-</script>
+<script th:src="@{/js/confirmation.js}"></script>
+<script th:src="@{/js/dashboard.js}"></script>
 </body>
 </html>
