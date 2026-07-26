@@ -1,5 +1,6 @@
 package fr.ficheprojet.web;
 
+import fr.ficheprojet.exception.CommentaireNotFoundException;
 import fr.ficheprojet.exception.ProjetNotFoundException;
 import fr.ficheprojet.exception.TransitionInvalideException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,6 +23,13 @@ public class GlobalExceptionHandler {
     public String gererProjetIntrouvable(ProjetNotFoundException exception, RedirectAttributes redirectAttributes) {
         redirectAttributes.addFlashAttribute("messageErreur", exception.getMessage());
         return "redirect:/dashboard";
+    }
+
+    @ExceptionHandler(CommentaireNotFoundException.class)
+    public String gererCommentaireIntrouvable(CommentaireNotFoundException exception, HttpServletRequest request,
+                                               RedirectAttributes redirectAttributes) {
+        redirectAttributes.addFlashAttribute("messageErreur", exception.getMessage());
+        return "redirect:" + pageOrigine(request);
     }
 
     @ExceptionHandler(TransitionInvalideException.class)

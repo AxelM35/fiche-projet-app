@@ -285,6 +285,10 @@
         </div>
     </div>
 
+    <th:block th:if="${projet.id} != null">
+        <div th:replace="~{fragments/commentaires :: commentaires(${projet.id}, ${commentaires}, ${commentaireForm}, ${peutCommenter}, ${emailUtilisateurConnecte})}"></div>
+    </th:block>
+
     <!-- Sticky footer : boutons d'action, hors du formulaire principal pour
          permettre des actions de workflow independantes (voir attribut form="formProjet"). -->
     <div class="footer-actions d-flex flex-wrap gap-2 justify-content-between align-items-center">
