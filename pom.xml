@@ -43,6 +43,16 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- Migrations de schema versionnees (remplace ddl-auto=update) -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-postgresql</artifactId>
+        </dependency>
+
         <!-- Securite : OAuth2 login (Google) + RBAC -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -32,13 +32,14 @@ Ce qui est nécessaire avant un vrai lancement, par thème.
 
 ### 2.3 Déploiement
 - [ ] HTTPS via reverse proxy (nginx/Caddy/Traefik) — obligatoire pour OAuth2 en production et pour la confidentialité des données.
-- [ ] Migration vers Flyway : écrire une migration baseline correspondant au schéma actuel généré par `ddl-auto=update`, puis désactiver l'auto-DDL.
+- [x] Migration vers Flyway : migration baseline `V1__init.sql` correspondant au schéma généré par `ddl-auto=update`, `ddl-auto` passé en `validate`. **À tester sur une base vide (`docker compose down -v && docker compose up --build`) avant de considérer que c'est acquis.**
 - [ ] Stratégie de sauvegarde PostgreSQL (`pg_dump` planifié, rétention, **test de restauration réel** — une sauvegarde jamais restaurée n'est pas fiable).
-- [ ] Absence de CI actuellement (`.github/workflows` n'existe pas) : mettre en place une Action GitHub qui lance `./mvnw test` sur chaque push/PR, pour ne pas dépendre uniquement des tests locaux.
+- [x] CI GitHub Actions (`.github/workflows/ci.yml`) : lance `./mvnw test` sur chaque push/PR vers `main`.
 - [ ] Exposer un endpoint de santé (`spring-boot-starter-actuator` `/actuator/health`) pour le monitoring du conteneur.
 
 ### 2.4 Revue de sécurité
-- [ ] Revue complète avant mise en ligne (headers HTTP : CSP, HSTS, X-Frame-Options ; limitation du taux de tentatives de login ; scan des dépendances — Dependabot ou OWASP dependency-check).
+- [x] Premiers en-têtes HTTP (CSP, HSTS, Permissions-Policy) dans `SecurityConfig` — CSP garde `'unsafe-inline'` (scripts/styles inline dans les templates), à durcir plus tard avec des nonces. Ne remplace pas la revue complète ci-dessous.
+- [ ] Revue complète avant mise en ligne (rate limiting login, scan des dépendances — Dependabot ou OWASP dependency-check, externalisation des scripts/styles inline pour retirer `'unsafe-inline'`).
 - [ ] Vérifier qu'aucun secret n'est committé (`.env` déjà ignoré — bon point) et que les logs ne journalisent pas de données personnelles sensibles.
 - [ ] Réfléchir au RGPD si des données d'élèves mineurs venaient à être stockées nominativement à l'avenir (voir §3, pièces jointes) — actuellement seul un effectif chiffré est stocké, pas de liste nominative.
 
