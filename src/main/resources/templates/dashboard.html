@@ -226,10 +226,10 @@
                 </p>
             </div>
             <div class="modal-footer justify-content-between">
-                <form id="formArchiverProjet" method="post">
+                <form id="formArchiverProjet" method="post" th:action="@{/dashboard}">
                     <button type="submit" class="btn btn-outline-secondary"><i class="bi bi-archive me-1"></i>Archiver</button>
                 </form>
-                <form id="formSupprimerProjet" method="post"
+                <form id="formSupprimerProjet" method="post" th:action="@{/dashboard}"
                       data-confirm="Supprimer définitivement ce dossier ? Cette action est irréversible.">
                     <button type="submit" class="btn btn-danger"><i class="bi bi-trash me-1"></i>Supprimer définitivement</button>
                 </form>
