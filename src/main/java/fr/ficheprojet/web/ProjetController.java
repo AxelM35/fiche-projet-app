@@ -81,12 +81,19 @@ public class ProjetController {
         model.addAttribute("emailUtilisateurConnecte", authentication != null ? authentication.getName() : null);
 
         // Un dossier definitivement valide n'est plus modifiable (sauf par un
-        // Admin, correction exceptionnelle apres coup), et un observateur en
+        // Admin, correction exceptionnelle apres coup), un observateur en
         // lecture seule ne doit jamais voir un formulaire editable (meme sans
-        // bouton actif) : dans ces cas, on affiche la consultation plutot que
-        // le formulaire.
+        // bouton actif), et un Prof qui n'est ni l'organisateur du dossier ni
+        // un role de validation (COMPTA/VIESCO/DIRECTION/ADMIN, via
+        // peutGererLienDrive qui porte deja exactement cette semantique) ne
+        // doit voir que la consultation : sans ce dernier cas, n'importe quel
+        // Prof pouvait ouvrir le dossier d'un collegue et se retrouver face a
+        // un formulaire d'apparence editable (champs non verrouilles), alors
+        // que l'enregistrement aurait de toute facon ete refuse cote service.
         boolean estValide = projet.getStatut() == StatutProjet.VALIDE;
-        if ((estValide && !possedeRole(authentication, "ROLE_ADMIN")) || estEnLectureSeule(authentication)) {
+        if ((estValide && !possedeRole(authentication, "ROLE_ADMIN"))
+                || estEnLectureSeule(authentication)
+                || !projetService.peutGererLienDrive(projet)) {
             model.addAttribute("projet", projetService.chargerConsultation(id));
             return "consultation";
         }
