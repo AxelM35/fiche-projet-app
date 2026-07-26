@@ -44,7 +44,7 @@ public class RoleAdminService {
         String emailNormalise = email.trim().toLowerCase(Locale.ROOT);
         if (!roleAttributionRepository.existsByEmailAndRole(emailNormalise, role)) {
             roleAttributionRepository.save(new RoleAttribution(emailNormalise, role));
-            journalService.enregistrer("Attribution du role " + role, null, null, emailNormalise);
+            journalService.enregistrer("Attribution du rôle " + role, null, null, emailNormalise);
         }
     }
 
@@ -52,7 +52,7 @@ public class RoleAdminService {
     @Transactional
     public void retirer(Long id) {
         roleAttributionRepository.findById(id).ifPresent(attribution ->
-                journalService.enregistrer("Retrait du role " + attribution.getRole(), null, null,
+                journalService.enregistrer("Retrait du rôle " + attribution.getRole(), null, null,
                         attribution.getEmail()));
         roleAttributionRepository.deleteById(id);
     }

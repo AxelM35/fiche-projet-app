@@ -28,7 +28,7 @@
 
     <!-- Alerte stylisee affichant le motif de refus au professeur -->
     <div class="alert alert-danger" role="alert" th:if="${statutCourant != null and statutCourant.name() == 'A_CORRIGER'}">
-        <h5 class="alert-heading"><i class="bi bi-exclamation-triangle me-2"></i>Ce dossier doit etre corrige</h5>
+        <h5 class="alert-heading"><i class="bi bi-exclamation-triangle me-2"></i>Ce dossier doit être corrigé</h5>
         <p class="mb-0" th:text="${motifRefus}">Motif du refus...</p>
     </div>
 
@@ -36,11 +36,11 @@
         <h1 class="h4 mb-0" th:text="${projet.id} != null ? 'Fiche projet n°' + ${projet.id} : 'Nouveau projet de voyage scolaire'">Fiche projet</h1>
         <span class="badge-statut" th:if="${statutCourant != null}" th:switch="${statutCourant.name()}">
             <span th:case="'BROUILLON'" class="badge-statut-brouillon">Brouillon</span>
-            <span th:case="'EN_ATTENTE_COMPTA'" class="badge-statut-attente">En attente Comptabilite</span>
+            <span th:case="'EN_ATTENTE_COMPTA'" class="badge-statut-attente">En attente Comptabilité</span>
             <span th:case="'EN_ATTENTE_VIE_SCOLAIRE'" class="badge-statut-attente">En attente Vie Scolaire</span>
             <span th:case="'EN_ATTENTE_DIRECTION'" class="badge-statut-attente">En attente Direction</span>
             <span th:case="'VALIDE'" class="badge-statut-valide">Valide</span>
-            <span th:case="'A_CORRIGER'" class="badge-statut-corriger">A corriger</span>
+            <span th:case="'A_CORRIGER'" class="badge-statut-corriger">À corriger</span>
         </span>
     </div>
 
@@ -48,7 +48,7 @@
 
     <!-- Reaffectation d'organisateur : reservee a l'Admin (ex. professeur ayant quitte l'etablissement) -->
     <div class="card carte-formulaire shadow-sm" th:if="${projet.id} != null" sec:authorize="hasRole('ADMIN')">
-        <div class="card-header fw-semibold"><i class="bi bi-person-gear me-2"></i>Reaffecter l'organisateur (Admin)</div>
+        <div class="card-header fw-semibold"><i class="bi bi-person-gear me-2"></i>Réaffecter l'organisateur (Admin)</div>
         <div class="card-body">
             <form th:action="@{/projets/{id}/reaffecter-organisateur(id=${projet.id})}" th:object="${reaffectation}" method="post" class="row g-3 align-items-end">
                 <div class="col-md-5">
@@ -60,7 +60,7 @@
                     <input type="email" class="form-control" id="organisateurEmailReaffectation" th:field="*{organisateurEmail}" th:placeholder="${projet.organisateurEmail}">
                 </div>
                 <div class="col-md-2">
-                    <button type="submit" class="btn btn-outline-primary w-100">Reaffecter</button>
+                    <button type="submit" class="btn btn-outline-primary w-100">Réaffecter</button>
                 </div>
             </form>
         </div>
@@ -97,13 +97,13 @@
                 </div>
 
                 <div class="col-md-3">
-                    <label class="form-label">Date de depart</label>
+                    <label class="form-label">Date de départ</label>
                     <input type="datetime-local" class="form-control" th:field="*{dateDepart}"
                            th:classappend="${#fields.hasErrors('dateDepart')} ? 'is-invalid'">
                     <div class="invalid-feedback" th:if="${#fields.hasErrors('dateDepart')}" th:errors="*{dateDepart}"></div>
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label">Lieu de depart</label>
+                    <label class="form-label">Lieu de départ</label>
                     <input type="text" class="form-control" th:field="*{lieuDepart}"
                            th:classappend="${#fields.hasErrors('lieuDepart')} ? 'is-invalid'">
                     <div class="invalid-feedback" th:if="${#fields.hasErrors('lieuDepart')}" th:errors="*{lieuDepart}"></div>
@@ -124,7 +124,7 @@
                 <div class="col-12">
                     <hr class="my-2">
                     <h6 class="text-muted mb-0">
-                        <i class="bi bi-building me-1"></i>Coordonnees de l'organisme ou du referent
+                        <i class="bi bi-building me-1"></i>Coordonnées de l'organisme ou du référent
                         <span class="fw-normal fst-italic">(facultatif)</span>
                     </h6>
                 </div>
@@ -135,7 +135,7 @@
                     <div class="invalid-feedback" th:if="${#fields.hasErrors('organismeNom')}" th:errors="*{organismeNom}"></div>
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label">Telephone du contact</label>
+                    <label class="form-label">Téléphone du contact</label>
                     <input type="text" class="form-control" th:field="*{organismeTelephone}"
                            th:classappend="${#fields.hasErrors('organismeTelephone')} ? 'is-invalid'">
                     <div class="invalid-feedback" th:if="${#fields.hasErrors('organismeTelephone')}" th:errors="*{organismeTelephone}"></div>
@@ -166,7 +166,7 @@
                     <div class="invalid-feedback" th:if="${#fields.hasErrors('organisateurEmail')}" th:errors="*{organisateurEmail}"></div>
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label">Telephone</label>
+                    <label class="form-label">Téléphone</label>
                     <input type="text" class="form-control" th:field="*{telephoneOrganisateur}"
                            th:classappend="${#fields.hasErrors('telephoneOrganisateur')} ? 'is-invalid'">
                     <div class="invalid-feedback" th:if="${#fields.hasErrors('telephoneOrganisateur')}" th:errors="*{telephoneOrganisateur}"></div>
@@ -179,13 +179,13 @@
             <div class="card-header fw-semibold"><i class="bi bi-people me-2"></i>Le Groupe</div>
             <div class="card-body row g-3">
                 <div class="col-md-6">
-                    <label class="form-label">Classes concernees</label>
+                    <label class="form-label">Classes concernées</label>
                     <input type="text" class="form-control" th:field="*{classesConcernees}" placeholder="Ex: 5A, 5B"
                            th:classappend="${#fields.hasErrors('classesConcernees')} ? 'is-invalid'">
                     <div class="invalid-feedback" th:if="${#fields.hasErrors('classesConcernees')}" th:errors="*{classesConcernees}"></div>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label">Effectif eleves</label>
+                    <label class="form-label">Effectif élèves</label>
                     <input type="number" min="1" class="form-control" th:field="*{effectif}"
                            th:classappend="${#fields.hasErrors('effectif')} ? 'is-invalid'">
                     <div class="invalid-feedback" th:if="${#fields.hasErrors('effectif')}" th:errors="*{effectif}"></div>
@@ -216,13 +216,13 @@
             <div class="card-header fw-semibold"><i class="bi bi-cash-coin me-2"></i>Le Budget</div>
             <div class="card-body row g-3">
                 <div class="col-md-4">
-                    <label class="form-label">Cout global (€)</label>
+                    <label class="form-label">Coût global (€)</label>
                     <input type="number" step="0.01" min="0" class="form-control" th:field="*{coutGlobal}"
                            th:classappend="${#fields.hasErrors('coutGlobal')} ? 'is-invalid'">
                     <div class="invalid-feedback" th:if="${#fields.hasErrors('coutGlobal')}" th:errors="*{coutGlobal}"></div>
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label">Cout par eleve (€)</label>
+                    <label class="form-label">Coût par élève (€)</label>
                     <input type="number" step="0.01" min="0" class="form-control" th:field="*{coutParEleve}"
                            th:classappend="${#fields.hasErrors('coutParEleve')} ? 'is-invalid'">
                     <div class="invalid-feedback" th:if="${#fields.hasErrors('coutParEleve')}" th:errors="*{coutParEleve}"></div>
@@ -236,7 +236,7 @@
 
                 <div class="col-12 form-check">
                     <input type="checkbox" class="form-check-input" id="eligiblePassCulture" th:field="*{eligiblePassCulture}">
-                    <label class="form-check-label" for="eligiblePassCulture">Eligible Pass Culture</label>
+                    <label class="form-check-label" for="eligiblePassCulture">Éligible Pass Culture</label>
                 </div>
             </div>
         </div>
@@ -257,7 +257,7 @@
          du formulaire principal car modifiable independamment du statut du
          dossier, voir /projets/{id}/lien-drive). -->
     <div class="card carte-formulaire shadow-sm" th:if="${projet.id} != null">
-        <div class="card-header fw-semibold"><i class="bi bi-folder2-open me-2"></i>Pieces jointes (Google Drive)</div>
+        <div class="card-header fw-semibold"><i class="bi bi-folder2-open me-2"></i>Pièces jointes (Google Drive)</div>
         <div class="card-body">
             <div th:if="${not #strings.isEmpty(projet.lienDrive)}" class="mb-3">
                 <a th:href="${projet.lienDrive}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary">
@@ -265,7 +265,7 @@
                 </a>
             </div>
             <p th:if="${#strings.isEmpty(projet.lienDrive)}" class="text-muted small mb-3">
-                Aucun dossier Drive renseigne pour ce projet.
+                Aucun dossier Drive renseigné pour ce projet.
             </p>
 
             <form th:if="${peutModifierLienDrive}" th:action="@{/projets/{id}/lien-drive(id=${projet.id})}"
@@ -276,7 +276,7 @@
                            placeholder="https://drive.google.com/drive/folders/..."
                            th:classappend="${#fields.hasErrors('lienDrive')} ? 'is-invalid'">
                     <div class="invalid-feedback" th:if="${#fields.hasErrors('lienDrive')}" th:errors="*{lienDrive}"></div>
-                    <div class="form-text">Colle ici le lien de partage du dossier Drive du projet (cree a la main), laisse vide pour le retirer.</div>
+                    <div class="form-text">Colle ici le lien de partage du dossier Drive du projet (créé à la main), laisse vide pour le retirer.</div>
                 </div>
                 <div class="col-md-3">
                     <button type="submit" class="btn btn-outline-primary w-100">Enregistrer</button>

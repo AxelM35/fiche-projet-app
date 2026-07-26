@@ -54,38 +54,38 @@ public class NotificationService {
         }
         switch (evenement.getNouveauStatut()) {
             case EN_ATTENTE_COMPTA -> notifier(rolesProperties.getCompta(),
-                    "Nouveau dossier a valider : " + evenement.getNomProjet(),
+                    "Nouveau dossier à valider : " + evenement.getNomProjet(),
                     "Le dossier \"" + evenement.getNomProjet() + "\" attend votre validation comptable.",
                     null, urlDossier(evenement.getProjetId()));
             case EN_ATTENTE_VIE_SCOLAIRE -> {
                 notifier(rolesProperties.getViesco(),
-                        "Nouveau dossier a valider : " + evenement.getNomProjet(),
-                        "Le dossier \"" + evenement.getNomProjet() + "\" a ete valide par la comptabilite et attend votre validation.",
+                        "Nouveau dossier à valider : " + evenement.getNomProjet(),
+                        "Le dossier \"" + evenement.getNomProjet() + "\" a été validé par la comptabilité et attend votre validation.",
                         null, urlDossier(evenement.getProjetId()));
                 notifier(List.of(evenement.getOrganisateurEmail()),
                         "Dossier en cours : " + evenement.getNomProjet(),
-                        "Votre dossier \"" + evenement.getNomProjet() + "\" a ete valide par la Comptabilite. "
+                        "Votre dossier \"" + evenement.getNomProjet() + "\" a été validé par la Comptabilité. "
                                 + "Il est maintenant en attente de validation par la Vie Scolaire.",
                         null, urlDossier(evenement.getProjetId()));
             }
             case EN_ATTENTE_DIRECTION -> {
                 notifier(rolesProperties.getDirection(),
-                        "Nouveau dossier a valider : " + evenement.getNomProjet(),
+                        "Nouveau dossier à valider : " + evenement.getNomProjet(),
                         "Le dossier \"" + evenement.getNomProjet() + "\" attend la validation finale de la direction.",
                         null, urlDossier(evenement.getProjetId()));
                 notifier(List.of(evenement.getOrganisateurEmail()),
                         "Dossier en cours : " + evenement.getNomProjet(),
-                        "Votre dossier \"" + evenement.getNomProjet() + "\" a ete valide par la Vie Scolaire. "
+                        "Votre dossier \"" + evenement.getNomProjet() + "\" a été validé par la Vie Scolaire. "
                                 + "Il est maintenant en attente de validation par la Direction.",
                         null, urlDossier(evenement.getProjetId()));
             }
             case VALIDE -> notifier(List.of(evenement.getOrganisateurEmail()),
-                    "Dossier valide : " + evenement.getNomProjet(),
-                    "Bonne nouvelle : votre dossier \"" + evenement.getNomProjet() + "\" a ete valide par la direction.",
+                    "Dossier validé : " + evenement.getNomProjet(),
+                    "Bonne nouvelle : votre dossier \"" + evenement.getNomProjet() + "\" a été validé par la direction.",
                     null, urlDossier(evenement.getProjetId()));
             case A_CORRIGER -> notifier(List.of(evenement.getOrganisateurEmail()),
-                    "Dossier a corriger : " + evenement.getNomProjet(),
-                    "Votre dossier \"" + evenement.getNomProjet() + "\" a ete refuse et necessite des corrections.",
+                    "Dossier à corriger : " + evenement.getNomProjet(),
+                    "Votre dossier \"" + evenement.getNomProjet() + "\" a été refusé et nécessite des corrections.",
                     evenement.getMotifRefus(), urlDossier(evenement.getProjetId()));
             default -> log.debug("Aucune notification prevue pour le statut {}", evenement.getNouveauStatut());
         }
@@ -123,9 +123,9 @@ public class NotificationService {
      */
     @PreAuthorize("hasRole('ADMIN')")
     public void envoyerEmailTest(String destinataire) {
-        mailSender.send(construireMessage(List.of(destinataire), "Email de test - Fiche Projet numerique",
-                "Ceci est un email de test envoye depuis le dashboard admin de l'application "
-                        + "Fiche Projet numerique, pour verifier la configuration SMTP.",
+        mailSender.send(construireMessage(List.of(destinataire), "Email de test - Fiche Projet numérique",
+                "Ceci est un email de test envoyé depuis le dashboard admin de l'application "
+                        + "Fiche Projet numérique, pour vérifier la configuration SMTP.",
                 null, null));
     }
 
@@ -145,7 +145,7 @@ public class NotificationService {
             // n'attend pas : on la convertit en MailException (comme le fait deja
             // Spring en interne) pour que les catch existants (AdminController,
             // surChangementDeStatut ci-dessus) continuent de fonctionner sans changement.
-            throw new MailPreparationException("Echec de la preparation de l'email : " + sujet, e);
+            throw new MailPreparationException("Échec de la préparation de l'email : " + sujet, e);
         }
     }
 

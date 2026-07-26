@@ -13,6 +13,6 @@ import lombok.Setter;
 public class RefusFormDTO {
 
     @NotBlank(message = "Le motif de refus est obligatoire.")
-    @Size(max = 2000, message = "Le motif ne doit pas depasser 2000 caracteres.")
+    @Size(max = 2000, message = "Le motif ne doit pas dépasser 2000 caractères.")
     private String motifRefus;
 }

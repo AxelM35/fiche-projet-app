@@ -6,8 +6,8 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
- * Point d'entree de l'application Fiche Projet numerique (gestion et
- * validation des projets de voyages scolaires du College Saint-Helier).
+ * Point d'entree de l'application Fiche Projet numérique (gestion et
+ * validation des projets de voyages scolaires du Collège Saint-Helier).
  * <p>
  * @EnableScheduling : necessaire pour RelanceService.relancerDossiersBloques()
  * (@Scheduled, relances automatiques quotidiennes des dossiers bloques).

@@ -383,7 +383,7 @@ class ProjetServiceTest {
                 .map(JournalEntree::getAction)
                 .toList();
 
-        assertThat(actions).contains("Creation", "Soumission", "Archivage", "Desarchivage");
+        assertThat(actions).contains("Création", "Soumission", "Archivage", "Désarchivage");
     }
 
     @Test

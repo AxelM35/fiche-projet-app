@@ -91,7 +91,7 @@ public class AdminController {
     @PostMapping("/admin/notifications/activer")
     public String activerNotifications(RedirectAttributes redirectAttributes) {
         notificationToggleService.activer();
-        redirectAttributes.addFlashAttribute("messageSucces", "Les notifications email sont reactivees.");
+        redirectAttributes.addFlashAttribute("messageSucces", "Les notifications email sont réactivées.");
         return "redirect:/admin/notifications";
     }
 
@@ -99,7 +99,7 @@ public class AdminController {
     public String desactiverNotifications(RedirectAttributes redirectAttributes) {
         notificationToggleService.desactiver();
         redirectAttributes.addFlashAttribute("messageSucces",
-                "Les notifications email sont desactivees jusqu'a reactivation ou redemarrage de l'application.");
+                "Les notifications email sont désactivées jusqu'à réactivation ou redémarrage de l'application.");
         return "redirect:/admin/notifications";
     }
 
@@ -107,9 +107,9 @@ public class AdminController {
     public String envoyerEmailTest(@RequestParam String destinataire, RedirectAttributes redirectAttributes) {
         try {
             notificationService.envoyerEmailTest(destinataire);
-            redirectAttributes.addFlashAttribute("messageSucces", "Email de test envoye a " + destinataire + ".");
+            redirectAttributes.addFlashAttribute("messageSucces", "Email de test envoyé à " + destinataire + ".");
         } catch (MailException e) {
-            redirectAttributes.addFlashAttribute("messageErreur", "Echec de l'envoi : " + e.getMostSpecificCause().getMessage());
+            redirectAttributes.addFlashAttribute("messageErreur", "Échec de l'envoi : " + e.getMostSpecificCause().getMessage());
         }
         return "redirect:/admin/notifications";
     }
@@ -146,8 +146,8 @@ public class AdminController {
         response.setHeader("Content-Disposition", "attachment; filename=projets.csv");
         PrintWriter writer = response.getWriter();
         writer.write("\uFEFF"); // BOM UTF-8, pour qu'Excel detecte correctement l'encodage.
-        writer.println(String.join(",", champsCsv("Id", "Nom", "Statut", "Archive", "Date depart",
-                "Date retour", "Organisateur", "Email organisateur", "Classes", "Effectif", "Cout global")));
+        writer.println(String.join(",", champsCsv("Id", "Nom", "Statut", "Archivé", "Date départ",
+                "Date retour", "Organisateur", "Email organisateur", "Classes", "Effectif", "Coût global")));
         for (Projet projet : resultats) {
             writer.println(String.join(",", champsCsv(
                     String.valueOf(projet.getId()),
@@ -209,14 +209,14 @@ public class AdminController {
 
         roleAdminService.ajouter(dto.getEmail(), dto.getRole());
         redirectAttributes.addFlashAttribute("messageSucces",
-                dto.getEmail() + " a bien recu le role " + dto.getRole() + ".");
+                dto.getEmail() + " a bien reçu le rôle " + dto.getRole() + ".");
         return "redirect:/admin/roles";
     }
 
     @PostMapping("/admin/roles/{id}/supprimer")
     public String retirerAttribution(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         roleAdminService.retirer(id);
-        redirectAttributes.addFlashAttribute("messageSucces", "L'attribution de role a ete retiree.");
+        redirectAttributes.addFlashAttribute("messageSucces", "L'attribution de rôle a été retirée.");
         return "redirect:/admin/roles";
     }
 

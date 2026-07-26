@@ -15,7 +15,7 @@
     <artifactId>fiche-projet</artifactId>
     <version>1.0.0</version>
     <name>fiche-projet-app</name>
-    <description>Fiche Projet numerique - Gestion et validation des projets de voyages scolaires du College Saint-Helier</description>
+    <description>Fiche Projet numérique - Gestion et validation des projets de voyages scolaires du Collège Saint-Helier</description>
 
     <properties>
         <java.version>17</java.version>

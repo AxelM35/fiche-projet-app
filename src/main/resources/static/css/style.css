@@ -545,7 +545,7 @@ a {
 }
 
 /* Tuile "sante" admin : valeurs plus longues (version, date) que les
-   compteurs numeriques, taille reduite pour rester lisible sur une ligne. */
+   compteurs numériques, taille reduite pour rester lisible sur une ligne. */
 .stat-value-compact {
     font-size: 1.1rem;
 }

@@ -33,14 +33,14 @@ public class ProjetFormDTO {
 
     // --- Identite ---
     @NotBlank(message = "Le nom du projet est obligatoire.")
-    @Size(max = 255, message = "Le nom du projet ne doit pas depasser 255 caracteres.")
+    @Size(max = 255, message = "Le nom du projet ne doit pas dépasser 255 caractères.")
     private String nomProjet;
 
-    @Size(max = 5000, message = "La description ne doit pas depasser 5000 caracteres.")
+    @Size(max = 5000, message = "La description ne doit pas dépasser 5000 caractères.")
     private String description;
 
     // --- Dates et lieux ---
-    @NotNull(message = "La date de depart est obligatoire.")
+    @NotNull(message = "La date de départ est obligatoire.")
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime dateDepart;
 
@@ -48,7 +48,7 @@ public class ProjetFormDTO {
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime dateRetour;
 
-    @NotBlank(message = "Le lieu de depart est obligatoire.")
+    @NotBlank(message = "Le lieu de départ est obligatoire.")
     private String lieuDepart;
 
     @NotBlank(message = "Le lieu de retour est obligatoire.")
@@ -58,14 +58,14 @@ public class ProjetFormDTO {
     private String transport;
 
     // --- Organisme ou referent externe (facultatif) ---
-    @Size(max = 255, message = "Le nom de l'organisme ne doit pas depasser 255 caracteres.")
+    @Size(max = 255, message = "Le nom de l'organisme ne doit pas dépasser 255 caractères.")
     private String organismeNom;
 
-    @Pattern(regexp = "^$|^[0-9+ .-]{6,20}$", message = "Le format du telephone est invalide.")
+    @Pattern(regexp = "^$|^[0-9+ .-]{6,20}$", message = "Le format du téléphone est invalide.")
     private String organismeTelephone;
 
-    @Email(message = "L'email de l'organisme doit etre une adresse valide.")
-    @Size(max = 255, message = "L'email de l'organisme ne doit pas depasser 255 caracteres.")
+    @Email(message = "L'email de l'organisme doit être une adresse valide.")
+    @Size(max = 255, message = "L'email de l'organisme ne doit pas dépasser 255 caractères.")
     private String organismeEmail;
 
     // --- Organisateur ---
@@ -73,19 +73,19 @@ public class ProjetFormDTO {
     private String organisateurNom;
 
     @NotBlank(message = "L'email de l'organisateur est obligatoire.")
-    @Email(message = "L'email de l'organisateur doit etre une adresse valide.")
+    @Email(message = "L'email de l'organisateur doit être une adresse valide.")
     private String organisateurEmail;
 
-    @NotBlank(message = "Le telephone de l'organisateur est obligatoire.")
-    @Pattern(regexp = "^[0-9+ .-]{6,20}$", message = "Le format du telephone est invalide.")
+    @NotBlank(message = "Le téléphone de l'organisateur est obligatoire.")
+    @Pattern(regexp = "^[0-9+ .-]{6,20}$", message = "Le format du téléphone est invalide.")
     private String telephoneOrganisateur;
 
     // --- Groupe ---
-    @NotBlank(message = "Les classes concernees sont obligatoires.")
+    @NotBlank(message = "Les classes concernées sont obligatoires.")
     private String classesConcernees;
 
     @NotNull(message = "L'effectif est obligatoire.")
-    @Positive(message = "L'effectif doit etre superieur a zero.")
+    @Positive(message = "L'effectif doit être supérieur à zéro.")
     private Integer effectif;
 
     /**
@@ -96,21 +96,21 @@ public class ProjetFormDTO {
     private List<String> accompagnateurs = new ArrayList<>();
 
     // --- Budget ---
-    @NotNull(message = "Le cout global est obligatoire.")
-    @PositiveOrZero(message = "Le cout global doit etre positif ou nul.")
+    @NotNull(message = "Le coût global est obligatoire.")
+    @PositiveOrZero(message = "Le coût global doit être positif ou nul.")
     private BigDecimal coutGlobal;
 
-    @NotNull(message = "Le cout par eleve est obligatoire.")
-    @PositiveOrZero(message = "Le cout par eleve doit etre positif ou nul.")
+    @NotNull(message = "Le coût par élève est obligatoire.")
+    @PositiveOrZero(message = "Le coût par élève doit être positif ou nul.")
     private BigDecimal coutParEleve;
 
-    @PositiveOrZero(message = "Le montant de la subvention doit etre positif ou nul.")
+    @PositiveOrZero(message = "Le montant de la subvention doit être positif ou nul.")
     private BigDecimal montantSubvention = BigDecimal.ZERO;
 
     private boolean eligiblePassCulture;
 
     // --- Commentaire libre (facultatif) ---
-    @Size(max = 5000, message = "Le commentaire ne doit pas depasser 5000 caracteres.")
+    @Size(max = 5000, message = "Le commentaire ne doit pas dépasser 5000 caractères.")
     private String commentaire;
 
     /**

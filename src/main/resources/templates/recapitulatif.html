@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title th:text="'Recapitulatif avant soumission - ' + ${projet.nomProjet}">Recapitulatif</title>
+    <title th:text="'Récapitulatif avant soumission - ' + ${projet.nomProjet}">Récapitulatif</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,16 +18,16 @@
 <div class="container px-4 pb-footer-sticky">
 
     <div class="alert alert-info" role="alert">
-        <h5 class="alert-heading"><i class="bi bi-info-circle me-2"></i>Verifiez le dossier avant de le soumettre</h5>
+        <h5 class="alert-heading"><i class="bi bi-info-circle me-2"></i>Vérifiez le dossier avant de le soumettre</h5>
         <p class="mb-0">
-            Une fois soumis, le dossier entre dans le circuit de validation (Comptabilite, puis Vie Scolaire, puis
-            Direction) et ne pourra plus etre modifie tant qu'il n'aura pas ete refuse ou entierement valide.
-            Relisez les informations ci-dessous ; si quelque chose doit etre corrige, retournez au formulaire.
+            Une fois soumis, le dossier entre dans le circuit de validation (Comptabilité, puis Vie Scolaire, puis
+            Direction) et ne pourra plus être modifié tant qu'il n'aura pas été refusé ou entièrement validé.
+            Relisez les informations ci-dessous ; si quelque chose doit être corrigé, retournez au formulaire.
         </p>
     </div>
 
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-        <h1 class="h4 mb-0">Recapitulatif : <span th:text="${projet.nomProjet}">Nom du projet</span></h1>
+        <h1 class="h4 mb-0">Récapitulatif : <span th:text="${projet.nomProjet}">Nom du projet</span></h1>
     </div>
 
     <!-- Carte : Le Voyage -->
@@ -47,11 +47,11 @@
                 <div th:text="${projet.description}" class="text-pre-wrap">-</div>
             </div>
             <div class="col-md-3">
-                <div class="text-muted small">Date de depart</div>
+                <div class="text-muted small">Date de départ</div>
                 <div th:text="${#temporals.format(projet.dateDepart, 'dd/MM/yyyy HH:mm')}">-</div>
             </div>
             <div class="col-md-3">
-                <div class="text-muted small">Lieu de depart</div>
+                <div class="text-muted small">Lieu de départ</div>
                 <div th:text="${projet.lieuDepart}">-</div>
             </div>
             <div class="col-md-3">
@@ -66,14 +66,14 @@
             <th:block th:if="${not #strings.isEmpty(projet.organismeNom) or not #strings.isEmpty(projet.organismeTelephone) or not #strings.isEmpty(projet.organismeEmail)}">
                 <div class="col-12">
                     <hr class="my-2">
-                    <h6 class="text-muted mb-0"><i class="bi bi-building me-1"></i>Coordonnees de l'organisme ou du referent</h6>
+                    <h6 class="text-muted mb-0"><i class="bi bi-building me-1"></i>Coordonnées de l'organisme ou du référent</h6>
                 </div>
                 <div class="col-md-4" th:if="${not #strings.isEmpty(projet.organismeNom)}">
                     <div class="text-muted small">Nom</div>
                     <div th:text="${projet.organismeNom}">-</div>
                 </div>
                 <div class="col-md-4" th:if="${not #strings.isEmpty(projet.organismeTelephone)}">
-                    <div class="text-muted small">Telephone</div>
+                    <div class="text-muted small">Téléphone</div>
                     <div th:text="${projet.organismeTelephone}">-</div>
                 </div>
                 <div class="col-md-4" th:if="${not #strings.isEmpty(projet.organismeEmail)}">
@@ -97,7 +97,7 @@
                 <div th:text="${projet.organisateurEmail}">-</div>
             </div>
             <div class="col-md-4">
-                <div class="text-muted small">Telephone</div>
+                <div class="text-muted small">Téléphone</div>
                 <div th:text="${projet.telephoneOrganisateur}">-</div>
             </div>
         </div>
@@ -108,11 +108,11 @@
         <div class="card-header fw-semibold"><i class="bi bi-people me-2"></i>Le Groupe</div>
         <div class="card-body row g-3">
             <div class="col-md-6">
-                <div class="text-muted small">Classes concernees</div>
+                <div class="text-muted small">Classes concernées</div>
                 <div th:text="${projet.classesConcernees}">-</div>
             </div>
             <div class="col-md-6">
-                <div class="text-muted small">Effectif eleves</div>
+                <div class="text-muted small">Effectif élèves</div>
                 <div th:text="${projet.effectif}">-</div>
             </div>
             <div class="col-12" th:if="${not #lists.isEmpty(projet.accompagnateurs)}">
@@ -129,11 +129,11 @@
         <div class="card-header fw-semibold"><i class="bi bi-cash-coin me-2"></i>Le Budget</div>
         <div class="card-body row g-3">
             <div class="col-md-4">
-                <div class="text-muted small">Cout global</div>
+                <div class="text-muted small">Coût global</div>
                 <div th:text="${projet.coutGlobal} + ' €'">-</div>
             </div>
             <div class="col-md-4">
-                <div class="text-muted small">Cout par eleve</div>
+                <div class="text-muted small">Coût par élève</div>
                 <div th:text="${projet.coutParEleve} + ' €'">-</div>
             </div>
             <div class="col-md-4">
@@ -142,7 +142,7 @@
             </div>
             <div class="col-12">
                 <span class="badge" th:classappend="${projet.eligiblePassCulture} ? 'bg-success' : 'bg-secondary'"
-                      th:text="${projet.eligiblePassCulture} ? 'Eligible Pass Culture' : 'Non eligible Pass Culture'">-</span>
+                      th:text="${projet.eligiblePassCulture} ? 'Éligible Pass Culture' : 'Non éligible Pass Culture'">-</span>
             </div>
         </div>
     </div>
