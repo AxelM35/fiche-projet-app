@@ -40,7 +40,9 @@ Ce qui est nécessaire avant un vrai lancement, par thème.
 
 ### 2.4 Revue de sécurité
 - [x] Premiers en-têtes HTTP (CSP, HSTS, Permissions-Policy) dans `SecurityConfig` — CSP garde `'unsafe-inline'` (scripts/styles inline dans les templates), à durcir plus tard avec des nonces. Ne remplace pas la revue complète ci-dessous.
-- [ ] Revue complète avant mise en ligne (rate limiting login, scan des dépendances — Dependabot ou OWASP dependency-check, externalisation des scripts/styles inline pour retirer `'unsafe-inline'`).
+- [x] Rate limiting sur les routes d'authentification (`/login`, `/oauth2/authorization/google`, `/login/oauth2/code/google`) : `LoginRateLimitingFilter` (fenêtre fixe maison, pas de bibliothèque dédiée — la règle est volontairement simple), 20 requêtes/minute par IP, au tout début de la chaîne de filtres Spring Security (avant toute session/CSRF). Volontairement **pas** un bean Spring (instancié directement dans `SecurityConfig` + `addFilterBefore`), sinon Spring Boot l'aurait *aussi* enregistré comme filtre servlet générique et exécuté deux fois par requête. **Limite connue** : s'appuie sur `request.getRemoteAddr()`, donc suppose qu'aucun reverse proxy ne s'intercale — à revoir (`X-Forwarded-For` + liste de proxies de confiance) une fois le reverse proxy HTTPS en place (voir §2.3). Testé via `LoginRateLimitingFilterTest`.
+- [x] Scan de dépendances : `.github/dependabot.yml` (Maven, image Docker de base, GitHub Actions), mises à jour hebdomadaires proposées en PR.
+- [ ] Revue complète avant mise en ligne : externalisation des scripts/styles inline pour retirer `'unsafe-inline'` de la CSP (reste le plus gros morceau, pas engagé).
 - [ ] Vérifier qu'aucun secret n'est committé (`.env` déjà ignoré — bon point) et que les logs ne journalisent pas de données personnelles sensibles.
 - [ ] Réfléchir au RGPD si des données d'élèves mineurs venaient à être stockées nominativement à l'avenir (voir §3, pièces jointes) — actuellement seul un effectif chiffré est stocké, pas de liste nominative.
 
