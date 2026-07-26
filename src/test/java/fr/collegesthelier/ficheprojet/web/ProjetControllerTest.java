@@ -101,6 +101,33 @@ class ProjetControllerTest {
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("/js/boutons-validation.js")));
     }
 
+    /**
+     * Regression : les formulaires "Archiver" et "Supprimer définitivement"
+     * de la modale de gestion admin n'avaient pas de th:action (l'URL reelle
+     * est posee par dashboard.js au clic) - sans th:action, l'extension
+     * Thymeleaf Spring Security n'injecte pas le jeton CSRF automatiquement,
+     * ce qui faisait echouer la soumission en 403 dans un vrai navigateur
+     * (MockMvc + .with(csrf()) ne l'aurait pas detecte, d'ou cette assertion
+     * directe sur le HTML rendu).
+     */
+    @Test
+    @WithMockUser(username = "amorvan@college-sthelier.fr", authorities = {"ROLE_PROF", "ROLE_ADMIN"})
+    void lesFormulairesDeGestionAdminContiennentLeJetonCsrf() throws Exception {
+        MvcResult resultat = mockMvc.perform(get("/dashboard"))
+                .andExpect(status().isOk())
+                .andReturn();
+        String html = resultat.getResponse().getContentAsString();
+
+        assertThat(extraireFormulaire(html, "formArchiverProjet")).contains("name=\"_csrf\"");
+        assertThat(extraireFormulaire(html, "formSupprimerProjet")).contains("name=\"_csrf\"");
+    }
+
+    private String extraireFormulaire(String html, String idFormulaire) {
+        int debut = html.indexOf("id=\"" + idFormulaire + "\"");
+        int fin = html.indexOf("</form>", debut);
+        return html.substring(debut, fin);
+    }
+
     @Test
     @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
     void leFormulaireDeCreationSAffiche() throws Exception {
