@@ -52,45 +52,64 @@ public class NotificationService {
                     evenement.getProjetId());
             return;
         }
-        try {
-            switch (evenement.getNouveauStatut()) {
-                case EN_ATTENTE_COMPTA -> notifier(rolesProperties.getCompta(),
-                        "Nouveau dossier a valider : " + evenement.getNomProjet(),
-                        "Le dossier \"" + evenement.getNomProjet() + "\" attend votre validation comptable.",
-                        null, urlDossier(evenement.getProjetId()));
-                case EN_ATTENTE_VIE_SCOLAIRE -> notifier(rolesProperties.getViesco(),
+        switch (evenement.getNouveauStatut()) {
+            case EN_ATTENTE_COMPTA -> notifier(rolesProperties.getCompta(),
+                    "Nouveau dossier a valider : " + evenement.getNomProjet(),
+                    "Le dossier \"" + evenement.getNomProjet() + "\" attend votre validation comptable.",
+                    null, urlDossier(evenement.getProjetId()));
+            case EN_ATTENTE_VIE_SCOLAIRE -> {
+                notifier(rolesProperties.getViesco(),
                         "Nouveau dossier a valider : " + evenement.getNomProjet(),
                         "Le dossier \"" + evenement.getNomProjet() + "\" a ete valide par la comptabilite et attend votre validation.",
                         null, urlDossier(evenement.getProjetId()));
-                case EN_ATTENTE_DIRECTION -> notifier(rolesProperties.getDirection(),
+                notifier(List.of(evenement.getOrganisateurEmail()),
+                        "Dossier en cours : " + evenement.getNomProjet(),
+                        "Votre dossier \"" + evenement.getNomProjet() + "\" a ete valide par la Comptabilite. "
+                                + "Il est maintenant en attente de validation par la Vie Scolaire.",
+                        null, urlDossier(evenement.getProjetId()));
+            }
+            case EN_ATTENTE_DIRECTION -> {
+                notifier(rolesProperties.getDirection(),
                         "Nouveau dossier a valider : " + evenement.getNomProjet(),
                         "Le dossier \"" + evenement.getNomProjet() + "\" attend la validation finale de la direction.",
                         null, urlDossier(evenement.getProjetId()));
-                case VALIDE -> notifier(List.of(evenement.getOrganisateurEmail()),
-                        "Dossier valide : " + evenement.getNomProjet(),
-                        "Bonne nouvelle : votre dossier \"" + evenement.getNomProjet() + "\" a ete valide par la direction.",
+                notifier(List.of(evenement.getOrganisateurEmail()),
+                        "Dossier en cours : " + evenement.getNomProjet(),
+                        "Votre dossier \"" + evenement.getNomProjet() + "\" a ete valide par la Vie Scolaire. "
+                                + "Il est maintenant en attente de validation par la Direction.",
                         null, urlDossier(evenement.getProjetId()));
-                case A_CORRIGER -> notifier(List.of(evenement.getOrganisateurEmail()),
-                        "Dossier a corriger : " + evenement.getNomProjet(),
-                        "Votre dossier \"" + evenement.getNomProjet() + "\" a ete refuse et necessite des corrections.",
-                        evenement.getMotifRefus(), urlDossier(evenement.getProjetId()));
-                default -> log.debug("Aucune notification prevue pour le statut {}", evenement.getNouveauStatut());
             }
-        } catch (RuntimeException e) {
-            // Un incident d'envoi d'email ne doit jamais faire echouer le workflow
-            // metier : le changement de statut est deja valide et persiste au
-            // moment ou ce listener s'execute (phase AFTER_COMMIT).
-            log.error("Echec de l'envoi de la notification pour le projet {}", evenement.getProjetId(), e);
+            case VALIDE -> notifier(List.of(evenement.getOrganisateurEmail()),
+                    "Dossier valide : " + evenement.getNomProjet(),
+                    "Bonne nouvelle : votre dossier \"" + evenement.getNomProjet() + "\" a ete valide par la direction.",
+                    null, urlDossier(evenement.getProjetId()));
+            case A_CORRIGER -> notifier(List.of(evenement.getOrganisateurEmail()),
+                    "Dossier a corriger : " + evenement.getNomProjet(),
+                    "Votre dossier \"" + evenement.getNomProjet() + "\" a ete refuse et necessite des corrections.",
+                    evenement.getMotifRefus(), urlDossier(evenement.getProjetId()));
+            default -> log.debug("Aucune notification prevue pour le statut {}", evenement.getNouveauStatut());
         }
     }
 
+    /**
+     * Chaque appel est independant des autres (certains statuts notifient a
+     * la fois le valideur suivant et l'organisateur, voir EN_ATTENTE_VIE_SCOLAIRE
+     * / EN_ATTENTE_DIRECTION ci-dessus) : un incident d'envoi pour l'un des
+     * deux destinataires ne doit ni empecher l'autre, ni faire echouer le
+     * workflow metier (le changement de statut est deja valide et persiste
+     * au moment ou ce listener s'execute, phase AFTER_COMMIT).
+     */
     private void notifier(List<String> destinataires, String sujet, String message, String motifRefus, String lienDossier) {
         if (destinataires == null || destinataires.isEmpty()) {
             log.warn("Aucun destinataire configure pour la notification : {}", sujet);
             return;
         }
 
-        mailSender.send(construireMessage(destinataires, sujet, message, motifRefus, lienDossier));
+        try {
+            mailSender.send(construireMessage(destinataires, sujet, message, motifRefus, lienDossier));
+        } catch (RuntimeException e) {
+            log.error("Echec de l'envoi de la notification \"{}\" a {}", sujet, destinataires, e);
+        }
     }
 
     /**
