@@ -35,6 +35,7 @@ services:
       ROLES_COMPTA: ${ROLES_COMPTA:-compta@college-sthelier.fr}
       ROLES_VIESCO: ${ROLES_VIESCO:-viesco@college-sthelier.fr}
       ROLES_DIRECTION: ${ROLES_DIRECTION:-direction@college-sthelier.fr}
+      ROLES_LECTURE_SEULE: ${ROLES_LECTURE_SEULE:-}
       MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
       MAIL_PORT: ${MAIL_PORT:-587}
       MAIL_USERNAME: ${MAIL_USERNAME:-}

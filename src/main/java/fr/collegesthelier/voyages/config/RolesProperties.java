@@ -21,4 +21,5 @@ public class RolesProperties {
     private List<String> compta = List.of();
     private List<String> viesco = List.of();
     private List<String> direction = List.of();
+    private List<String> lectureSeule = List.of();
 }

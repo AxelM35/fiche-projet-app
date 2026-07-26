@@ -223,6 +223,11 @@ a {
     color: var(--md-on-error-container);
 }
 
+.chip-role-lecture-seule {
+    background-color: var(--md-surface-container-high);
+    color: var(--md-on-surface-variant);
+}
+
 /* -------------------------------------------------------------------
    Cartes : elevation M3 douce et teintee, formes arrondies larges.
    ------------------------------------------------------------------- */

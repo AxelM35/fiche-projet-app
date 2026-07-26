@@ -228,6 +228,24 @@ class ProjetServiceTest {
     }
 
     @Test
+    void unUtilisateurEnLectureSeulePeutConsulterMaisNeCreeNiNeValideRien() {
+        connecterEnTantQue("martin@college-sthelier.fr", "ROLE_PROF");
+        Long id = projetService.creerProjet(dtoValide()).getId();
+        projetService.soumettre(id);
+
+        connecterEnTantQue("secretariat@college-sthelier.fr", "ROLE_LECTURE_SEULE");
+
+        // La consultation reste ouverte a tout utilisateur authentifie.
+        assertThat(projetService.trouverParId(id).getStatut()).isEqualTo(StatutProjet.EN_ATTENTE_COMPTA);
+        assertThat(projetService.projetsPourTableauDeBord()).isNotEmpty();
+
+        // Mais aucune action de creation ou de workflow ne lui est ouverte.
+        assertThatThrownBy(() -> projetService.creerProjet(dtoValide())).isInstanceOf(AccessDeniedException.class);
+        assertThatThrownBy(() -> projetService.validerCompta(id)).isInstanceOf(AccessDeniedException.class);
+        assertThatThrownBy(() -> projetService.dupliquer(id)).isInstanceOf(AccessDeniedException.class);
+    }
+
+    @Test
     void uneModificationAvecUneVersionPerimeeEstRejetee() {
         connecterEnTantQue("martin@college-sthelier.fr", "ROLE_PROF");
         Projet projet = projetService.creerProjet(dtoValide());

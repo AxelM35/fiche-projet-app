@@ -234,20 +234,21 @@
             <a class="btn btn-outline-secondary" th:href="@{/dashboard}"><i class="bi bi-arrow-left me-1"></i>Retour au tableau de bord</a>
 
             <!-- Dupliquer : disponible des que le projet existe deja, quel que soit son statut -->
-            <form th:if="${projet.id} != null" th:action="@{/projets/{id}/dupliquer(id=${projet.id})}" method="post" class="d-inline">
+            <form th:if="${projet.id} != null" sec:authorize="hasRole('PROF')" th:action="@{/projets/{id}/dupliquer(id=${projet.id})}" method="post" class="d-inline">
                 <button type="submit" class="btn btn-outline-primary"><i class="bi bi-copy me-1"></i>Dupliquer</button>
             </form>
         </div>
 
         <div class="d-flex flex-wrap gap-2">
             <!-- Enregistrer : reserve a l'organisateur du dossier tant qu'il est modifiable -->
-            <button type="submit" form="formProjet" class="btn btn-primary"
+            <button type="submit" form="formProjet" class="btn btn-primary" sec:authorize="hasRole('PROF')"
                     th:if="${statutCourant == null or statutCourant.name() == 'BROUILLON' or statutCourant.name() == 'A_CORRIGER'}">
                 Enregistrer
             </button>
 
             <!-- Soumettre pour validation : uniquement sur un dossier deja enregistre -->
             <form th:if="${projet.id} != null and (${statutCourant.name() == 'BROUILLON'} or ${statutCourant.name() == 'A_CORRIGER'})"
+                  sec:authorize="hasRole('PROF')"
                   th:action="@{/projets/{id}/soumettre(id=${projet.id})}" method="post" class="d-inline">
                 <button type="submit" class="btn btn-success">Soumettre pour validation</button>
             </form>
