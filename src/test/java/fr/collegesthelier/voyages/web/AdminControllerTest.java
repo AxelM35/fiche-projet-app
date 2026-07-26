@@ -8,7 +8,9 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
@@ -96,6 +98,27 @@ class AdminControllerTest {
     @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
     void unProfNAccedePasALaRecherche() throws Exception {
         mockMvc.perform(get("/admin/recherche"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "amorvan@college-sthelier.fr", authorities = {"ROLE_PROF", "ROLE_ADMIN"})
+    void unAdminAccedeALaPageNotificationsEtPeutEnvoyerUnTestSansPlanter() throws Exception {
+        mockMvc.perform(get("/admin/notifications"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin-notifications"));
+
+        // Aucun vrai serveur SMTP en test (voir application-test.properties) :
+        // l'envoi echoue forcement, mais le controleur doit rattraper la
+        // MailException et rediriger avec un message d'erreur, pas planter.
+        mockMvc.perform(post("/admin/notifications/test").with(csrf()).param("destinataire", "amorvan@college-sthelier.fr"))
+                .andExpect(status().is3xxRedirection());
+    }
+
+    @Test
+    @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
+    void unProfNAccedePasAuxNotifications() throws Exception {
+        mockMvc.perform(get("/admin/notifications"))
                 .andExpect(status().isForbidden());
     }
 }

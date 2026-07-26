@@ -6,12 +6,17 @@ import fr.collegesthelier.voyages.model.Projet;
 import fr.collegesthelier.voyages.model.RoleMetier;
 import fr.collegesthelier.voyages.model.StatutProjet;
 import fr.collegesthelier.voyages.service.JournalService;
+import fr.collegesthelier.voyages.service.NotificationService;
+import fr.collegesthelier.voyages.service.NotificationToggleService;
 import fr.collegesthelier.voyages.service.ProjetService;
 import fr.collegesthelier.voyages.service.RoleAdminService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.mail.MailException;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -45,6 +50,8 @@ public class AdminController {
     private final RolesProperties rolesProperties;
     private final ProjetService projetService;
     private final JournalService journalService;
+    private final NotificationService notificationService;
+    private final NotificationToggleService notificationToggleService;
 
     @GetMapping("/admin/archives")
     public String archives(Model model) {
@@ -62,6 +69,39 @@ public class AdminController {
     public String journal(Model model) {
         model.addAttribute("entrees", journalService.listerRecentes());
         return "admin-journal";
+    }
+
+    @GetMapping("/admin/notifications")
+    public String notifications(@AuthenticationPrincipal OAuth2User principal, Model model) {
+        model.addAttribute("notificationsActives", notificationToggleService.sontActives());
+        model.addAttribute("emailTestParDefaut", principal != null ? principal.getAttribute("email") : null);
+        return "admin-notifications";
+    }
+
+    @PostMapping("/admin/notifications/activer")
+    public String activerNotifications(RedirectAttributes redirectAttributes) {
+        notificationToggleService.activer();
+        redirectAttributes.addFlashAttribute("messageSucces", "Les notifications email sont reactivees.");
+        return "redirect:/admin/notifications";
+    }
+
+    @PostMapping("/admin/notifications/desactiver")
+    public String desactiverNotifications(RedirectAttributes redirectAttributes) {
+        notificationToggleService.desactiver();
+        redirectAttributes.addFlashAttribute("messageSucces",
+                "Les notifications email sont desactivees jusqu'a reactivation ou redemarrage de l'application.");
+        return "redirect:/admin/notifications";
+    }
+
+    @PostMapping("/admin/notifications/test")
+    public String envoyerEmailTest(@RequestParam String destinataire, RedirectAttributes redirectAttributes) {
+        try {
+            notificationService.envoyerEmailTest(destinataire);
+            redirectAttributes.addFlashAttribute("messageSucces", "Email de test envoye a " + destinataire + ".");
+        } catch (MailException e) {
+            redirectAttributes.addFlashAttribute("messageErreur", "Echec de l'envoi : " + e.getMostSpecificCause().getMessage());
+        }
+        return "redirect:/admin/notifications";
     }
 
     @GetMapping("/admin/recherche")

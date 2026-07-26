@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -32,10 +33,16 @@ public class NotificationService {
     private final JavaMailSender mailSender;
     private final RolesProperties rolesProperties;
     private final NotificationProperties notificationProperties;
+    private final NotificationToggleService notificationToggleService;
 
     @Async("mailExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void surChangementDeStatut(ProjetEvent evenement) {
+        if (!notificationToggleService.sontActives()) {
+            log.info("Notifications desactivees (interrupteur admin) : email non envoye pour le projet {}",
+                    evenement.getProjetId());
+            return;
+        }
         try {
             switch (evenement.getNouveauStatut()) {
                 case EN_ATTENTE_COMPTA -> notifier(rolesProperties.getCompta(),
@@ -75,12 +82,28 @@ public class NotificationService {
             return;
         }
 
+        mailSender.send(construireMessage(destinataires, sujet, corps));
+    }
+
+    /**
+     * Envoi synchrone (pas @Async, pas de catch) declenche depuis le
+     * dashboard admin pour verifier la configuration SMTP : contrairement a
+     * notifier(), l'appelant doit voir immediatement si l'envoi a echoue.
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    public void envoyerEmailTest(String destinataire) {
+        mailSender.send(construireMessage(List.of(destinataire), "Email de test - Voyages Scolaires",
+                "Ceci est un email de test envoye depuis le dashboard admin de l'application "
+                        + "Voyages Scolaires, pour verifier la configuration SMTP."));
+    }
+
+    private SimpleMailMessage construireMessage(List<String> destinataires, String sujet, String corps) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(notificationProperties.getEmailExpediteur());
         message.setTo(destinataires.toArray(new String[0]));
         message.setSubject(sujet);
         message.setText(corps);
-        mailSender.send(message);
+        return message;
     }
 
     private String lienDossier(Long projetId) {
