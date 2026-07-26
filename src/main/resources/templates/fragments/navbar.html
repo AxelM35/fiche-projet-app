@@ -4,31 +4,37 @@
 <nav th:fragment="navbar" class="navbar navbar-expand-lg top-app-bar mb-4">
     <div class="container-fluid">
         <a class="navbar-brand" th:href="@{/dashboard}">Voyages Scolaires - College Saint-Helier</a>
-        <div class="d-flex align-items-center gap-3">
-            <span class="text-muted small" th:text="${utilisateurConnecte}">utilisateur@college-sthelier.fr</span>
-            <span class="chip-role chip-role-compta" sec:authorize="hasRole('COMPTA')">Comptabilite</span>
-            <span class="chip-role chip-role-viesco" sec:authorize="hasRole('VIESCO')">Vie Scolaire</span>
-            <span class="chip-role chip-role-direction" sec:authorize="hasRole('DIRECTION')">Direction</span>
-            <span class="chip-role chip-role-admin" sec:authorize="hasRole('ADMIN')">Admin</span>
-            <span class="chip-role chip-role-lecture-seule" sec:authorize="hasRole('LECTURE_SEULE')">Lecture seule</span>
-            <a class="btn btn-primary btn-sm" sec:authorize="hasRole('PROF')" th:href="@{/projets/nouveau}"><i class="bi bi-plus-lg me-1"></i>Nouveau projet</a>
-            <div class="dropdown" sec:authorize="hasRole('ADMIN')">
-                <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="bi bi-shield-lock me-1"></i>Administration
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" th:href="@{/admin/recherche}"><i class="bi bi-search me-2"></i>Recherche</a></li>
-                    <li><a class="dropdown-item" th:href="@{/admin/roles}"><i class="bi bi-people me-2"></i>Roles</a></li>
-                    <li><a class="dropdown-item" th:href="@{/admin/archives}"><i class="bi bi-archive me-2"></i>Archives</a></li>
-                    <li><a class="dropdown-item" th:href="@{/admin/dossiers-bloques}"><i class="bi bi-hourglass-split me-2"></i>Dossiers bloques</a></li>
-                    <li><a class="dropdown-item" th:href="@{/admin/journal}"><i class="bi bi-journal-text me-2"></i>Journal d'audit</a></li>
-                    <li><a class="dropdown-item" th:href="@{/admin/notifications}"><i class="bi bi-envelope me-2"></i>Notifications</a></li>
-                    <li><a class="dropdown-item" th:href="@{/admin/sante}"><i class="bi bi-heart-pulse me-2"></i>Sante</a></li>
-                </ul>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContenu"
+                aria-controls="navbarContenu" aria-expanded="false" aria-label="Basculer la navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarContenu">
+            <div class="d-flex flex-wrap align-items-center gap-3 mt-3 mt-lg-0">
+                <span class="text-muted small" th:text="${utilisateurConnecte}">utilisateur@college-sthelier.fr</span>
+                <span class="chip-role chip-role-compta" sec:authorize="hasRole('COMPTA')">Comptabilite</span>
+                <span class="chip-role chip-role-viesco" sec:authorize="hasRole('VIESCO')">Vie Scolaire</span>
+                <span class="chip-role chip-role-direction" sec:authorize="hasRole('DIRECTION')">Direction</span>
+                <span class="chip-role chip-role-admin" sec:authorize="hasRole('ADMIN')">Admin</span>
+                <span class="chip-role chip-role-lecture-seule" sec:authorize="hasRole('LECTURE_SEULE')">Lecture seule</span>
+                <a class="btn btn-primary btn-sm" sec:authorize="hasRole('PROF')" th:href="@{/projets/nouveau}"><i class="bi bi-plus-lg me-1"></i>Nouveau projet</a>
+                <div class="dropdown" sec:authorize="hasRole('ADMIN')">
+                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-shield-lock me-1"></i>Administration
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" th:href="@{/admin/recherche}"><i class="bi bi-search me-2"></i>Recherche</a></li>
+                        <li><a class="dropdown-item" th:href="@{/admin/roles}"><i class="bi bi-people me-2"></i>Roles</a></li>
+                        <li><a class="dropdown-item" th:href="@{/admin/archives}"><i class="bi bi-archive me-2"></i>Archives</a></li>
+                        <li><a class="dropdown-item" th:href="@{/admin/dossiers-bloques}"><i class="bi bi-hourglass-split me-2"></i>Dossiers bloques</a></li>
+                        <li><a class="dropdown-item" th:href="@{/admin/journal}"><i class="bi bi-journal-text me-2"></i>Journal d'audit</a></li>
+                        <li><a class="dropdown-item" th:href="@{/admin/notifications}"><i class="bi bi-envelope me-2"></i>Notifications</a></li>
+                        <li><a class="dropdown-item" th:href="@{/admin/sante}"><i class="bi bi-heart-pulse me-2"></i>Sante</a></li>
+                    </ul>
+                </div>
+                <form th:action="@{/logout}" method="post" class="mb-0">
+                    <button type="submit" class="btn btn-text btn-sm">Deconnexion</button>
+                </form>
             </div>
-            <form th:action="@{/logout}" method="post" class="mb-0">
-                <button type="submit" class="btn btn-text btn-sm">Deconnexion</button>
-            </form>
         </div>
     </div>
 </nav>

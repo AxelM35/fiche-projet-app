@@ -555,3 +555,41 @@ a {
 .kanban-col {
     min-width: 300px;
 }
+
+/* -------------------------------------------------------------------
+   Responsive mobile.
+   ------------------------------------------------------------------- */
+
+/* Kanban : defilement horizontal tactile plus naturel (une colonne visible
+   a la fois, avec un accrochage sur chaque colonne au lieu de s'arreter
+   n'importe ou entre deux). */
+.kanban-scroll {
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+}
+
+.kanban-scroll > .kanban-col {
+    scroll-snap-align: start;
+}
+
+@media (max-width: 576px) {
+    /* Une colonne occupe l'essentiel de l'ecran (avec un aperçu de la
+       suivante) plutot que la largeur fixe pensee pour desktop. */
+    .kanban-col {
+        min-width: 85vw;
+    }
+
+    /* Marge laterale reduite : gagne de la place sur un tres petit ecran. */
+    .container-fluid.px-4,
+    .container.px-4 {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    /* Barre de recherche du dashboard : pleine largeur plutot que sa
+       largeur minimale pensee pour desktop (260px, trop etroite ou trop
+       large selon les telephones). */
+    .search-box {
+        width: 100%;
+    }
+}

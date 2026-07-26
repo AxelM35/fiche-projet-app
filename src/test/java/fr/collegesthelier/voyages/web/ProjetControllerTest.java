@@ -25,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
@@ -74,6 +75,29 @@ class ProjetControllerTest {
         mockMvc.perform(get("/dashboard"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("dashboard"));
+    }
+
+    /**
+     * Regression : la navbar utilisait navbar-expand-lg sans bouton
+     * hamburger ni <div class="collapse">, donc sans aucun moyen de la
+     * replier sous 992px (voir fragments/navbar.html) - verifie que le
+     * couple toggler/collapse est bien present.
+     */
+    @Test
+    @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
+    void laNavbarEstRepliableSurMobile() throws Exception {
+        mockMvc.perform(get("/dashboard"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("navbar-toggler")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("collapse navbar-collapse")));
+    }
+
+    @Test
+    @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
+    void leDashboardChargeLeScriptDesSpinnersDeValidation() throws Exception {
+        mockMvc.perform(get("/dashboard"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("/js/boutons-validation.js")));
     }
 
     @Test

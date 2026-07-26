@@ -163,10 +163,11 @@
     </a>
 
     <form th:action="@{/projets/{id}/soumettre(id=${projet.id})}" method="post" class="d-inline">
-        <button type="submit" class="btn btn-success"><i class="bi bi-send me-1"></i>Confirmer et soumettre</button>
+        <button type="submit" class="btn btn-success js-bouton-validation"><i class="bi bi-send me-1"></i>Confirmer et soumettre</button>
     </form>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/boutons-validation.js}"></script>
 </body>
 </html>
