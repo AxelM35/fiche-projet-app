@@ -62,6 +62,9 @@ Idées à évaluer, aucune n'est engagée — à trier selon la valeur perçue.
 - **Statistiques consolidées** : budget total engagé par année/par classe, taux de refus par étape, délai moyen de traitement par rôle seulement pour le rôle Admin
 - **Filtres avancés sur le dashboard** : par classe, par période, par organisateur (aujourd'hui recherche client simple uniquement).
 - **Dashboard Admin** : Créer un dashboard Admin pour pouvoir modifier des paramètres directement dans l'application (modification des rôles, ajout/retrait d'adresse mail, suppression de projet, archivage des années précédentes et autres fonctions utiles à discuter avec le client).
+  - ✅ **Gestion des rôles** (`/admin/roles`) : un Admin ajoute/retire des attributions de rôle par email, sans redémarrage. Stocké en base (table `role_attributions`, migration `V2`), en complément des listes `.env` (jamais en remplacement — `ROLES_ADMIN` reste le filet de sécurité contre un verrouillage total). Page réservée à `ROLE_ADMIN` y compris côté contrôleur (contrairement au reste de l'appli, en lecture ouverte à tous).
+  - ⬜ Suppression / archivage de projet : bouton "Gérer" → "Archiver" ou "Supprimer" avec confirmation (les deux options sont voulues). Pas encore fait.
+  - ⬜ Autres fonctions à discuter avec le client.
 
 ## 4. Pistes UX/UI
 

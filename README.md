@@ -37,6 +37,12 @@ de `ROLE_PROF` (jamais les deux). Ce rôle est destiné à un observateur (ex.
 secrétariat) qui consulte tous les dossiers sans jamais pouvoir en créer,
 modifier ou valider un seul.
 
+Un `ROLE_ADMIN` peut aussi attribuer des roles directement depuis
+l'application (`/admin/roles`, lien "Administration" dans la barre de
+navigation), sans redémarrage. Ces attributions sont stockées en base et
+s'ajoutent toujours aux listes `.env` (jamais ne les remplacent) : retirer
+quelqu'un ajouté via `.env` nécessite toujours de modifier `.env`.
+
 ## Demarrage local avec Docker Compose
 
 ```bash

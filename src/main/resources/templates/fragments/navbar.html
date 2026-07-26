@@ -12,6 +12,7 @@
             <span class="chip-role chip-role-admin" sec:authorize="hasRole('ADMIN')">Admin</span>
             <span class="chip-role chip-role-lecture-seule" sec:authorize="hasRole('LECTURE_SEULE')">Lecture seule</span>
             <a class="btn btn-primary btn-sm" sec:authorize="hasRole('PROF')" th:href="@{/projets/nouveau}"><i class="bi bi-plus-lg me-1"></i>Nouveau projet</a>
+            <a class="btn btn-outline-secondary btn-sm" sec:authorize="hasRole('ADMIN')" th:href="@{/admin/roles}"><i class="bi bi-shield-lock me-1"></i>Administration</a>
             <form th:action="@{/logout}" method="post" class="mb-0">
                 <button type="submit" class="btn btn-text btn-sm">Deconnexion</button>
             </form>

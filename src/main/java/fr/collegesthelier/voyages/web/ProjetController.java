@@ -9,8 +9,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -32,11 +30,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class ProjetController {
 
     private final ProjetService projetService;
-
-    @ModelAttribute("utilisateurConnecte")
-    public String utilisateurConnecte(@AuthenticationPrincipal OAuth2User principal) {
-        return principal != null ? principal.getAttribute("email") : null;
-    }
 
     @GetMapping("/")
     public String racine() {

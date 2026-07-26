@@ -2,6 +2,8 @@ package fr.collegesthelier.voyages.security;
 
 import fr.collegesthelier.voyages.config.RolesProperties;
 import fr.collegesthelier.voyages.config.SecurityProperties;
+import fr.collegesthelier.voyages.model.RoleMetier;
+import fr.collegesthelier.voyages.repository.RoleAttributionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
@@ -29,9 +31,14 @@ import java.util.Set;
  * 1. le filtre de domaine (rejet si l'email n'appartient pas au domaine
  *    autorise, variable d'environnement ALLOWED_EMAIL_DOMAIN) ;
  * 2. l'attribution des roles RBAC : ROLE_PROF par defaut, puis
- *    ROLE_COMPTA / ROLE_VIESCO / ROLE_DIRECTION / ROLE_ADMIN selon les
- *    listes d'emails configurees. Un utilisateur peut cumuler plusieurs
- *    roles.
+ *    ROLE_COMPTA / ROLE_VIESCO / ROLE_DIRECTION / ROLE_ADMIN selon
+ *    l'union de deux sources : les listes d'emails configurees (.env,
+ *    RolesProperties) et les attributions gerees depuis le dashboard admin
+ *    (RoleAttribution, en base). La base ne fait jamais que s'ajouter aux
+ *    listes d'environnement, jamais les remplacer : une erreur de
+ *    manipulation dans le dashboard admin ne peut donc jamais retirer
+ *    l'acces attribue via .env (voir ROLES_ADMIN, filet de securite contre
+ *    un verrouillage total). Un utilisateur peut cumuler plusieurs roles.
  *    Exception : un email figurant dans la liste "lecture seule" recoit
  *    ROLE_LECTURE_SEULE a la place de ROLE_PROF (jamais les deux), pour
  *    un observateur (ex. secretariat) qui doit tout consulter sans jamais
@@ -46,6 +53,7 @@ public class CustomOAuth2UserService extends OidcUserService {
 
     private final SecurityProperties securityProperties;
     private final RolesProperties rolesProperties;
+    private final RoleAttributionRepository roleAttributionRepository;
 
     @Override
     public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
@@ -79,26 +87,31 @@ public class CustomOAuth2UserService extends OidcUserService {
 
         // Tout utilisateur autorise a se connecter recoit le role de base,
         // sauf s'il est inscrit comme simple observateur (lecture seule).
-        if (figureDansListe(rolesProperties.getLectureSeule(), emailNormalise)) {
+        if (possedeRole(rolesProperties.getLectureSeule(), RoleMetier.LECTURE_SEULE, emailNormalise)) {
             authorities.add(new SimpleGrantedAuthority("ROLE_LECTURE_SEULE"));
         } else {
             authorities.add(new SimpleGrantedAuthority("ROLE_PROF"));
         }
 
-        if (figureDansListe(rolesProperties.getCompta(), emailNormalise)) {
+        if (possedeRole(rolesProperties.getCompta(), RoleMetier.COMPTA, emailNormalise)) {
             authorities.add(new SimpleGrantedAuthority("ROLE_COMPTA"));
         }
-        if (figureDansListe(rolesProperties.getViesco(), emailNormalise)) {
+        if (possedeRole(rolesProperties.getViesco(), RoleMetier.VIESCO, emailNormalise)) {
             authorities.add(new SimpleGrantedAuthority("ROLE_VIESCO"));
         }
-        if (figureDansListe(rolesProperties.getDirection(), emailNormalise)) {
+        if (possedeRole(rolesProperties.getDirection(), RoleMetier.DIRECTION, emailNormalise)) {
             authorities.add(new SimpleGrantedAuthority("ROLE_DIRECTION"));
         }
-        if (figureDansListe(rolesProperties.getAdmin(), emailNormalise)) {
+        if (possedeRole(rolesProperties.getAdmin(), RoleMetier.ADMIN, emailNormalise)) {
             authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
         }
 
         return authorities;
+    }
+
+    private boolean possedeRole(List<String> emailsConfigures, RoleMetier role, String emailNormalise) {
+        return figureDansListe(emailsConfigures, emailNormalise)
+                || roleAttributionRepository.existsByEmailAndRole(emailNormalise, role);
     }
 
     private boolean figureDansListe(List<String> emailsAutorises, String emailNormalise) {
