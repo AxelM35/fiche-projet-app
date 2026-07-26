@@ -39,12 +39,14 @@ public class PdfExportService {
      * Sous-ensemble du journal d'audit correspondant au fil de validation du
      * workflow (par etape) : on exclut volontairement les actions
      * administratives (archivage, reaffectation, lien Drive...) qui ne font
-     * pas partie de l'historique de validation attendu dans l'export.
+     * pas partie de l'historique de validation attendu dans l'export. Les
+     * refus sont qualifies par etape ("Refus (Comptabilité)", etc., voir
+     * ProjetService.refuser) : filtre par prefixe plutot que par egalite.
      */
     private static final Set<String> ACTIONS_HISTORIQUE_VALIDATION = Set.of(
             "Création", "Soumission", "Resoumission",
             "Validation Comptabilité", "Validation Vie Scolaire",
-            "Validation Direction (finale)", "Refus");
+            "Validation Direction (finale)");
 
     private final ProjetService projetService;
     private final JournalEntreeRepository journalEntreeRepository;
@@ -56,7 +58,8 @@ public class PdfExportService {
         ProjetConsultationDTO projet = projetService.chargerConsultation(id);
         List<JournalEntree> historiqueValidation = journalEntreeRepository
                 .findByProjetIdOrderByDateEvenementAsc(id).stream()
-                .filter(entree -> ACTIONS_HISTORIQUE_VALIDATION.contains(entree.getAction()))
+                .filter(entree -> ACTIONS_HISTORIQUE_VALIDATION.contains(entree.getAction())
+                        || entree.getAction().startsWith("Refus"))
                 .toList();
         List<Commentaire> commentaires = commentaireService.lister(id);
 

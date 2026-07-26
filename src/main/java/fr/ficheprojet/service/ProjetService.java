@@ -463,8 +463,23 @@ public class ProjetService {
         // effacer pour elle ni pour les etapes suivantes.
 
         Projet enregistre = projetRepository.save(projet);
-        publierEvenement(enregistre, ancienStatut, "Refus", motifRefus);
+        publierEvenement(enregistre, ancienStatut, "Refus (" + libelleEtape(ancienStatut) + ")", motifRefus);
         return enregistre;
+    }
+
+    /**
+     * Libelle de l'etape a laquelle un dossier etait en attente (utilise
+     * pour qualifier l'action "Refus (...)" dans le journal d'audit,
+     * necessaire au calcul du taux de refus par etape - voir
+     * StatistiquesService).
+     */
+    private String libelleEtape(StatutProjet statut) {
+        return switch (statut) {
+            case EN_ATTENTE_COMPTA -> "Comptabilité";
+            case EN_ATTENTE_VIE_SCOLAIRE -> "Vie Scolaire";
+            case EN_ATTENTE_DIRECTION -> "Direction";
+            default -> statut.name();
+        };
     }
 
     // -------------------------------------------------------------------

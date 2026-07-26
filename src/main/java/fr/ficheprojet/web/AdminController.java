@@ -11,6 +11,7 @@ import fr.ficheprojet.service.NotificationToggleService;
 import fr.ficheprojet.service.ProjetService;
 import fr.ficheprojet.service.RoleAdminService;
 import fr.ficheprojet.service.SanteService;
+import fr.ficheprojet.service.StatistiquesService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -54,6 +55,13 @@ public class AdminController {
     private final NotificationService notificationService;
     private final NotificationToggleService notificationToggleService;
     private final SanteService santeService;
+    private final StatistiquesService statistiquesService;
+
+    @GetMapping("/admin/statistiques")
+    public String statistiques(Model model) {
+        model.addAttribute("stats", statistiquesService.calculer());
+        return "admin-statistiques";
+    }
 
     @GetMapping("/admin/sante")
     public String sante(Model model) {
