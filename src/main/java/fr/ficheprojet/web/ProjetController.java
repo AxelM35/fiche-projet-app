@@ -6,10 +6,14 @@ import fr.ficheprojet.dto.ReaffectationFormDTO;
 import fr.ficheprojet.dto.RefusFormDTO;
 import fr.ficheprojet.model.Projet;
 import fr.ficheprojet.model.StatutProjet;
+import fr.ficheprojet.service.PdfExportService;
 import fr.ficheprojet.service.ProjetService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Controller;
@@ -36,6 +40,7 @@ import java.util.List;
 public class ProjetController {
 
     private final ProjetService projetService;
+    private final PdfExportService pdfExportService;
 
     @GetMapping("/")
     public String racine() {
@@ -191,6 +196,21 @@ public class ProjetController {
 
         model.addAttribute("projet", projetService.chargerConsultation(id));
         return "recapitulatif";
+    }
+
+    /**
+     * Export PDF de la fiche (recapitulatif + historique de validation).
+     * Accessible a tout utilisateur pouvant deja consulter le dossier
+     * (aucune restriction de role supplementaire, memes regles d'acces que
+     * GET /projets/{id}).
+     */
+    @GetMapping("/projets/{id}/export-pdf")
+    public ResponseEntity<byte[]> exporterPdf(@PathVariable Long id) {
+        byte[] pdf = pdfExportService.genererFichePdf(id);
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"fiche-projet-" + id + ".pdf\"")
+                .body(pdf);
     }
 
     private void remplirModelPourErreurFormulaire(Model model, Projet projetExistant) {

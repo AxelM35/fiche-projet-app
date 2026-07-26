@@ -291,7 +291,8 @@
         <div class="d-flex flex-wrap gap-2">
             <a class="btn btn-outline-secondary" th:href="@{/dashboard}"><i class="bi bi-arrow-left me-1"></i>Retour au tableau de bord</a>
 
-            <!-- Dupliquer : disponible des que le projet existe deja, quel que soit son statut -->
+            <!-- Export PDF et duplication : disponibles des que le projet existe deja, quel que soit son statut -->
+            <a th:if="${projet.id} != null" class="btn btn-outline-primary" th:href="@{/projets/{id}/export-pdf(id=${projet.id})}"><i class="bi bi-file-earmark-pdf me-1"></i>Exporter en PDF</a>
             <form th:if="${projet.id} != null" sec:authorize="hasRole('PROF')" th:action="@{/projets/{id}/dupliquer(id=${projet.id})}" method="post" class="d-inline">
                 <button type="submit" class="btn btn-outline-primary"><i class="bi bi-copy me-1"></i>Dupliquer</button>
             </form>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="'Fiche projet n°' + ${projet.id}">Fiche projet</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 10pt;
+            color: #212529;
+        }
+        h1 {
+            font-size: 16pt;
+            margin-bottom: 0;
+        }
+        .sous-titre {
+            color: #6c757d;
+            margin-top: 2px;
+            margin-bottom: 16px;
+        }
+        .statut {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 9pt;
+            color: #ffffff;
+            background-color: #6c757d;
+        }
+        .section {
+            margin-top: 16px;
+            border-top: 1px solid #dee2e6;
+            padding-top: 10px;
+        }
+        .section-titre {
+            font-size: 11pt;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        table.champs {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table.champs td {
+            padding: 4px 8px 4px 0;
+            vertical-align: top;
+            width: 50%;
+        }
+        .libelle {
+            color: #6c757d;
+            font-size: 8.5pt;
+            display: block;
+        }
+        table.historique {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 6px;
+        }
+        table.historique th, table.historique td {
+            border: 1px solid #dee2e6;
+            padding: 5px 8px;
+            text-align: left;
+            font-size: 9pt;
+        }
+        table.historique th {
+            background-color: #f1f3f5;
+        }
+        .texte-libre {
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Fiche projet — <span th:text="${projet.nomProjet}">Nom du projet</span></h1>
+<p class="sous-titre">
+    Dossier n°<span th:text="${projet.id}">1</span> —
+    <span class="statut" th:switch="${projet.statut.name()}">
+        <span th:case="'BROUILLON'">Brouillon</span>
+        <span th:case="'EN_ATTENTE_COMPTA'">En attente (Comptabilité)</span>
+        <span th:case="'EN_ATTENTE_VIE_SCOLAIRE'">En attente (Vie Scolaire)</span>
+        <span th:case="'EN_ATTENTE_DIRECTION'">En attente (Direction)</span>
+        <span th:case="'VALIDE'">Validé</span>
+        <span th:case="'A_CORRIGER'">À corriger</span>
+    </span>
+</p>
+
+<div class="section">
+    <div class="section-titre">Le voyage</div>
+    <table class="champs">
+        <tr>
+            <td><span class="libelle">Date de départ</span>
+                <span th:text="${#temporals.format(projet.dateDepart, 'dd/MM/yyyy HH:mm')}">-</span></td>
+            <td><span class="libelle">Lieu de départ</span>
+                <span th:text="${projet.lieuDepart}">-</span></td>
+        </tr>
+        <tr>
+            <td><span class="libelle">Date de retour</span>
+                <span th:text="${#temporals.format(projet.dateRetour, 'dd/MM/yyyy HH:mm')}">-</span></td>
+            <td><span class="libelle">Lieu de retour</span>
+                <span th:text="${projet.lieuRetour}">-</span></td>
+        </tr>
+        <tr>
+            <td><span class="libelle">Transport</span>
+                <span th:text="${projet.transport}">-</span></td>
+            <td><span class="libelle">Organisme</span>
+                <span th:text="${projet.organismeNom}">-</span></td>
+        </tr>
+    </table>
+    <p th:if="${not #strings.isEmpty(projet.description)}">
+        <span class="libelle">Description</span>
+        <span class="texte-libre" th:text="${projet.description}">-</span>
+    </p>
+</div>
+
+<div class="section">
+    <div class="section-titre">Le responsable</div>
+    <table class="champs">
+        <tr>
+            <td><span class="libelle">Organisateur</span>
+                <span th:text="${projet.organisateurNom}">-</span></td>
+            <td><span class="libelle">Email</span>
+                <span th:text="${projet.organisateurEmail}">-</span></td>
+        </tr>
+        <tr>
+            <td><span class="libelle">Téléphone</span>
+                <span th:text="${projet.telephoneOrganisateur}">-</span></td>
+            <td></td>
+        </tr>
+    </table>
+</div>
+
+<div class="section">
+    <div class="section-titre">Le groupe</div>
+    <table class="champs">
+        <tr>
+            <td><span class="libelle">Classes concernées</span>
+                <span th:text="${projet.classesConcernees}">-</span></td>
+            <td><span class="libelle">Effectif élèves</span>
+                <span th:text="${projet.effectif}">-</span></td>
+        </tr>
+    </table>
+    <p th:unless="${#lists.isEmpty(projet.accompagnateurs)}">
+        <span class="libelle">Accompagnateurs</span>
+        <span th:text="${#strings.listJoin(projet.accompagnateurs, ', ')}">-</span>
+    </p>
+</div>
+
+<div class="section">
+    <div class="section-titre">Le budget</div>
+    <table class="champs">
+        <tr>
+            <td><span class="libelle">Coût global</span>
+                <span th:text="${projet.coutGlobal} + ' €'">-</span></td>
+            <td><span class="libelle">Coût par élève</span>
+                <span th:text="${projet.coutParEleve} + ' €'">-</span></td>
+        </tr>
+        <tr>
+            <td><span class="libelle">Subvention</span>
+                <span th:text="${projet.montantSubvention} + ' €'">-</span></td>
+            <td><span class="libelle">Pass Culture</span>
+                <span th:text="${projet.eligiblePassCulture} ? 'Éligible' : 'Non éligible'">-</span></td>
+        </tr>
+    </table>
+</div>
+
+<div class="section" th:if="${not #strings.isEmpty(projet.commentaire)}">
+    <div class="section-titre">Commentaire</div>
+    <p class="texte-libre" th:text="${projet.commentaire}">-</p>
+</div>
+
+<div class="section" th:if="${projet.statut.name() == 'A_CORRIGER'}">
+    <div class="section-titre">Motif du refus</div>
+    <p class="texte-libre" th:text="${projet.motifRefus}">-</p>
+</div>
+
+<div class="section">
+    <div class="section-titre">Historique de validation</div>
+    <table class="historique" th:unless="${#lists.isEmpty(historiqueValidation)}">
+        <thead>
+        <tr>
+            <th>Date</th>
+            <th>Étape</th>
+            <th>Auteur</th>
+            <th>Détail</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="entree : ${historiqueValidation}">
+            <td th:text="${#temporals.format(entree.dateEvenement, 'dd/MM/yyyy HH:mm')}">-</td>
+            <td th:text="${entree.action}">-</td>
+            <td th:text="${entree.auteurEmail} ?: '-'">-</td>
+            <td th:text="${entree.detail} ?: '-'">-</td>
+        </tr>
+        </tbody>
+    </table>
+    <p th:if="${#lists.isEmpty(historiqueValidation)}">Aucun événement enregistré pour ce dossier.</p>
+</div>
+
+</body>
+</html>
