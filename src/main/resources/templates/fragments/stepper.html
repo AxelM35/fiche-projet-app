@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!--
+    Stepper visuel du workflow de validation (4 etapes : Soumission,
+    Comptabilite, Vie Scolaire, Direction). Complement du badge de statut,
+    pas un remplacement : `etapes` est une List<EtapeWorkflowVue> (libelle,
+    icone, etat) construite cote controleur (ProjetController), l'etat de
+    chaque etape valant "fait" / "actif" / "erreur" / "avenir".
+-->
+<div th:fragment="stepper(etapes)" class="stepper-workflow" th:if="${etapes != null}">
+    <div class="stepper-etape" th:each="etape, iter : ${etapes}" th:classappend="'stepper-etape--' + ${etape.etat}">
+        <div class="stepper-cercle">
+            <i class="bi bi-check-lg" th:if="${etape.etat == 'fait'}"></i>
+            <i class="bi bi-exclamation-lg" th:if="${etape.etat == 'erreur'}"></i>
+            <span th:if="${etape.etat != 'fait' and etape.etat != 'erreur'}" th:text="${iter.count}">1</span>
+        </div>
+        <div class="stepper-libelle" th:text="${etape.libelle}">Etape</div>
+    </div>
+</div>
+
+</body>
+</html>

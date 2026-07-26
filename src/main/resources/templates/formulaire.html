@@ -44,6 +44,8 @@
         </span>
     </div>
 
+    <div th:replace="~{fragments/stepper :: stepper(${etapesWorkflow})}"></div>
+
     <!-- Reaffectation d'organisateur : reservee a l'Admin (ex. professeur ayant quitte l'etablissement) -->
     <div class="card carte-formulaire shadow-sm" th:if="${projet.id} != null" sec:authorize="hasRole('ADMIN')">
         <div class="card-header fw-semibold"><i class="bi bi-person-gear me-2"></i>Reaffecter l'organisateur (Admin)</div>

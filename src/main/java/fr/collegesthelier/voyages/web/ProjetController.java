@@ -20,6 +20,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Couche web : ne manipule que des DTO valides (jamais l'entite Projet
  * directement), conformement au pattern DTO impose pour eviter le Mass
@@ -52,12 +55,14 @@ public class ProjetController {
         model.addAttribute("projet", new ProjetFormDTO());
         model.addAttribute("statutCourant", StatutProjet.BROUILLON);
         model.addAttribute("motifRefus", null);
+        model.addAttribute("etapesWorkflow", construireEtapesWorkflow(StatutProjet.BROUILLON, 1));
         return "formulaire";
     }
 
     @GetMapping("/projets/{id}")
     public String formulaireEdition(@PathVariable Long id, Model model, Authentication authentication) {
         Projet projet = projetService.trouverParId(id);
+        model.addAttribute("etapesWorkflow", construireEtapesWorkflow(projet.getStatut(), calculerEtapeCourante(projet)));
 
         // Un dossier definitivement valide n'est plus modifiable (sauf par un
         // Admin, correction exceptionnelle apres coup), et un observateur en
@@ -108,6 +113,7 @@ public class ProjetController {
         if (bindingResult.hasErrors()) {
             model.addAttribute("statutCourant", StatutProjet.BROUILLON);
             model.addAttribute("motifRefus", null);
+            model.addAttribute("etapesWorkflow", construireEtapesWorkflow(StatutProjet.BROUILLON, 1));
             return "formulaire";
         }
 
@@ -124,6 +130,8 @@ public class ProjetController {
             Projet projetExistant = projetService.trouverParId(id);
             model.addAttribute("statutCourant", projetExistant.getStatut());
             model.addAttribute("motifRefus", projetExistant.getMotifRefus());
+            model.addAttribute("etapesWorkflow",
+                    construireEtapesWorkflow(projetExistant.getStatut(), calculerEtapeCourante(projetExistant)));
             return "formulaire";
         }
 
@@ -208,5 +216,46 @@ public class ProjetController {
             bindingResult.rejectValue("dateRetour", "date.incoherente",
                     "La date de retour doit etre posterieure ou egale a la date de depart.");
         }
+    }
+
+    private static final String[] LIBELLES_ETAPES_WORKFLOW = {"Soumission", "Comptabilite", "Vie Scolaire", "Direction"};
+    private static final String[] ICONES_ETAPES_WORKFLOW = {"bi-send", "bi-cash-coin", "bi-people", "bi-mortarboard"};
+
+    /**
+     * Etape (1 a 4) mise en evidence dans le stepper. Pour un dossier
+     * A_CORRIGER, il s'agit de l'etape qui a refuse le dossier : c'est
+     * exactement celle par laquelle la resoumission repassera (voir
+     * ProjetService.determinerEtapeDeReprise, meme logique basee sur les
+     * dates de validation deja acquises).
+     */
+    private int calculerEtapeCourante(Projet projet) {
+        return switch (projet.getStatut()) {
+            case BROUILLON -> 1;
+            case EN_ATTENTE_COMPTA -> 2;
+            case EN_ATTENTE_VIE_SCOLAIRE -> 3;
+            case EN_ATTENTE_DIRECTION, VALIDE -> 4;
+            case A_CORRIGER -> projet.getDateValidationVieScolaire() != null ? 4
+                    : projet.getDateValidationCompta() != null ? 3 : 2;
+        };
+    }
+
+    private List<EtapeWorkflowVue> construireEtapesWorkflow(StatutProjet statut, int etapeCourante) {
+        boolean toutesValidees = statut == StatutProjet.VALIDE;
+        List<EtapeWorkflowVue> etapes = new ArrayList<>();
+        for (int i = 1; i <= 4; i++) {
+            String etat;
+            if (toutesValidees || i < etapeCourante) {
+                etat = "fait";
+            } else if (i == etapeCourante) {
+                etat = statut == StatutProjet.A_CORRIGER ? "erreur" : "actif";
+            } else {
+                etat = "avenir";
+            }
+            etapes.add(new EtapeWorkflowVue(LIBELLES_ETAPES_WORKFLOW[i - 1], ICONES_ETAPES_WORKFLOW[i - 1], etat));
+        }
+        return etapes;
+    }
+
+    private record EtapeWorkflowVue(String libelle, String icone, String etat) {
     }
 }
