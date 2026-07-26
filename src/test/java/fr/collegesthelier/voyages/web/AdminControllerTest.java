@@ -9,6 +9,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
@@ -76,6 +77,25 @@ class AdminControllerTest {
     @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
     void unProfNAccedePasAuJournalDaudit() throws Exception {
         mockMvc.perform(get("/admin/journal"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "amorvan@college-sthelier.fr", authorities = {"ROLE_PROF", "ROLE_ADMIN"})
+    void unAdminAccedeALaRechercheEtALexportCsv() throws Exception {
+        mockMvc.perform(get("/admin/recherche").param("nom", "voyage"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin-recherche"));
+
+        mockMvc.perform(get("/admin/recherche/export.csv"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith("text/csv"));
+    }
+
+    @Test
+    @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
+    void unProfNAccedePasALaRecherche() throws Exception {
+        mockMvc.perform(get("/admin/recherche"))
                 .andExpect(status().isForbidden());
     }
 }
