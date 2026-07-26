@@ -56,6 +56,11 @@ L'application est alors disponible sur http://localhost:8080.
 Un service `db-backup` sauvegarde automatiquement la base PostgreSQL (voir
 [docs/SAUVEGARDE.md](docs/SAUVEGARDE.md) pour la configuration et la procédure de restauration).
 
+Pour un déploiement réel (HTTPS, identifiants Google/SMTP réels, checklist
+avant ouverture aux utilisateurs...), voir le guide dédié
+[docs/GUIDE_DEPLOIEMENT.md](docs/GUIDE_DEPLOIEMENT.md), écrit pour un profil
+administrateur infrastructure plutôt que développeur.
+
 ## Demarrage sans Docker (developpement)
 
 Necessite un PostgreSQL local et le JDK 17+.
@@ -75,22 +80,46 @@ export GOOGLE_CLIENT_SECRET=...
 
 Les tests d'integration utilisent une base H2 en memoire (voir `src/test/resources/application-test.properties`) et ne necessitent ni PostgreSQL ni identifiants OAuth2/SMTP reels.
 
+## Fonctionnalités complémentaires
+
+Au-delà du workflow de validation, l'application propose :
+
+- **Export PDF** de la fiche (récapitulatif + historique de validation + fil de commentaires) depuis n'importe quel dossier.
+- **Fil de commentaires** par dossier (échanges organisateur/valideurs, indépendants du motif de refus).
+- **Pièces jointes** : lien Google Drive par dossier, avec création automatique du dossier partagé (optionnelle, voir `.env.example`).
+- **Relances automatiques** par email sur les dossiers bloqués depuis trop longtemps.
+- **Dashboard Admin** (`/admin/...`) : gestion des rôles, recherche avancée + export CSV, archivage (unitaire ou groupé par année scolaire), journal d'audit, dossiers bloqués, statistiques consolidées, état de santé de l'application.
+- **Filtres avancés** côté client sur le tableau de bord (nom, classe, organisateur, période de départ).
+
+Le détail de chaque fonctionnalité (décisions, fichiers concernés, tests) est documenté dans [docs/CAHIER_DES_CHARGES.md](docs/CAHIER_DES_CHARGES.md).
+
 ## Architecture
 
 ```
 src/main/java/fr/collegesthelier/ficheprojet/
-├── FicheProjetApplication.java Point d'entree Spring Boot
-├── config/                     Securite (SecurityConfig), Async, proprietes (@ConfigurationProperties)
-├── security/                   CustomOAuth2UserService (authentification + RBAC)
-├── model/                      Entite JPA Projet, enum StatutProjet
-├── repository/                 ProjetRepository (Spring Data JPA)
-├── dto/                        ProjetFormDTO, RefusFormDTO (validations Jakarta)
-├── service/                    ProjetService (workflow), NotificationService (emails async)
-├── event/                      ProjetEvent
+├── FicheProjetApplication.java Point d'entree Spring Boot (@EnableScheduling pour les relances)
+├── config/                     Securite (SecurityConfig), Async, proprietes (@ConfigurationProperties :
+│                                roles, notifications, relances, Drive, securite)
+├── security/                   CustomOAuth2UserService (authentification + RBAC), LoginRateLimitingFilter
+├── model/                      Entites JPA : Projet, Commentaire, JournalEntree, RoleAttribution,
+│                                enums StatutProjet / RoleMetier
+├── repository/                 Spring Data JPA : ProjetRepository, CommentaireRepository,
+│                                JournalEntreeRepository, RoleAttributionRepository
+├── dto/                        DTO de formulaire (ProjetFormDTO, RefusFormDTO, CommentaireFormDTO...) et
+│                                de lecture (ProjetConsultationDTO, StatistiquesDTO, TableauDeBordStatsDTO...)
+├── service/                    ProjetService (workflow), CommentaireService, StatistiquesService,
+│                                JournalService, NotificationService (emails async), RelanceService,
+│                                GoogleDriveService, PdfExportService, RoleAdminService, SanteService,
+│                                AnneeScolaireUtil
+├── event/                      ProjetEvent, CommentaireEvent
 ├── exception/                  Exceptions metier
-└── web/                        ProjetController, GlobalExceptionHandler
+└── web/                        ProjetController (fiches), AdminController (dashboard admin),
+                                 LoginController, GlobalExceptionHandler, GlobalModelAttributes
 
 src/main/resources/
 ├── application.properties
-└── templates/                  dashboard.html (Kanban), formulaire.html, fragments/navbar.html
+├── db/migration/               Migrations Flyway (V1 baseline, puis une par evolution de schema)
+└── templates/                  dashboard.html (Kanban), formulaire.html / consultation.html (fiche),
+                                 admin-*.html (dashboard admin), pdf/ (export PDF), fragments/ (navbar,
+                                 stepper, commentaires)
 ```

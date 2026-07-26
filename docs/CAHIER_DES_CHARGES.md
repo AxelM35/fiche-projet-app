@@ -1,7 +1,7 @@
 # Cahier des charges — Fiche Projet numérique (gestion des projets de voyages scolaires)
 ### Collège Saint-Helier — état des lieux, chantiers restants et pistes d'évolution
 
-*Document de travail, à discuter et prioriser ensemble avant de démarrer le développement.*
+*Document vivant : état des lieux, décisions prises et pistes encore ouvertes, mis à jour au fil du développement (voir aussi le suivi Git pour le détail commit par commit).*
 
 ---
 
@@ -14,7 +14,7 @@
 - Notifications email asynchrones (`@Async` + `AFTER_COMMIT`) à chaque changement de statut, texte brut, échec catché sans casser le workflow.
 - CSRF géré automatiquement (thymeleaf-extras-springsecurity6 + formulaires `th:action`) — **déjà correct, rien à faire ici**.
 - UI Material 3 (Bootstrap 5 + variables `--bs-*`/`--md-*`), Kanban 5 colonnes, tuiles de stats, recherche côté client, vue consultation lecture seule, duplication en brouillon.
-- 17 tests (H2 en mémoire) couvrant service + contrôleur.
+- 88 tests (H2 en mémoire) couvrant services, contrôleurs et sécurité.
 
 ## 2. Chantiers techniques — mise en production
 
@@ -32,7 +32,7 @@ Ce qui est nécessaire avant un vrai lancement, par thème.
 - [ ] Rappel opérationnel déjà connu : déconnexion/reconnexion obligatoire après tout changement de rôles.
 
 ### 2.3 Déploiement
-- [ ] HTTPS via reverse proxy (nginx/Caddy/Traefik) — obligatoire pour OAuth2 en production et pour la confidentialité des données.
+- [ ] HTTPS via reverse proxy (nginx/Caddy/Traefik) — obligatoire pour OAuth2 en production et pour la confidentialité des données. Marche à suivre détaillée (dont un exemple Caddy minimal) dans [`docs/GUIDE_DEPLOIEMENT.md`](GUIDE_DEPLOIEMENT.md#5-étape-3--https-obligatoire), destiné au responsable informatique en charge du déploiement.
 - [x] Migration vers Flyway : migration baseline `V1__init.sql` correspondant au schéma généré par `ddl-auto=update`, `ddl-auto` passé en `validate`. **À tester sur une base vide (`docker compose down -v && docker compose up --build`) avant de considérer que c'est acquis.**
 - [x] Stratégie de sauvegarde PostgreSQL : service `db-backup` (dumps quotidiens compressés, rétention configurable, voir `docs/SAUVEGARDE.md`). **Le test de restauration réel reste à faire par toi** — la procédure est documentée mais je ne peux pas l'exécuter depuis mon environnement (pas de Docker).
 - [x] CI GitHub Actions (`.github/workflows/ci.yml`) : lance `./mvnw test` sur chaque push/PR vers `main`.
@@ -55,17 +55,17 @@ Ce qui est nécessaire avant un vrai lancement, par thème.
 
 ### 2.4bis Audit RGPD (revue des données personnelles stockées)
 
-Inventaire réalisé en relisant le modèle de données (`Projet`, `RoleAttribution`, `JournalEntree`) et le service d'authentification.
+Inventaire réalisé en relisant le modèle de données (`Projet`, `RoleAttribution`, `JournalEntree`, `Commentaire`) et le service d'authentification. **Mis à jour** suite à l'ajout du fil de commentaires (§3) : la table `commentaires` est désormais couverte ci-dessous.
 
 - **Aucune donnée nominative d'élève mineur stockée** : `effectif` est un simple nombre, `classesConcernees` un libellé de classe (ex. "5A, 5B"), jamais une liste de noms d'élèves. Confirme ce qui était déjà supposé dans ce document.
 - **Données personnelles réellement présentes** (toutes des adultes, personnel de l'établissement ou tiers professionnels) :
   - Organisateur du projet : nom, email, téléphone (`organisateurNom/Email/telephoneOrganisateur`).
   - Accompagnateurs : uniquement des noms en texte libre (`accompagnateurs`, pas d'email/téléphone).
   - Contact de l'organisme/prestataire de voyage (facultatif) : nom, téléphone, email.
-  - Emails du personnel dans `RoleAttribution` (attribution de rôle) et `JournalEntree.auteurEmail` (auteur d'une action du journal d'audit).
+  - Emails du personnel dans `RoleAttribution` (attribution de rôle), `JournalEntree.auteurEmail` (auteur d'une action du journal d'audit) et `Commentaire.auteurEmail` (auteur d'un message du fil de commentaires d'un dossier).
   - Adresse IP dans les logs de rate limiting (voir ci-dessus).
-- **Champs à risque (texte libre)** : `commentaire` et `motifRefus` sont des zones de texte libre — rien n'empêche techniquement un utilisateur d'y saisir un nom d'élève ou une autre donnée personnelle non prévue par le formulaire. Pas de contrôle automatique possible sur du texte libre ; recommandation : sensibiliser les utilisateurs (ex. mention courte dans le libellé du champ) à ne pas y saisir de données nominatives d'élèves.
-- **Droit à l'effacement** : déjà couvert — un Admin peut supprimer définitivement un dossier (`/projets/{id}/supprimer`), ce qui efface toutes les données personnelles associées. Le journal d'audit conserve une trace dénormalisée (nom du projet, jamais les données personnelles du dossier) après une suppression définitive, par design (traçabilité), ce qui est proportionné.
+- **Champs à risque (texte libre)** : `Projet.commentaire`, `Projet.motifRefus` et désormais `Commentaire.texte` (fil de commentaires, §3) sont des zones de texte libre — rien n'empêche techniquement un utilisateur d'y saisir un nom d'élève ou une autre donnée personnelle non prévue par le formulaire. Le fil de commentaires élargit ce risque (plusieurs messages, potentiellement plusieurs auteurs, sur la durée de vie du dossier) par rapport aux deux champs uniques d'origine. Pas de contrôle automatique possible sur du texte libre ; recommandation : sensibiliser les utilisateurs (ex. mention courte dans le libellé du champ/à proximité du fil) à ne pas y saisir de données nominatives d'élèves.
+- **Droit à l'effacement** : déjà couvert — un Admin peut supprimer définitivement un dossier (`/projets/{id}/supprimer`), ce qui efface toutes les données personnelles associées, y compris son fil de commentaires (`ProjetService.supprimerDefinitivement` supprime explicitement les lignes `commentaires` correspondantes avant de supprimer le projet, la table n'ayant pas de suppression en cascade au niveau base). Le journal d'audit conserve une trace dénormalisée (nom du projet, jamais les données personnelles du dossier) après une suppression définitive, par design (traçabilité), ce qui est proportionné.
 - **Pas de politique de rétention/purge automatique** à ce jour (aucune donnée n'est supprimée automatiquement après N années). Pas obligatoire en soi (le RGPD exige une durée de conservation *justifiée*, pas une suppression automatique), mais à formaliser si le volume de dossiers archivés devient important — piste déjà notée en §3 ("Archivage par année scolaire").
 - **Pièces jointes Google Drive** (§3) : les fichiers déposés dans le dossier Drive du projet (devis, autorisations, RIB...) sont hors du périmètre technique de cette appli (gérés directement dans Google Drive) — la politique de conservation/accès de ces fichiers relève de la configuration du Drive partagé de l'établissement, pas du code.
 - **Conclusion** : pas de non-conformité bloquante identifiée pour l'usage actuel (staff uniquement, pas de données d'élèves nominatives). Les points d'attention (texte libre, rétention des logs/journal) sont documentés ci-dessus plutôt que "corrigés dans le code", car ce sont des questions d'usage/politique plutôt que des bugs.
@@ -125,8 +125,8 @@ Idées à évaluer, aucune n'est engagée — à trier selon la valeur perçue.
 | Phase | Contenu | Objectif |
 |---|---|---|
 | **1 — Bloquant avant mise en prod** | HTTPS, Flyway, config réelle (domaine/rôles/OAuth prod), sauvegardes PostgreSQL testées, revue de sécurité, test SMTP réel | Rendre le déploiement actuel fiable et sûr |
-| **2 — Confort** | CI (tests auto), couleurs officielles, emails HTML, stepper visuel du workflow | Finitions avant l'ouverture aux utilisateurs réels |
-| **3 — Itératif avant le lancement** | Pièces jointes, export PDF, historique d'audit, calendrier, relances automatiques, filtres avancés | Amélioration continue selon les retours terrain |
+| **2 — Confort** | CI ✅, couleurs officielles (toujours ouvert, §2.5/§6), emails HTML ✅, stepper visuel du workflow ✅ | Finitions avant l'ouverture aux utilisateurs réels |
+| **3 — Itératif avant le lancement** | Pièces jointes ✅ (MVP lien Drive), export PDF ✅, relances automatiques ✅, archivage par année scolaire ✅, fil de commentaires ✅, statistiques consolidées ✅, filtres avancés dashboard ✅ — tous livrés (§3). Restent : intégration Drive complète (reportée après lancement) et autres fonctions dashboard admin (ouvert, retours terrain) | Amélioration continue selon les retours terrain |
 
 ## 6. Questions ouvertes (besoin de ta décision)
 
