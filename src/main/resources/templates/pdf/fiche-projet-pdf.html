@@ -72,6 +72,17 @@
         .texte-libre {
             white-space: pre-wrap;
         }
+        .commentaire-pdf {
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 6px 8px;
+            margin-bottom: 6px;
+        }
+        .commentaire-entete {
+            color: #6c757d;
+            font-size: 8.5pt;
+            margin-bottom: 3px;
+        }
     </style>
 </head>
 <body>
@@ -199,6 +210,21 @@
         </tbody>
     </table>
     <p th:if="${#lists.isEmpty(historiqueValidation)}">Aucun événement enregistré pour ce dossier.</p>
+</div>
+
+<div class="section">
+    <div class="section-titre">Fil de commentaires</div>
+    <div th:each="commentaire : ${commentaires}" class="commentaire-pdf">
+        <div class="commentaire-entete">
+            <span th:text="${commentaire.auteurEmail}">auteur@college-sthelier.fr</span>
+            <span th:if="${commentaire.auteurRole}" th:text="'(' + ${commentaire.auteurRole} + ')'"></span>
+            —
+            <span th:text="${#temporals.format(commentaire.dateCreation, 'dd/MM/yyyy HH:mm')}">-</span>
+            <span th:if="${commentaire.dateModification != null}">(modifié)</span>
+        </div>
+        <p class="texte-libre" th:text="${commentaire.texte}">Texte du commentaire</p>
+    </div>
+    <p th:if="${#lists.isEmpty(commentaires)}">Aucun commentaire pour ce dossier.</p>
 </div>
 
 </body>

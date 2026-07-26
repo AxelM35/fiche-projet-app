@@ -1,6 +1,7 @@
 package fr.collegesthelier.ficheprojet.service;
 
 import fr.collegesthelier.ficheprojet.dto.ProjetConsultationDTO;
+import fr.collegesthelier.ficheprojet.model.Commentaire;
 import fr.collegesthelier.ficheprojet.model.JournalEntree;
 import fr.collegesthelier.ficheprojet.repository.JournalEntreeRepository;
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
@@ -23,7 +24,8 @@ import java.util.Set;
 /**
  * Genere le PDF recapitulatif d'un dossier (bouton "Exporter en PDF" sur la
  * fiche projet, formulaire.html et consultation.html) : rend le template
- * Thymeleaf pdf/fiche-projet-pdf.html en HTML, puis le convertit en PDF via
+ * Thymeleaf pdf/fiche-projet-pdf.html (recapitulatif + historique de
+ * validation + fil de commentaires) en HTML, puis le convertit en PDF via
  * openhtmltopdf. Le HTML rendu par Thymeleaf n'est pas garanti strictement
  * XHTML (attributs booleens, balises non fermees...) : on passe par Jsoup
  * pour le reparser en document XML bien forme avant de le donner a
@@ -46,6 +48,7 @@ public class PdfExportService {
 
     private final ProjetService projetService;
     private final JournalEntreeRepository journalEntreeRepository;
+    private final CommentaireService commentaireService;
     private final TemplateEngine templateEngine;
 
     @Transactional(readOnly = true)
@@ -55,10 +58,12 @@ public class PdfExportService {
                 .findByProjetIdOrderByDateEvenementAsc(id).stream()
                 .filter(entree -> ACTIONS_HISTORIQUE_VALIDATION.contains(entree.getAction()))
                 .toList();
+        List<Commentaire> commentaires = commentaireService.lister(id);
 
         Context contexte = new Context(Locale.FRENCH);
         contexte.setVariable("projet", projet);
         contexte.setVariable("historiqueValidation", historiqueValidation);
+        contexte.setVariable("commentaires", commentaires);
         String html = templateEngine.process("pdf/fiche-projet-pdf", contexte);
 
         return convertirEnPdf(html);

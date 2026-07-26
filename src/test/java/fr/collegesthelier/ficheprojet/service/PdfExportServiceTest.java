@@ -35,6 +35,9 @@ class PdfExportServiceTest {
     @Autowired
     private PdfExportService pdfExportService;
 
+    @Autowired
+    private CommentaireService commentaireService;
+
     private ProjetFormDTO dtoValide() {
         ProjetFormDTO dto = new ProjetFormDTO();
         dto.setNomProjet("Voyage a Rome");
@@ -87,6 +90,18 @@ class PdfExportServiceTest {
 
         connecterEnTantQue("compta@college-sthelier.fr", "ROLE_COMPTA");
         projetService.validerCompta(projet.getId());
+
+        byte[] pdf = pdfExportService.genererFichePdf(projet.getId());
+
+        assertThat(pdf).isNotEmpty();
+        assertThat(new String(pdf, 0, 5, java.nio.charset.StandardCharsets.US_ASCII)).isEqualTo("%PDF-");
+    }
+
+    @Test
+    void genereUnPdfIncluantLeFilDeCommentaires() {
+        connecterEnTantQue("martin@college-sthelier.fr", "ROLE_PROF");
+        Projet projet = projetService.creerProjet(dtoValide());
+        commentaireService.ajouter(projet.getId(), "Merci de vérifier le budget avant validation.");
 
         byte[] pdf = pdfExportService.genererFichePdf(projet.getId());
 
