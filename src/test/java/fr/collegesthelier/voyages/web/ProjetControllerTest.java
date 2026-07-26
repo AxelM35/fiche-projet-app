@@ -54,6 +54,20 @@ class ProjetControllerTest {
         SecurityContextHolder.clearContext();
     }
 
+    /**
+     * Avec un seul fournisseur OAuth2 (Google), Spring Security saute la
+     * page de connexion generee automatiquement et redirige directement
+     * vers /oauth2/authorization/google : sans page /login explicite
+     * (SecurityConfig.loginPage + LoginController), cette URL n'existe
+     * plus du tout (404), notamment apres une deconnexion qui y redirige.
+     */
+    @Test
+    void laPageDeConnexionSAfficheSansAuthentification() throws Exception {
+        mockMvc.perform(get("/login"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("login"));
+    }
+
     @Test
     @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
     void leTableauDeBordSAffiche() throws Exception {

@@ -28,10 +28,17 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/css/**", "/js/**", "/webjars/**", "/error", "/login/**").permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/webjars/**", "/error", "/login", "/login/**",
+                                "/oauth2/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
+                        // Page de connexion explicite : avec un seul fournisseur (Google),
+                        // Spring Security saute sinon la page generee automatiquement et
+                        // redirige directement vers /oauth2/authorization/google, ce qui
+                        // laisse /login sans aucune route (404 constate sur la redirection
+                        // de logoutSuccessUrl). LoginController fournit la vue "login".
+                        .loginPage("/login")
                         // Google est enregistre avec le scope "openid" : le flux est OIDC,
                         // donc oidcUserService(...) est le point d'extension a utiliser
                         // (userService(...) ne serait jamais invoque dans ce cas).
