@@ -70,7 +70,7 @@ Idées à évaluer, aucune n'est engagée — à trier selon la valeur perçue.
   - ✅ **Modification d'un dossier `VALIDE`** : un Admin peut désormais rouvrir et corriger un dossier déjà validé (les autres rôles restent bloqués) ; tracé dans le journal d'audit.
   - ✅ **Recherche admin avancée** (`/admin/recherche`) : par nom, organisateur, classe, statut, archivage (tous statuts et archivés confondus, contrairement au dashboard). **Export CSV** (`/admin/recherche/export.csv`) des résultats filtrés.
   - ✅ **Email de test SMTP + interrupteur temporaire des notifications** (`/admin/notifications`) : envoi d'un email de test immédiat (échec remonté à l'écran, contrairement au flux normal qui l'avale), et un interrupteur volontairement non persisté (redémarrage = notifications réactivées).
-  - ⬜ Tableau "santé" (dernière sauvegarde, nombre de dossiers, version) + sauvegarde à la demande.
+  - ✅ **Tableau "santé"** (`/admin/sante`) : nombre de dossiers en base, version déployée (MANIFEST du jar), date de la dernière sauvegarde (lue dans `./backups/last/`, monté en lecture seule dans le conteneur `app`). Pas de bouton "sauvegarder maintenant" dans l'appli (délibéré, voir `docs/SAUVEGARDE.md`) — exécuter un processus système ou donner accès au conteneur `db-backup` depuis le serveur web est une surface d'attaque évitable ; commande documentée à lancer soi-même à la place.
   - ⬜ Autres fonctions à discuter avec le client.
 
 ## 4. Pistes UX/UI

@@ -101,6 +101,11 @@ public class ProjetService {
         return projetRepository.findByArchiveTrueOrderByDateDepartDesc();
     }
 
+    @Transactional(readOnly = true)
+    public long compterProjets() {
+        return projetRepository.count();
+    }
+
     /**
      * Chiffres cles affiches en tuiles au-dessus du Kanban. Calcules a
      * partir du tableau deja charge (pas de requete supplementaire) : le
