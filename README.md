@@ -43,6 +43,9 @@ docker compose up --build
 
 L'application est alors disponible sur http://localhost:8080.
 
+Un service `db-backup` sauvegarde automatiquement la base PostgreSQL (voir
+[docs/SAUVEGARDE.md](docs/SAUVEGARDE.md) pour la configuration et la procédure de restauration).
+
 ## Demarrage sans Docker (developpement)
 
 Necessite un PostgreSQL local et le JDK 17+.

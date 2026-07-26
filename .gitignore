@@ -34,3 +34,6 @@ target/
 # Secrets locaux (jamais commiter les vraies valeurs)
 .env
 
+# Sauvegardes PostgreSQL locales (service db-backup)
+/backups/
+
