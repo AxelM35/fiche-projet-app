@@ -26,6 +26,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
@@ -258,6 +259,23 @@ class ProjetControllerTest {
         mockMvc.perform(get("/projets/{id}/recapitulatif", id))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(view().name("redirect:/projets/" + id));
+    }
+
+    /**
+     * Le bouton "Exporter en PDF" doit fonctionner quel que soit le statut du
+     * dossier (ici un simple brouillon) et renvoyer un vrai document PDF en
+     * piece jointe.
+     */
+    @Test
+    @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
+    void lExportPdfRenvoieUnDocumentPdfEnPieceJointe() throws Exception {
+        Long id = projetService.creerProjet(dtoBase()).getId();
+
+        mockMvc.perform(get("/projets/{id}/export-pdf", id))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/pdf"))
+                .andExpect(header().string("Content-Disposition",
+                        org.hamcrest.Matchers.containsString("fiche-projet-" + id + ".pdf")));
     }
 
     private ProjetFormDTO dtoBase() {
