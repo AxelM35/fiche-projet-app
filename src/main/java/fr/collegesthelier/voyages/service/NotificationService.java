@@ -98,8 +98,12 @@ public class NotificationService {
      * deux destinataires ne doit ni empecher l'autre, ni faire echouer le
      * workflow metier (le changement de statut est deja valide et persiste
      * au moment ou ce listener s'execute, phase AFTER_COMMIT).
+     * <p>
+     * Visibilite package (pas private) : reutilise telle quelle par
+     * RelanceService pour les relances automatiques, meme construction
+     * d'email (HTML + repli texte) et meme resilience aux echecs d'envoi.
      */
-    private void notifier(List<String> destinataires, String sujet, String message, String motifRefus, String lienDossier) {
+    void notifier(List<String> destinataires, String sujet, String message, String motifRefus, String lienDossier) {
         if (destinataires == null || destinataires.isEmpty()) {
             log.warn("Aucun destinataire configure pour la notification : {}", sujet);
             return;
