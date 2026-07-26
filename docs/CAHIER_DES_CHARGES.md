@@ -64,6 +64,13 @@ Idées à évaluer, aucune n'est engagée — à trier selon la valeur perçue.
 - **Dashboard Admin** : Créer un dashboard Admin pour pouvoir modifier des paramètres directement dans l'application (modification des rôles, ajout/retrait d'adresse mail, suppression de projet, archivage des années précédentes et autres fonctions utiles à discuter avec le client).
   - ✅ **Gestion des rôles** (`/admin/roles`) : un Admin ajoute/retire des attributions de rôle par email, sans redémarrage. Stocké en base (table `role_attributions`, migration `V2`), en complément des listes `.env` (jamais en remplacement — `ROLES_ADMIN` reste le filet de sécurité contre un verrouillage total). Page réservée à `ROLE_ADMIN` y compris côté contrôleur (contrairement au reste de l'appli, en lecture ouverte à tous).
   - ✅ **Suppression / archivage de projet** : bouton "..." (admin, sur chaque carte du dashboard) → modale "Archiver" (réversible, retire du tableau de bord) ou "Supprimer définitivement" (irréversible, avec confirmation JS). Page `/admin/archives` pour retrouver et désarchiver/supprimer les dossiers archivés. Nouveau champ `Projet.archive` (migration `V3`), indépendant du statut de workflow.
+  - ✅ **Journal d'audit** (`/admin/journal`, table `journal_entrees`, migration `V4`) : trace création, soumission, chaque validation, refus (avec motif), archivage/désarchivage, suppression définitive, modification admin d'un dossier validé, réaffectation d'organisateur, ajout/retrait de rôle — avec auteur, date, dossier concerné (nom dénormalisé, survit à une suppression définitive) et détail. Les 200 événements les plus récents.
+  - ✅ **Dossiers bloqués** (`/admin/dossiers-bloques`) : dossiers en attente de validation triés du plus ancien au plus récent, avec le nombre de jours d'attente (calculé à partir des dates de validation déjà existantes, pas de nouveau champ) — pour relancer manuellement en attendant d'éventuelles relances automatiques.
+  - ✅ **Réaffectation d'organisateur** (Admin, sur la fiche projet) : change l'organisateur d'un dossier sans toucher au statut ni aux validations déjà obtenues.
+  - ✅ **Modification d'un dossier `VALIDE`** : un Admin peut désormais rouvrir et corriger un dossier déjà validé (les autres rôles restent bloqués) ; tracé dans le journal d'audit.
+  - ⬜ Recherche admin avancée (tous statuts + archivés) et export CSV.
+  - ⬜ Email de test SMTP + interrupteur temporaire des notifications.
+  - ⬜ Tableau "santé" (dernière sauvegarde, nombre de dossiers, version) + sauvegarde à la demande.
   - ⬜ Autres fonctions à discuter avec le client.
 
 ## 4. Pistes UX/UI

@@ -25,6 +25,7 @@ import java.util.Map;
 public class RoleAdminService {
 
     private final RoleAttributionRepository roleAttributionRepository;
+    private final JournalService journalService;
 
     @Transactional(readOnly = true)
     public Map<RoleMetier, List<RoleAttribution>> listerParRole() {
@@ -43,12 +44,16 @@ public class RoleAdminService {
         String emailNormalise = email.trim().toLowerCase(Locale.ROOT);
         if (!roleAttributionRepository.existsByEmailAndRole(emailNormalise, role)) {
             roleAttributionRepository.save(new RoleAttribution(emailNormalise, role));
+            journalService.enregistrer("Attribution du role " + role, null, null, emailNormalise);
         }
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public void retirer(Long id) {
+        roleAttributionRepository.findById(id).ifPresent(attribution ->
+                journalService.enregistrer("Retrait du role " + attribution.getRole(), null, null,
+                        attribution.getEmail()));
         roleAttributionRepository.deleteById(id);
     }
 }
