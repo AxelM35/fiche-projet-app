@@ -145,6 +145,20 @@ class AdminControllerTest {
                 .andExpect(view().name("admin-sante"));
     }
 
+    /**
+     * Regression : admin-sante.html n'incluait pas le bundle JS de Bootstrap
+     * (seule page admin dans ce cas), rendant inoperant le menu deroulant
+     * "Administration" de la navbar (data-bs-toggle="dropdown", qui depend
+     * de ce script pour fonctionner).
+     */
+    @Test
+    @WithMockUser(username = "amorvan@college-sthelier.fr", authorities = {"ROLE_PROF", "ROLE_ADMIN"})
+    void laPageSanteChargeLeBundleJsDeBootstrap() throws Exception {
+        mockMvc.perform(get("/admin/sante"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("bootstrap.bundle.min.js")));
+    }
+
     @Test
     @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
     void unProfNAccedePasALaPageSante() throws Exception {
