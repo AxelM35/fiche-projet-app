@@ -423,3 +423,17 @@ a {
     background-color: var(--md-primary);
     border-color: var(--md-primary);
 }
+
+/* Page de connexion : carte unique centree, pas de top app bar. */
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 24rem;
+}
