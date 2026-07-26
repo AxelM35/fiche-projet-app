@@ -351,6 +351,90 @@ a {
 }
 
 /* -------------------------------------------------------------------
+   Stepper visuel du workflow (fiche projet) : 4 etapes (Soumission,
+   Comptabilite, Vie Scolaire, Direction) reliees par un connecteur,
+   en complement du badge de statut. Etats possibles par etape : fait
+   (validee), actif (en cours), erreur (a corrige un dossier A_CORRIGER),
+   avenir (pas encore atteinte).
+   ------------------------------------------------------------------- */
+.stepper-workflow {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    padding: 1rem 0.5rem 0;
+}
+
+.stepper-etape {
+    position: relative;
+    flex: 1;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.stepper-etape:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 1.15rem;
+    left: 50%;
+    width: 100%;
+    height: 2px;
+    background-color: var(--md-outline-variant);
+    z-index: 0;
+}
+
+.stepper-cercle {
+    position: relative;
+    z-index: 1;
+    width: 2.3rem;
+    height: 2.3rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    background-color: var(--md-surface-container-high);
+    color: var(--md-on-surface-variant);
+    border: 2px solid var(--md-surface-container-high);
+}
+
+.stepper-libelle {
+    font-size: 0.75rem;
+    color: var(--md-on-surface-variant);
+}
+
+.stepper-etape--actif .stepper-cercle {
+    background-color: var(--md-primary);
+    border-color: var(--md-primary);
+    color: var(--md-on-primary);
+    box-shadow: 0 0 0 0.2rem var(--md-primary-container);
+}
+
+.stepper-etape--actif .stepper-libelle {
+    color: var(--md-primary);
+    font-weight: 600;
+}
+
+.stepper-etape--fait .stepper-cercle {
+    background-color: var(--md-success-container);
+    border-color: var(--md-success-container);
+    color: var(--md-on-success-container);
+}
+
+.stepper-etape--erreur .stepper-cercle {
+    background-color: var(--md-error-container);
+    border-color: var(--md-error-container);
+    color: var(--md-on-error-container);
+}
+
+.stepper-etape--erreur .stepper-libelle {
+    color: var(--md-error);
+    font-weight: 600;
+}
+
+/* -------------------------------------------------------------------
    Modales : dialogues M3, coins tres arrondis, pas de bandeau colore
    plein (seule l'icone porte la couleur d'alerte).
    ------------------------------------------------------------------- */

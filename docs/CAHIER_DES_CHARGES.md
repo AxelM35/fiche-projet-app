@@ -76,7 +76,7 @@ Idées à évaluer, aucune n'est engagée — à trier selon la valeur perçue.
 ## 4. Pistes UX/UI
 
 - **Couleurs officielles du collège** (déjà cité en §2.5, mais c'est autant un sujet UI que technique).
-- **Stepper visuel du workflow** sur la fiche projet (1-2-3-4 avec étape courante mise en évidence), en complément du badge de statut actuel — rendrait la progression plus lisible pour l'organisateur.
+- ✅ **Stepper visuel du workflow** sur la fiche projet (1-2-3-4 : Soumission, Comptabilité, Vie Scolaire, Direction), en complément du badge de statut — fait. Affiché sur `formulaire.html` et `consultation.html` (fragment `fragments/stepper.html`). Étape en cours mise en évidence (cercle plein, libellé en couleur primaire) ; étapes déjà validées cochées en vert. Pour un dossier `A_CORRIGER`, l'étape qui a refusé est affichée en rouge (icône alerte) plutôt qu'"en cours" — calculée dans `ProjetController` à partir des dates de validation déjà acquises, avec la même logique que `ProjetService.determinerEtapeDeReprise` (le refus met en évidence l'étape par laquelle la resoumission repassera).
 - **Écran récapitulatif avant soumission** : relire les infos clés avant de passer en `EN_ATTENTE_COMPTA`, pour éviter les allers-retours.
 - **Responsive mobile** : vérifier spécifiquement le rendu du Kanban 5 colonnes sur petit écran (probable besoin de scroll horizontal ou de vue liste alternative).
 - **Feedback visuel** sur les actions asynchrones (spinner sur les boutons de validation/refus le temps de la requête).
