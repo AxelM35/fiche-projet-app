@@ -44,5 +44,23 @@ services:
     ports:
       - "8080:8080"
 
+  db-backup:
+    image: prodrigestivill/postgres-backup-local:16-alpine
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backups:/backups
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_DB: ${DB_NAME:-voyages_scolaires}
+      POSTGRES_USER: ${DB_USER:-voyages_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?la variable DB_PASSWORD doit etre definie dans .env}
+      SCHEDULE: ${BACKUP_SCHEDULE:-@daily}
+      BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS:-7}
+      BACKUP_KEEP_WEEKS: ${BACKUP_KEEP_WEEKS:-4}
+      BACKUP_KEEP_MONTHS: ${BACKUP_KEEP_MONTHS:-6}
+
 volumes:
   db_data:

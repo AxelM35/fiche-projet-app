@@ -33,7 +33,7 @@ Ce qui est nécessaire avant un vrai lancement, par thème.
 ### 2.3 Déploiement
 - [ ] HTTPS via reverse proxy (nginx/Caddy/Traefik) — obligatoire pour OAuth2 en production et pour la confidentialité des données.
 - [x] Migration vers Flyway : migration baseline `V1__init.sql` correspondant au schéma généré par `ddl-auto=update`, `ddl-auto` passé en `validate`. **À tester sur une base vide (`docker compose down -v && docker compose up --build`) avant de considérer que c'est acquis.**
-- [ ] Stratégie de sauvegarde PostgreSQL (`pg_dump` planifié, rétention, **test de restauration réel** — une sauvegarde jamais restaurée n'est pas fiable).
+- [x] Stratégie de sauvegarde PostgreSQL : service `db-backup` (dumps quotidiens compressés, rétention configurable, voir `docs/SAUVEGARDE.md`). **Le test de restauration réel reste à faire par toi** — la procédure est documentée mais je ne peux pas l'exécuter depuis mon environnement (pas de Docker).
 - [x] CI GitHub Actions (`.github/workflows/ci.yml`) : lance `./mvnw test` sur chaque push/PR vers `main`.
 - [ ] Exposer un endpoint de santé (`spring-boot-starter-actuator` `/actuator/health`) pour le monitoring du conteneur.
 
