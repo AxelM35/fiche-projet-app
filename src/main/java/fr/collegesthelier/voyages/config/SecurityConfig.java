@@ -30,6 +30,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/css/**", "/js/**", "/webjars/**", "/error", "/login", "/login/**",
                                 "/oauth2/**").permitAll()
+                        // Public (pas d'authentification) : sonde de monitoring du conteneur
+                        // (Docker healthcheck, futur reverse proxy...). N'expose que le statut
+                        // global UP/DOWN (voir management.endpoint.health.show-details=never).
+                        .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
