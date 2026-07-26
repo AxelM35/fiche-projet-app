@@ -112,4 +112,11 @@ public class ProjetFormDTO {
     // --- Commentaire libre (facultatif) ---
     @Size(max = 5000, message = "Le commentaire ne doit pas depasser 5000 caracteres.")
     private String commentaire;
+
+    /**
+     * Affichage seulement : modifie via LienDriveFormDTO/modifierLienDrive,
+     * jamais reecrit par la soumission du formulaire principal (voir
+     * ProjetService.copierDtoVersEntite, qui ne le touche pas).
+     */
+    private String lienDrive;
 }

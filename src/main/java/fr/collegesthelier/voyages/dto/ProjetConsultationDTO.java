@@ -37,6 +37,7 @@ public record ProjetConsultationDTO(
         BigDecimal montantSubvention,
         boolean eligiblePassCulture,
         String commentaire,
+        String lienDrive,
         StatutProjet statut,
         String motifRefus,
         LocalDateTime dateValidationProf,

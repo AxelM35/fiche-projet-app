@@ -1,5 +1,6 @@
 package fr.collegesthelier.voyages.web;
 
+import fr.collegesthelier.voyages.dto.LienDriveFormDTO;
 import fr.collegesthelier.voyages.dto.ProjetFormDTO;
 import fr.collegesthelier.voyages.dto.ReaffectationFormDTO;
 import fr.collegesthelier.voyages.dto.RefusFormDTO;
@@ -63,6 +64,8 @@ public class ProjetController {
     public String formulaireEdition(@PathVariable Long id, Model model, Authentication authentication) {
         Projet projet = projetService.trouverParId(id);
         model.addAttribute("etapesWorkflow", construireEtapesWorkflow(projet.getStatut(), calculerEtapeCourante(projet)));
+        model.addAttribute("peutModifierLienDrive", projetService.peutGererLienDrive(projet));
+        model.addAttribute("lienDriveForm", lienDriveFormPreRempli(projet));
 
         // Un dossier definitivement valide n'est plus modifiable (sauf par un
         // Admin, correction exceptionnelle apres coup), et un observateur en
@@ -92,6 +95,12 @@ public class ProjetController {
                 .anyMatch(role::equals);
     }
 
+    private LienDriveFormDTO lienDriveFormPreRempli(Projet projet) {
+        LienDriveFormDTO dto = new LienDriveFormDTO();
+        dto.setLienDrive(projet.getLienDrive());
+        return dto;
+    }
+
     @PostMapping("/projets/{id}/reaffecter-organisateur")
     public String reaffecterOrganisateur(@PathVariable Long id,
                                           @Valid @ModelAttribute("reaffectation") ReaffectationFormDTO dto,
@@ -103,6 +112,20 @@ public class ProjetController {
 
         projetService.reaffecterOrganisateur(id, dto.getOrganisateurEmail(), dto.getOrganisateurNom());
         redirectAttributes.addFlashAttribute("messageSucces", "Le dossier a ete reaffecte.");
+        return "redirect:/projets/" + id;
+    }
+
+    @PostMapping("/projets/{id}/lien-drive")
+    public String modifierLienDrive(@PathVariable Long id, @Valid @ModelAttribute("lienDriveForm") LienDriveFormDTO dto,
+                                     BindingResult bindingResult, RedirectAttributes redirectAttributes) {
+        if (bindingResult.hasErrors()) {
+            redirectAttributes.addFlashAttribute("messageErreur",
+                    "Le lien doit etre une URL Google Drive valide (https://drive.google.com/...).");
+            return "redirect:/projets/" + id;
+        }
+
+        projetService.modifierLienDrive(id, dto.getLienDrive());
+        redirectAttributes.addFlashAttribute("messageSucces", "Le lien du dossier Drive a ete mis a jour.");
         return "redirect:/projets/" + id;
     }
 
@@ -132,6 +155,8 @@ public class ProjetController {
             model.addAttribute("motifRefus", projetExistant.getMotifRefus());
             model.addAttribute("etapesWorkflow",
                     construireEtapesWorkflow(projetExistant.getStatut(), calculerEtapeCourante(projetExistant)));
+            model.addAttribute("peutModifierLienDrive", projetService.peutGererLienDrive(projetExistant));
+            model.addAttribute("lienDriveForm", lienDriveFormPreRempli(projetExistant));
             return "formulaire";
         }
 

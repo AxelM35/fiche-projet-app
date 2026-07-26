@@ -91,6 +91,14 @@ public class Projet {
     @Column(columnDefinition = "TEXT")
     private String commentaire;
 
+    // --- Pieces jointes (MVP) : simple lien vers un dossier Google Drive
+    // gere en dehors de l'application (cree/partage a la main), pas
+    // d'integration API Drive pour l'instant. Modifiable independamment du
+    // reste du formulaire (voir ProjetService.modifierLienDrive), y compris
+    // par les roles de validation pendant l'instruction du dossier.
+    @Column(name = "lien_drive", length = 500)
+    private String lienDrive;
+
     // --- Workflow (audit) ---
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)

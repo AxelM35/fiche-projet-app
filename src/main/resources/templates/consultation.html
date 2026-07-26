@@ -200,6 +200,36 @@
             </ul>
         </div>
     </div>
+
+    <!-- Carte : Pieces jointes (lien Drive gere hors de l'application) -->
+    <div class="card carte-formulaire shadow-sm">
+        <div class="card-header fw-semibold"><i class="bi bi-folder2-open me-2"></i>Pieces jointes (Google Drive)</div>
+        <div class="card-body">
+            <div th:if="${not #strings.isEmpty(projet.lienDrive)}" class="mb-3">
+                <a th:href="${projet.lienDrive}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary">
+                    <i class="bi bi-box-arrow-up-right me-1"></i>Ouvrir le dossier Drive
+                </a>
+            </div>
+            <p th:if="${#strings.isEmpty(projet.lienDrive)}" class="text-muted small mb-3">
+                Aucun dossier Drive renseigne pour ce projet.
+            </p>
+
+            <form th:if="${peutModifierLienDrive}" th:action="@{/projets/{id}/lien-drive(id=${projet.id})}"
+                  th:object="${lienDriveForm}" method="post" class="row g-2 align-items-end">
+                <div class="col-md-9">
+                    <label class="form-label" for="lienDriveInput">Lien du dossier Drive</label>
+                    <input type="url" class="form-control" id="lienDriveInput" th:field="*{lienDrive}"
+                           placeholder="https://drive.google.com/drive/folders/..."
+                           th:classappend="${#fields.hasErrors('lienDrive')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('lienDrive')}" th:errors="*{lienDrive}"></div>
+                    <div class="form-text">Colle ici le lien de partage du dossier Drive du projet (cree a la main), laisse vide pour le retirer.</div>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-outline-primary w-100">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 <!-- Sticky footer : retour + duplication (aucune autre action possible, le dossier est valide) -->

@@ -262,6 +262,7 @@ public class ProjetService {
                 projet.getMontantSubvention(),
                 Boolean.TRUE.equals(projet.getEligiblePassCulture()),
                 projet.getCommentaire(),
+                projet.getLienDrive(),
                 projet.getStatut(),
                 projet.getMotifRefus(),
                 projet.getDateValidationProf(),
@@ -295,6 +296,7 @@ public class ProjetService {
         dto.setMontantSubvention(projet.getMontantSubvention());
         dto.setEligiblePassCulture(Boolean.TRUE.equals(projet.getEligiblePassCulture()));
         dto.setCommentaire(projet.getCommentaire());
+        dto.setLienDrive(projet.getLienDrive());
         return dto;
     }
 
@@ -467,6 +469,48 @@ public class ProjetService {
         projetRepository.save(projet);
         journalService.enregistrer("Reaffectation organisateur", projet.getId(), projet.getNomProjet(),
                 "De " + ancienEmail + " vers " + nouvelEmail);
+    }
+
+    /**
+     * Lien vers le dossier Google Drive des pieces jointes (MVP : simple
+     * URL, pas d'integration API Drive). Modifiable independamment du
+     * statut du dossier (y compris pendant l'instruction, EN_ATTENTE_*, ou
+     * une fois VALIDE) : contrairement au reste du formulaire, l'ajout d'une
+     * piece jointe n'est pas bloque par le circuit de validation. Ouvert a
+     * l'organisateur du dossier ainsi qu'aux roles de validation
+     * (Compta/Vie Scolaire/Direction), qui peuvent avoir besoin d'attacher
+     * un document recu pendant l'instruction.
+     */
+    @PreAuthorize("hasRole('PROF')")
+    @Transactional
+    public Projet modifierLienDrive(Long id, String lienDrive) {
+        Projet projet = trouverParId(id);
+        if (!peutGererLienDrive(projet)) {
+            throw new AccessDeniedException("Vous n'etes pas autorise a modifier les pieces jointes de ce dossier.");
+        }
+
+        projet.setLienDrive(lienDrive == null || lienDrive.isBlank() ? null : lienDrive);
+        Projet enregistre = projetRepository.save(projet);
+        journalService.enregistrer("Lien Drive", enregistre.getId(), enregistre.getNomProjet(),
+                enregistre.getLienDrive() != null ? enregistre.getLienDrive() : "Lien retire");
+        return enregistre;
+    }
+
+    /**
+     * Determine si l'utilisateur connecte peut ajouter/modifier/retirer le
+     * lien Drive d'un dossier : l'organisateur du dossier, ou n'importe quel
+     * role de validation (pas necessairement celui de l'etape en cours,
+     * puisqu'une piece jointe peut arriver a n'importe quel moment du
+     * circuit). ROLE_LECTURE_SEULE reste volontairement exclu (role de
+     * consultation uniquement).
+     */
+    @Transactional(readOnly = true)
+    public boolean peutGererLienDrive(Projet projet) {
+        String emailConnecte = emailUtilisateurConnecte();
+        boolean estProprietaire = emailConnecte != null
+                && emailConnecte.equalsIgnoreCase(projet.getOrganisateurEmail());
+        return estProprietaire || possedeRole("ROLE_COMPTA") || possedeRole("ROLE_VIESCO")
+                || possedeRole("ROLE_DIRECTION") || possedeRole("ROLE_ADMIN");
     }
 
     /**
