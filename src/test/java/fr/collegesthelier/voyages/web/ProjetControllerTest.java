@@ -169,6 +169,73 @@ class ProjetControllerTest {
                 .andExpect(view().name("consultation"));
     }
 
+    /**
+     * Le bouton "Soumettre pour validation" poste desormais (via formaction)
+     * vers preparer-soumission, qui enregistre le formulaire puis redirige
+     * vers le recapitulatif : verifie ce redirect, que la page s'affiche, et
+     * que "Confirmer et soumettre" fait bien avancer le statut.
+     */
+    @Test
+    @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
+    void preparerLaSoumissionEnregistreEtRedirigeVersLeRecapitulatif() throws Exception {
+        Long id = projetService.creerProjet(dtoBase()).getId();
+
+        MvcResult preparation = mockMvc.perform(post("/projets/{id}/preparer-soumission", id)
+                        .with(csrf())
+                        .param("nomProjet", "Voyage a Barcelone (modifie)")
+                        .param("dateDepart", "2026-11-01T08:00")
+                        .param("dateRetour", "2026-11-05T18:00")
+                        .param("lieuDepart", "College")
+                        .param("lieuRetour", "College")
+                        .param("transport", "Car")
+                        .param("organisateurNom", "M. Prof")
+                        .param("organisateurEmail", "prof@college-sthelier.fr")
+                        .param("telephoneOrganisateur", "0102030405")
+                        .param("classesConcernees", "6A")
+                        .param("effectif", "28")
+                        .param("coutGlobal", "1500")
+                        .param("coutParEleve", "50")
+                        .param("montantSubvention", "0"))
+                .andExpect(status().is3xxRedirection())
+                .andReturn();
+
+        assertThat(preparation.getResponse().getRedirectedUrl()).isEqualTo("/projets/" + id + "/recapitulatif");
+        assertThat(projetService.trouverParId(id).getNomProjet()).isEqualTo("Voyage a Barcelone (modifie)");
+
+        mockMvc.perform(get("/projets/{id}/recapitulatif", id))
+                .andExpect(status().isOk())
+                .andExpect(view().name("recapitulatif"));
+
+        mockMvc.perform(post("/projets/{id}/soumettre", id).with(csrf()))
+                .andExpect(status().is3xxRedirection());
+        assertThat(projetService.trouverParId(id).getStatut().name()).isEqualTo("EN_ATTENTE_COMPTA");
+    }
+
+    @Test
+    @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
+    void preparerLaSoumissionAvecDonneesInvalidesReaffichleFormulaireAvecErreurs() throws Exception {
+        Long id = projetService.creerProjet(dtoBase()).getId();
+
+        mockMvc.perform(post("/projets/{id}/preparer-soumission", id).with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("formulaire"));
+    }
+
+    /**
+     * Un dossier deja engage dans le circuit de validation n'a plus rien a
+     * relire avant soumission : le recapitulatif redirige simplement vers la
+     * fiche plutot que d'afficher une page vide de sens pour ce statut.
+     */
+    @Test
+    @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
+    void leRecapitulatifDunDossierDejaValideRedirigeVersLaFiche() throws Exception {
+        Long id = creerEtValiderCompletement();
+
+        mockMvc.perform(get("/projets/{id}/recapitulatif", id))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(view().name("redirect:/projets/" + id));
+    }
+
     private ProjetFormDTO dtoBase() {
         ProjetFormDTO dto = new ProjetFormDTO();
         dto.setNomProjet("Voyage a Barcelone");

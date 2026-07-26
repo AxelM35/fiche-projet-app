@@ -306,12 +306,16 @@
                 Enregistrer
             </button>
 
-            <!-- Soumettre pour validation : uniquement sur un dossier deja enregistre -->
-            <form th:if="${projet.id} != null and (${statutCourant.name() == 'BROUILLON'} or ${statutCourant.name() == 'A_CORRIGER'})"
-                  sec:authorize="hasRole('PROF')"
-                  th:action="@{/projets/{id}/soumettre(id=${projet.id})}" method="post" class="d-inline">
-                <button type="submit" class="btn btn-success">Soumettre pour validation</button>
-            </form>
+            <!-- Soumettre pour validation : uniquement sur un dossier deja enregistre.
+                 formaction (plutot qu'un <form> separe comme les autres actions) : le
+                 clic soumet le formulaire principal en entier vers un endpoint dedie qui
+                 enregistre d'abord les modifications en cours, puis redirige vers un
+                 recapitulatif avant la soumission definitive (voir preparerSoumission). -->
+            <button type="submit" form="formProjet" class="btn btn-success" sec:authorize="hasRole('PROF')"
+                    th:if="${projet.id} != null and (${statutCourant.name() == 'BROUILLON'} or ${statutCourant.name() == 'A_CORRIGER'})"
+                    th:formaction="@{/projets/{id}/preparer-soumission(id=${projet.id})}">
+                Soumettre pour validation
+            </button>
 
             <!-- Validation comptable -->
             <form th:if="${statutCourant} != null and ${statutCourant.name() == 'EN_ATTENTE_COMPTA'}"
