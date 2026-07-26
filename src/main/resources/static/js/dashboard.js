@@ -15,15 +15,26 @@ document.getElementById('modalGererProjet').addEventListener('show.bs.modal', fu
     document.getElementById('formSupprimerProjet').action = '/projets/' + projetId + '/supprimer';
 });
 
-// Filtrage cote client, par nom de projet, colonne par colonne (sans
-// aller-retour serveur : le tableau est deja entierement charge).
-document.getElementById('rechercheProjet').addEventListener('input', function (evenement) {
-    const recherche = evenement.target.value.trim().toLowerCase();
+// Filtrage cote client (nom, classe, organisateur, periode de depart),
+// colonne par colonne, sans aller-retour serveur : le tableau est deja
+// entierement charge. Tous les criteres renseignes doivent correspondre
+// (ET logique) ; un critere vide ne filtre rien.
+function appliquerFiltresDashboard() {
+    const recherche = document.getElementById('rechercheProjet').value.trim().toLowerCase();
+    const classe = document.getElementById('filtreClasse').value.trim().toLowerCase();
+    const organisateur = document.getElementById('filtreOrganisateur').value.trim().toLowerCase();
+    const dateDebut = document.getElementById('filtreDateDepartDebut').value;
+    const dateFin = document.getElementById('filtreDateDepartFin').value;
 
     document.querySelectorAll('.kanban-column').forEach(function (colonne) {
         let visibles = 0;
         colonne.querySelectorAll('.project-card').forEach(function (carte) {
-            const correspond = carte.getAttribute('data-nom').includes(recherche);
+            const dateDepart = carte.getAttribute('data-date-depart');
+            const correspond = carte.getAttribute('data-nom').includes(recherche)
+                && carte.getAttribute('data-classe').includes(classe)
+                && carte.getAttribute('data-organisateur').includes(organisateur)
+                && (!dateDebut || (dateDepart && dateDepart >= dateDebut))
+                && (!dateFin || (dateDepart && dateDepart <= dateFin));
             carte.classList.toggle('d-none', !correspond);
             if (correspond) {
                 visibles += 1;
@@ -39,4 +50,19 @@ document.getElementById('rechercheProjet').addEventListener('input', function (e
             messageVide.classList.toggle('d-none', visibles > 0);
         }
     });
+}
+
+['rechercheProjet', 'filtreClasse', 'filtreOrganisateur'].forEach(function (id) {
+    document.getElementById(id).addEventListener('input', appliquerFiltresDashboard);
+});
+['filtreDateDepartDebut', 'filtreDateDepartFin'].forEach(function (id) {
+    document.getElementById(id).addEventListener('change', appliquerFiltresDashboard);
+});
+document.getElementById('filtresReinitialiser').addEventListener('click', function () {
+    document.getElementById('rechercheProjet').value = '';
+    document.getElementById('filtreClasse').value = '';
+    document.getElementById('filtreOrganisateur').value = '';
+    document.getElementById('filtreDateDepartDebut').value = '';
+    document.getElementById('filtreDateDepartFin').value = '';
+    appliquerFiltresDashboard();
 });

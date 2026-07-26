@@ -102,6 +102,30 @@ class ProjetControllerTest {
     }
 
     /**
+     * Filtres avances du dashboard (classe, organisateur, periode de
+     * depart) : verifie que les champs de filtre sont bien presents et que
+     * chaque carte porte les attributs data-* necessaires au filtrage cote
+     * client (voir dashboard.js).
+     */
+    @Test
+    @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
+    void leDashboardExposeLesFiltresAvancesEtLesDonneesDesCartes() throws Exception {
+        ProjetFormDTO dto = dtoBase();
+        projetService.creerProjet(dto);
+        String dateDepartAttendue = dto.getDateDepart().toLocalDate().toString();
+
+        MvcResult resultat = mockMvc.perform(get("/dashboard"))
+                .andExpect(status().isOk())
+                .andReturn();
+        String html = resultat.getResponse().getContentAsString();
+
+        assertThat(html).contains("id=\"filtreClasse\"", "id=\"filtreOrganisateur\"",
+                "id=\"filtreDateDepartDebut\"", "id=\"filtreDateDepartFin\"");
+        assertThat(html).contains("data-classe=\"6a\"", "data-organisateur=\"m. prof\"",
+                "data-date-depart=\"" + dateDepartAttendue + "\"");
+    }
+
+    /**
      * Regression : les formulaires "Archiver" et "Supprimer définitivement"
      * de la modale de gestion admin n'avaient pas de th:action (l'URL reelle
      * est posee par dashboard.js au clic) - sans th:action, l'extension
