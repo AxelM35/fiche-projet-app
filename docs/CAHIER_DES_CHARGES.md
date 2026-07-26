@@ -120,6 +120,91 @@ Idées à évaluer, aucune n'est engagée — à trier selon la valeur perçue.
 - ✅ **Feedback visuel** sur les boutons de validation/refus/soumission — fait. `static/js/boutons-validation.js` : un seul écouteur délégué sur l'événement `submit` (via `event.submitter`, identifie le bouton réellement à l'origine même pour un bouton associé par l'attribut `form="..."` comme "Soumettre pour validation"), désactive le bouton et affiche un spinner Bootstrap + "Traitement..." dès que le formulaire est réellement soumis (jamais avant une validation HTML5 bloquante, ex. champ requis vide). Classe marqueur `js-bouton-validation` posée sur : Soumettre, Valider Budget/Vie Scolaire/Direction, Confirmer le refus (dashboard et formulaire), Confirmer et soumettre (récapitulatif). Volontairement pas étendu à "Enregistrer"/"Dupliquer"/"Archiver"/"Supprimer" (hors du périmètre demandé).
 - **Aide contextuelle** pour les nouveaux professeurs à la première connexion (tooltip ou courte visite guidée expliquant le workflow).
 
+## 4bis. Audit UX — parcours utilisateur pour un public non technique (juillet 2026)
+
+Audit réalisé après le lancement de la v1, à la demande du porteur du projet : rendre l'app facile à
+prendre en main par tout le personnel de l'établissement (pas seulement les profils à l'aise avec le
+numérique), sans remettre en cause le stepper visuel ni le responsive mobile déjà livrés (§4). Public
+concerné : profs organisateurs (usage occasionnel, 1-2 fois/an), Comptabilité/Vie Scolaire/Direction
+(usage récurrent mais rapide), Admin (usage approfondi), secrétariat en lecture seule — personne n'a de
+formation dédiée à l'outil. Idées à évaluer, aucune n'est engagée.
+
+**Étapes du parcours jugées les plus à risque a priori** : le formulaire de création (premier contact
+avec l'outil), la lecture du dashboard Kanban (retrouver "mes" dossiers parmi ceux de tout
+l'établissement), la correction d'un dossier `A_CORRIGER` (bien re-soumettre après correction), et tout
+cas d'erreur/autorisation refusée en dehors du flux normal.
+
+**Points de friction confirmés par des captures d'écran réelles** (formulaire vierge desktop/mobile,
+formulaire en échec de validation, dashboard vu par un compte Prof, fiche `A_CORRIGER`) :
+- `formulaire.html` : aucun marquage des champs obligatoires (pas de `*`, pas de légende) — confirmé.
+  En revanche, les erreurs de validation par champ sont en fait bien traitées (bordure rouge + icône +
+  message sous chaque champ, jamais la couleur seule) : le vrai manque est un résumé en haut de page
+  ("X champs à corriger"), pas la lisibilité champ par champ.
+- Le champ **"Subvention (€)"** reste pré-rempli à `0` (`ProjetFormDTO.montantSubvention = BigDecimal.ZERO`
+  par défaut, contrairement aux autres montants qui restent `null`) et ne déclenche jamais d'erreur
+  puisque 0 est une valeur valide (`@PositiveOrZero`) : un dossier peut être enregistré avec une
+  subvention à 0€ jamais réellement décidée par l'organisateur, sans que rien ne l'indique.
+- Le champ "Téléphone" (organisateur), quand il est vide, affiche deux messages redondants empilés
+  ("... est obligatoire." et "Le format du téléphone est invalide.") pour la même cause — confirmé,
+  verbeux sans être trompeur.
+- `dashboard.html` / `ProjetController.tableauDeBord` : **confirmé concrètement** — un compte Prof
+  (`robin.morvan1009@gmail.com`) voit directement dans le Kanban un dossier organisé par un collègue
+  (`Axel`), sans aucune distinction visuelle "mon dossier" vs "dossier d'un collègue", et sans filtre
+  par utilisateur côté serveur.
+- ✅ **Corrigé pendant l'audit** : `ProjetController.formulaireEdition` ne routait vers la consultation
+  lecture seule que pour un dossier `VALIDE` (non-Admin) ou un rôle lecture seule, sans jamais vérifier
+  si l'utilisateur était l'organisateur du dossier ou un rôle de validation concerné. Un Prof ouvrant le
+  dossier d'un collègue recevait donc le formulaire éditable complet (champs non verrouillés), alors que
+  l'enregistrement aurait de toute façon été rejeté côté service (`verifierDroitModification`). Corrigé
+  en réutilisant `ProjetService.peutGererLienDrive` pour décider du template ; test de non-régression
+  dédié ajouté (`unProfNonOrganisateurVoitLaConsultationSurLeDossierDunCollegue`).
+- Dossier `A_CORRIGER` : le motif de refus est mis en évidence sur **trois canaux à la fois** (bannière
+  rouge en haut, stepper avec icône ⚠ rouge sur l'étape refusée, badge de statut) — plus clair que
+  prévu. Le bouton "Soumettre pour validation" est bien visible dans le footer sticky, pas besoin de
+  scroller pour le trouver. Le vrai point de friction, affiné : "Enregistrer" et "Soumettre pour
+  validation" sont deux boutons adjacents de poids visuel comparable, sans hiérarchie indiquant lequel
+  des deux referme réellement la correction — un utilisateur peut cliquer "Enregistrer" et croire que
+  c'est fait.
+- Gestion des erreurs : `GlobalExceptionHandler` traduit déjà bien les erreurs métier connues
+  (dossier introuvable, conflit de version, transition invalide) en messages français clairs et
+  redirige proprement. En revanche, aucun `AccessDeniedHandler` ni page 403/404/500 personnalisée
+  n'est configuré dans `SecurityConfig` : un utilisateur tombant sur un lien expiré ou une action non
+  autorisée atterrit sur la page d'erreur Spring Boot par défaut (technique, en anglais) — pas encore
+  vérifié par une capture d'écran, mais confirmé par lecture du code.
+- Couleurs officielles du collège toujours pas appliquées (violet M3 générique, déjà cité en §2.5/§4).
+- Hypothèse infirmée : un premier écran mobile laissait penser que le titre de la navbar ("Fiche Projet
+  numérique - Collège Saint-Helier") était tronqué sur petit écran ; une capture ultérieure du dashboard
+  mobile montre le titre correctement affiché sur deux lignes complètes. Pas un problème réel, retiré du
+  suivi.
+
+**Pistes d'amélioration proposées** :
+- ⬜ **Vue "Mes dossiers" par défaut pour les profs** sur le dashboard (filtre pré-rempli avec leur
+  propre nom, ou onglet séparé du Kanban global), plutôt que de partir du Kanban complet de
+  l'établissement.
+- ⬜ **Aide contextuelle / onboarding** à la première connexion d'un Prof (tooltip ou courte visite
+  guidée expliquant les 4 étapes du workflow) — reprend la piste déjà notée en §4.
+- ⬜ **Clarté du formulaire** : légende "champs obligatoires" + astérisques, résumé d'erreurs en haut
+  de page avec ancre vers le premier champ en erreur après un "Enregistrer" échoué.
+- ⬜ **Pages d'erreur personnalisées** (403/404/500) en français, ton rassurant, avec lien de retour
+  au tableau de bord et contact en cas de blocage.
+- ⬜ **Hiérarchie visuelle Enregistrer / Soumettre pour validation** sur un dossier `A_CORRIGER` (ex.
+  mettre "Soumettre pour validation" seul en avant, "Enregistrer" en style secondaire discret, ou un
+  texte d'aide rappelant qu'il faut soumettre à nouveau après correction).
+- ⬜ **Message de validation téléphone** : n'afficher "Le format du téléphone est invalide" que si le
+  champ n'est pas vide, pour ne pas doubler inutilement le message "obligatoire".
+- ⬜ **Couleurs officielles du collège** — reprend la piste déjà notée en §2.5/§4, dépend toujours de
+  la charte graphique à confirmer avec le client (§6).
+- ⬜ **Champ "Subvention" sans valeur par défaut** : laisser `null` comme les autres montants plutôt
+  que de pré-remplir `0`, pour éviter qu'une subvention non décidée soit enregistrée silencieusement.
+
+**Priorisation retenue** (à la demande du porteur du projet, discutée point par point) :
+
+| Priorité | Contenu | Pourquoi |
+|---|---|---|
+| **P1 — fort impact quotidien** | 1. Vue "Mes dossiers" par défaut sur le dashboard · 2. Aide contextuelle / onboarding première connexion · 3. Clarté du formulaire (légende + résumé d'erreurs) | Ce qui touche le plus souvent un prof occasionnel, dès sa première utilisation |
+| **P2 — confiance et clarté avant ouverture large** | 4. Pages d'erreur personnalisées 403/404/500 · 5. Hiérarchie Enregistrer / Soumettre sur un dossier `A_CORRIGER` | À traiter avant que tout le personnel utilise l'outil sans accompagnement |
+| **P3 — confort, peut attendre les retours terrain** | 6. Message de validation téléphone redondant · 7. Couleurs officielles du collège (bloqué sur confirmation client, §6) · 8. Champ Subvention sans valeur par défaut | Améliorations mineures, aucune urgence |
+
 ## 5. Priorisation proposée (à valider)
 
 | Phase | Contenu | Objectif |
