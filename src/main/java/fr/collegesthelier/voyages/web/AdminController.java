@@ -10,6 +10,7 @@ import fr.collegesthelier.voyages.service.NotificationService;
 import fr.collegesthelier.voyages.service.NotificationToggleService;
 import fr.collegesthelier.voyages.service.ProjetService;
 import fr.collegesthelier.voyages.service.RoleAdminService;
+import fr.collegesthelier.voyages.service.SanteService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -52,6 +53,15 @@ public class AdminController {
     private final JournalService journalService;
     private final NotificationService notificationService;
     private final NotificationToggleService notificationToggleService;
+    private final SanteService santeService;
+
+    @GetMapping("/admin/sante")
+    public String sante(Model model) {
+        model.addAttribute("nombreDeProjets", santeService.nombreDeProjets());
+        model.addAttribute("version", santeService.versionApplication());
+        model.addAttribute("derniereSauvegarde", santeService.derniereSauvegarde().orElse(null));
+        return "admin-sante";
+    }
 
     @GetMapping("/admin/archives")
     public String archives(Model model) {

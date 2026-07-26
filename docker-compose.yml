@@ -44,6 +44,10 @@ services:
       APP_BASE_URL: ${APP_BASE_URL:-http://localhost:8080}
     ports:
       - "8080:8080"
+    volumes:
+      # Lecture seule : uniquement pour que la page admin "Sante" affiche la
+      # date de la derniere sauvegarde. L'application n'ecrit jamais ici.
+      - ./backups:/backups:ro
 
   db-backup:
     image: prodrigestivill/postgres-backup-local:16-alpine

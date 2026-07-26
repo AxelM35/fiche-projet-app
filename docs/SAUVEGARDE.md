@@ -24,6 +24,27 @@ backups/
 Le service démarre avec les autres via `docker compose up`, aucune action
 supplémentaire n'est nécessaire une fois `.env` renseigné.
 
+La page admin "Santé" (`/admin/sante`) affiche la date de la dernière sauvegarde
+trouvée dans `./backups/last/` (lecture seule, montée dans le conteneur `app`).
+
+## Déclencher une sauvegarde immédiate
+
+Volontairement **pas de bouton dans l'application** pour ça : il faudrait soit
+exécuter un processus système (`pg_dump`) depuis le serveur web à la demande
+d'une requête HTTP, soit donner à l'appli un accès au conteneur `db-backup`
+(socket Docker exposé = tout le serveur devient pilotable depuis l'appli web).
+Les deux sont une surface d'attaque à éviter dans un panneau admin.
+
+À la place, depuis ton terminal :
+
+```bash
+docker compose exec db-backup /backup.sh
+```
+
+C'est le script interne à l'image `prodrigestivill/postgres-backup-local`
+(d'après sa documentation) — si la commande ne trouve pas le script, vérifie
+son emplacement exact avec `docker compose exec db-backup ls /`.
+
 ## Tester une restauration
 
 **Une sauvegarde qui n'a jamais été restaurée n'est pas fiable.** Ce test se fait
