@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Tableau de bord - Fiche Projet numerique</title>
+    <title>Tableau de bord - Fiche Projet numérique</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -72,7 +72,7 @@
             <div class="stat-tile">
                 <div class="stat-tile-icon bg-info-subtle text-info"><i class="bi bi-cash-coin"></i></div>
                 <div>
-                    <div class="stat-tile-label">Budget total engage</div>
+                    <div class="stat-tile-label">Budget total engagé</div>
                     <div class="stat-tile-value" th:text="${#numbers.formatDecimal(stats.budgetTotalEngage(), 0, 'WHITESPACE', 0, 'POINT')} + ' €'">0 €</div>
                 </div>
             </div>
@@ -85,7 +85,7 @@
                 <div class="card-header fw-semibold d-flex justify-content-between align-items-center">
                     <span th:switch="${entree.key.name()}">
                         <span th:case="'BROUILLON'">Brouillon</span>
-                        <span th:case="'EN_ATTENTE_COMPTA'">En attente Comptabilite</span>
+                        <span th:case="'EN_ATTENTE_COMPTA'">En attente Comptabilité</span>
                         <span th:case="'EN_ATTENTE_VIE_SCOLAIRE'">En attente Vie Scolaire</span>
                         <span th:case="'EN_ATTENTE_DIRECTION'">En attente Direction</span>
                         <span th:case="'VALIDE'">Valide</span>
@@ -111,20 +111,20 @@
                                         <span th:case="'EN_ATTENTE_COMPTA'" class="badge-statut-attente">En attente</span>
                                         <span th:case="'EN_ATTENTE_VIE_SCOLAIRE'" class="badge-statut-attente">En attente</span>
                                         <span th:case="'EN_ATTENTE_DIRECTION'" class="badge-statut-attente">En attente</span>
-                                        <span th:case="'VALIDE'" class="badge-statut-valide">Valide</span>
-                                        <span th:case="'A_CORRIGER'" class="badge-statut-corriger">A corriger</span>
+                                        <span th:case="'VALIDE'" class="badge-statut-valide">Validé</span>
+                                        <span th:case="'A_CORRIGER'" class="badge-statut-corriger">À corriger</span>
                                     </span>
                                     <button type="button" class="btn btn-sm btn-link text-muted p-0" sec:authorize="hasRole('ADMIN')"
                                             data-bs-toggle="modal" data-bs-target="#modalGererProjet"
                                             th:attr="data-projet-id=${projet.id},data-projet-nom=${projet.nomProjet}"
-                                            title="Gerer ce dossier (archiver / supprimer)">
+                                            title="Gérer ce dossier (archiver / supprimer)">
                                         <i class="bi bi-three-dots-vertical"></i>
                                     </button>
                                 </div>
                             </div>
                             <div class="small text-muted mb-1">
                                 <i class="bi bi-geo-alt"></i>
-                                <span th:text="${projet.lieuDepart} + ' -> ' + ${projet.lieuRetour}">Depart -> Retour</span>
+                                <span th:text="${projet.lieuDepart} + ' -> ' + ${projet.lieuRetour}">Départ -> Retour</span>
                             </div>
                             <div class="small text-muted mb-1">
                                 <i class="bi bi-calendar3"></i>
@@ -135,7 +135,7 @@
                             <div class="small mb-1">
                                 <i class="bi bi-person"></i>
                                 <span th:text="${projet.organisateurNom}">Nom</span>
-                                &middot; <span th:text="${projet.effectif}">30</span> eleves
+                                &middot; <span th:text="${projet.effectif}">30</span> élèves
                             </div>
 
                             <div class="mt-2 d-flex flex-wrap gap-1">
@@ -216,13 +216,13 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Gerer le dossier <span id="gererProjetNom" class="fw-semibold"></span></h5>
+                <h5 class="modal-title">Gérer le dossier <span id="gererProjetNom" class="fw-semibold"></span></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
             </div>
             <div class="modal-body">
                 <p class="text-muted small mb-0">
-                    Archiver retire le dossier du tableau de bord sans le supprimer (recuperable depuis
-                    l'administration). Supprimer l'efface definitivement et sans retour possible.
+                    Archiver retire le dossier du tableau de bord sans le supprimer (récupérable depuis
+                    l'administration). Supprimer l'efface définitivement et sans retour possible.
                 </p>
             </div>
             <div class="modal-footer justify-content-between">
@@ -230,8 +230,8 @@
                     <button type="submit" class="btn btn-outline-secondary"><i class="bi bi-archive me-1"></i>Archiver</button>
                 </form>
                 <form id="formSupprimerProjet" method="post"
-                      data-confirm="Supprimer definitivement ce dossier ? Cette action est irreversible.">
-                    <button type="submit" class="btn btn-danger"><i class="bi bi-trash me-1"></i>Supprimer definitivement</button>
+                      data-confirm="Supprimer définitivement ce dossier ? Cette action est irréversible.">
+                    <button type="submit" class="btn btn-danger"><i class="bi bi-trash me-1"></i>Supprimer définitivement</button>
                 </form>
             </div>
         </div>

@@ -36,7 +36,7 @@ public class GlobalExceptionHandler {
                                            RedirectAttributes redirectAttributes) {
         log.warn("Conflit de mise a jour concurrente detecte", exception);
         redirectAttributes.addFlashAttribute("messageErreur",
-                "Ce dossier a ete modifie entre-temps par quelqu'un d'autre. Merci de recharger la page et de reessayer.");
+                "Ce dossier a été modifié entre-temps par quelqu'un d'autre. Merci de recharger la page et de réessayer.");
         return "redirect:" + pageOrigine(request);
     }
 

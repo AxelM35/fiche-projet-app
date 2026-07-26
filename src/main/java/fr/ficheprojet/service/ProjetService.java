@@ -140,7 +140,7 @@ public class ProjetService {
         projet.setStatut(StatutProjet.BROUILLON);
         Projet enregistre = projetRepository.save(projet);
         creerDossierDriveSiActive(enregistre);
-        journalService.enregistrer("Creation", enregistre.getId(), enregistre.getNomProjet(), null);
+        journalService.enregistrer("Création", enregistre.getId(), enregistre.getNomProjet(), null);
         return enregistre;
     }
 
@@ -167,7 +167,7 @@ public class ProjetService {
                 || projet.getStatut() == StatutProjet.A_CORRIGER
                 || (projet.getStatut() == StatutProjet.VALIDE && estAdmin);
         if (!modifiable) {
-            throw new TransitionInvalideException("Ce dossier est deja engage dans le circuit de validation et ne peut plus etre modifie.");
+            throw new TransitionInvalideException("Ce dossier est déjà engagé dans le circuit de validation et ne peut plus être modifié.");
         }
         verifierDroitModification(projet);
         verifierVersion(projet, dto.getVersion());
@@ -180,7 +180,7 @@ public class ProjetService {
         // propre entree de journal, distincte d'une simple modification de
         // brouillon par son organisateur.
         String action = (projet.getStatut() == StatutProjet.VALIDE && estAdmin)
-                ? "Modification (admin, dossier deja valide)" : "Modification";
+                ? "Modification (admin, dossier déjà validé)" : "Modification";
         journalService.enregistrer(action, enregistre.getId(), enregistre.getNomProjet(), null);
         return enregistre;
     }
@@ -326,7 +326,7 @@ public class ProjetService {
         Projet projet = trouverParId(id);
         verifierDroitModification(projet);
         if (projet.getStatut() != StatutProjet.BROUILLON && projet.getStatut() != StatutProjet.A_CORRIGER) {
-            throw new TransitionInvalideException("Seul un dossier en brouillon ou a corriger peut etre soumis.");
+            throw new TransitionInvalideException("Seul un dossier en brouillon ou à corriger peut être soumis.");
         }
 
         StatutProjet ancienStatut = projet.getStatut();
@@ -369,7 +369,7 @@ public class ProjetService {
         projet.setDateValidationCompta(LocalDateTime.now());
 
         Projet enregistre = projetRepository.save(projet);
-        publierEvenement(enregistre, ancienStatut, "Validation Comptabilite", null);
+        publierEvenement(enregistre, ancienStatut, "Validation Comptabilité", null);
         return enregistre;
     }
 
@@ -415,7 +415,7 @@ public class ProjetService {
     public Projet refuser(Long id, String motifRefus) {
         Projet projet = trouverParId(id);
         if (!STATUTS_REFUSABLES.contains(projet.getStatut())) {
-            throw new TransitionInvalideException("Ce dossier n'est pas dans un etat pouvant etre refuse.");
+            throw new TransitionInvalideException("Ce dossier n'est pas dans un état pouvant être refusé.");
         }
 
         StatutProjet ancienStatut = projet.getStatut();
@@ -456,7 +456,7 @@ public class ProjetService {
         Projet projet = trouverParId(id);
         projet.setArchive(false);
         projetRepository.save(projet);
-        journalService.enregistrer("Desarchivage", projet.getId(), projet.getNomProjet(), null);
+        journalService.enregistrer("Désarchivage", projet.getId(), projet.getNomProjet(), null);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -466,7 +466,7 @@ public class ProjetService {
         Long projetId = projet.getId();
         String nomProjet = projet.getNomProjet();
         projetRepository.delete(projet);
-        journalService.enregistrer("Suppression definitive", projetId, nomProjet, null);
+        journalService.enregistrer("Suppression définitive", projetId, nomProjet, null);
     }
 
     /**
@@ -483,7 +483,7 @@ public class ProjetService {
         projet.setOrganisateurEmail(nouvelEmail);
         projet.setOrganisateurNom(nouveauNom);
         projetRepository.save(projet);
-        journalService.enregistrer("Reaffectation organisateur", projet.getId(), projet.getNomProjet(),
+        journalService.enregistrer("Réaffectation organisateur", projet.getId(), projet.getNomProjet(),
                 "De " + ancienEmail + " vers " + nouvelEmail);
     }
 
@@ -502,13 +502,13 @@ public class ProjetService {
     public Projet modifierLienDrive(Long id, String lienDrive) {
         Projet projet = trouverParId(id);
         if (!peutGererLienDrive(projet)) {
-            throw new AccessDeniedException("Vous n'etes pas autorise a modifier les pieces jointes de ce dossier.");
+            throw new AccessDeniedException("Vous n'êtes pas autorisé à modifier les pièces jointes de ce dossier.");
         }
 
         projet.setLienDrive(lienDrive == null || lienDrive.isBlank() ? null : lienDrive);
         Projet enregistre = projetRepository.save(projet);
         journalService.enregistrer("Lien Drive", enregistre.getId(), enregistre.getNomProjet(),
-                enregistre.getLienDrive() != null ? enregistre.getLienDrive() : "Lien retire");
+                enregistre.getLienDrive() != null ? enregistre.getLienDrive() : "Lien retiré");
         return enregistre;
     }
 

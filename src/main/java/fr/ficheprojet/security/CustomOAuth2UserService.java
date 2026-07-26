@@ -64,7 +64,7 @@ public class CustomOAuth2UserService extends OidcUserService {
             log.warn("Connexion refusee pour l'email '{}' : domaine non autorise", email);
             throw new OAuth2AuthenticationException(
                     new OAuth2Error("domaine_non_autorise"),
-                    "Seuls les comptes @" + securityProperties.getAllowedEmailDomain() + " sont autorises.");
+                    "Seuls les comptes @" + securityProperties.getAllowedEmailDomain() + " sont autorisés.");
         }
 
         Set<GrantedAuthority> authorities = construireAuthorities(email);

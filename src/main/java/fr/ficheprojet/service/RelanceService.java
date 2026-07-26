@@ -32,7 +32,7 @@ import java.util.Optional;
 public class RelanceService {
 
     private static final String ACTION_RELANCE = "Relance";
-    private static final String AUTEUR_SYSTEME = "Systeme (relance automatique)";
+    private static final String AUTEUR_SYSTEME = "Système (relance automatique)";
 
     private final ProjetService projetService;
     private final JournalEntreeRepository journalEntreeRepository;
@@ -84,7 +84,7 @@ public class RelanceService {
 
         notificationService.notifier(destinataires, sujet, message, null, lienDossier);
         journalService.enregistrer(ACTION_RELANCE, dossier.id(), dossier.nomProjet(),
-                "Relance apres " + dossier.joursEnAttente() + " jours d'attente (" + dossier.statut() + ")", AUTEUR_SYSTEME);
+                "Relance après " + dossier.joursEnAttente() + " jours d'attente (" + dossier.statut() + ")", AUTEUR_SYSTEME);
     }
 
     private List<String> destinatairesPourStatut(StatutProjet statut) {

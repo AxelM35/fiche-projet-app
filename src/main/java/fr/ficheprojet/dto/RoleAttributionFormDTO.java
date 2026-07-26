@@ -15,6 +15,6 @@ public class RoleAttributionFormDTO {
     @Email(message = "L'email n'est pas valide.")
     private String email;
 
-    @NotNull(message = "Le role est obligatoire.")
+    @NotNull(message = "Le rôle est obligatoire.")
     private RoleMetier role;
 }

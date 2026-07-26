@@ -111,7 +111,7 @@ public class ProjetController {
         }
 
         projetService.reaffecterOrganisateur(id, dto.getOrganisateurEmail(), dto.getOrganisateurNom());
-        redirectAttributes.addFlashAttribute("messageSucces", "Le dossier a ete reaffecte.");
+        redirectAttributes.addFlashAttribute("messageSucces", "Le dossier a été réaffecté.");
         return "redirect:/projets/" + id;
     }
 
@@ -120,12 +120,12 @@ public class ProjetController {
                                      BindingResult bindingResult, RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
             redirectAttributes.addFlashAttribute("messageErreur",
-                    "Le lien doit etre une URL Google Drive valide (https://drive.google.com/...).");
+                    "Le lien doit être une URL Google Drive valide (https://drive.google.com/...).");
             return "redirect:/projets/" + id;
         }
 
         projetService.modifierLienDrive(id, dto.getLienDrive());
-        redirectAttributes.addFlashAttribute("messageSucces", "Le lien du dossier Drive a ete mis a jour.");
+        redirectAttributes.addFlashAttribute("messageSucces", "Le lien du dossier Drive a été mis à jour.");
         return "redirect:/projets/" + id;
     }
 
@@ -141,7 +141,7 @@ public class ProjetController {
         }
 
         Projet projet = projetService.creerProjet(dto);
-        redirectAttributes.addFlashAttribute("messageSucces", "Le projet a ete cree en brouillon.");
+        redirectAttributes.addFlashAttribute("messageSucces", "Le projet a été créé en brouillon.");
         return "redirect:/projets/" + projet.getId();
     }
 
@@ -155,7 +155,7 @@ public class ProjetController {
         }
 
         projetService.modifierProjet(id, dto);
-        redirectAttributes.addFlashAttribute("messageSucces", "Les modifications ont ete enregistrees.");
+        redirectAttributes.addFlashAttribute("messageSucces", "Les modifications ont été enregistrées.");
         return "redirect:/projets/" + id;
     }
 
@@ -205,56 +205,56 @@ public class ProjetController {
     @PostMapping("/projets/{id}/dupliquer")
     public String dupliquer(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         Projet copie = projetService.dupliquer(id);
-        redirectAttributes.addFlashAttribute("messageSucces", "Le projet a ete duplique en brouillon. Pensez a adapter les classes et les dates.");
+        redirectAttributes.addFlashAttribute("messageSucces", "Le projet a été dupliqué en brouillon. Pensez à adapter les classes et les dates.");
         return "redirect:/projets/" + copie.getId();
     }
 
     @PostMapping("/projets/{id}/soumettre")
     public String soumettre(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         projetService.soumettre(id);
-        redirectAttributes.addFlashAttribute("messageSucces", "Le dossier a ete soumis pour validation.");
+        redirectAttributes.addFlashAttribute("messageSucces", "Le dossier a été soumis pour validation.");
         return "redirect:/dashboard";
     }
 
     @PostMapping("/projets/{id}/valider-compta")
     public String validerCompta(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         projetService.validerCompta(id);
-        redirectAttributes.addFlashAttribute("messageSucces", "Validation comptable enregistree.");
+        redirectAttributes.addFlashAttribute("messageSucces", "Validation comptable enregistrée.");
         return "redirect:/dashboard";
     }
 
     @PostMapping("/projets/{id}/valider-vie-scolaire")
     public String validerVieScolaire(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         projetService.validerVieScolaire(id);
-        redirectAttributes.addFlashAttribute("messageSucces", "Validation vie scolaire enregistree.");
+        redirectAttributes.addFlashAttribute("messageSucces", "Validation vie scolaire enregistrée.");
         return "redirect:/dashboard";
     }
 
     @PostMapping("/projets/{id}/valider-direction")
     public String validerDirection(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         projetService.validerDirection(id);
-        redirectAttributes.addFlashAttribute("messageSucces", "Le dossier a ete valide definitivement.");
+        redirectAttributes.addFlashAttribute("messageSucces", "Le dossier a été validé définitivement.");
         return "redirect:/dashboard";
     }
 
     @PostMapping("/projets/{id}/archiver")
     public String archiver(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         projetService.archiver(id);
-        redirectAttributes.addFlashAttribute("messageSucces", "Le dossier a ete archive.");
+        redirectAttributes.addFlashAttribute("messageSucces", "Le dossier a été archivé.");
         return "redirect:/dashboard";
     }
 
     @PostMapping("/projets/{id}/desarchiver")
     public String desarchiver(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         projetService.desarchiver(id);
-        redirectAttributes.addFlashAttribute("messageSucces", "Le dossier a ete desarchive.");
+        redirectAttributes.addFlashAttribute("messageSucces", "Le dossier a été désarchivé.");
         return "redirect:/admin/archives";
     }
 
     @PostMapping("/projets/{id}/supprimer")
     public String supprimer(@PathVariable Long id, HttpServletRequest request, RedirectAttributes redirectAttributes) {
         projetService.supprimerDefinitivement(id);
-        redirectAttributes.addFlashAttribute("messageSucces", "Le dossier a ete supprime definitivement.");
+        redirectAttributes.addFlashAttribute("messageSucces", "Le dossier a été supprimé définitivement.");
         String referer = request.getHeader("Referer");
         return "redirect:" + (referer != null && referer.contains("/admin/archives") ? "/admin/archives" : "/dashboard");
     }
@@ -268,7 +268,7 @@ public class ProjetController {
         }
 
         projetService.refuser(id, refusDto.getMotifRefus());
-        redirectAttributes.addFlashAttribute("messageSucces", "Le dossier a ete renvoye au professeur pour correction.");
+        redirectAttributes.addFlashAttribute("messageSucces", "Le dossier a été renvoyé au professeur pour correction.");
         return "redirect:/dashboard";
     }
 
@@ -276,11 +276,11 @@ public class ProjetController {
         if (dto.getDateDepart() != null && dto.getDateRetour() != null
                 && dto.getDateRetour().isBefore(dto.getDateDepart())) {
             bindingResult.rejectValue("dateRetour", "date.incoherente",
-                    "La date de retour doit etre posterieure ou egale a la date de depart.");
+                    "La date de retour doit être postérieure ou égale à la date de départ.");
         }
     }
 
-    private static final String[] LIBELLES_ETAPES_WORKFLOW = {"Soumission", "Comptabilite", "Vie Scolaire", "Direction"};
+    private static final String[] LIBELLES_ETAPES_WORKFLOW = {"Soumission", "Comptabilité", "Vie Scolaire", "Direction"};
     private static final String[] ICONES_ETAPES_WORKFLOW = {"bi-send", "bi-cash-coin", "bi-people", "bi-mortarboard"};
 
     /**

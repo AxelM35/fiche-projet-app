@@ -1,6 +1,6 @@
 # fiche-projet-app
 
-Fiche Projet numerique : application web de gestion et de validation des projets de voyages scolaires du Collège Exemple, en remplacement du workflow historique base sur Google Sheets.
+Fiche Projet numérique : application web de gestion et de validation des projets de voyages scolaires du Collège Exemple, en remplacement du workflow historique base sur Google Sheets.
 
 ## Stack technique
 

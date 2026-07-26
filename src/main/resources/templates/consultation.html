@@ -29,11 +29,11 @@
         </h1>
         <span class="badge-statut" th:switch="${projet.statut.name()}">
             <span th:case="'BROUILLON'" class="badge-statut-brouillon">Brouillon</span>
-            <span th:case="'EN_ATTENTE_COMPTA'" class="badge-statut-attente">En attente (Comptabilite)</span>
+            <span th:case="'EN_ATTENTE_COMPTA'" class="badge-statut-attente">En attente (Comptabilité)</span>
             <span th:case="'EN_ATTENTE_VIE_SCOLAIRE'" class="badge-statut-attente">En attente (Vie Scolaire)</span>
             <span th:case="'EN_ATTENTE_DIRECTION'" class="badge-statut-attente">En attente (Direction)</span>
             <span th:case="'VALIDE'" class="badge-statut-valide">Valide</span>
-            <span th:case="'A_CORRIGER'" class="badge-statut-corriger">A corriger</span>
+            <span th:case="'A_CORRIGER'" class="badge-statut-corriger">À corriger</span>
         </span>
     </div>
 
@@ -56,11 +56,11 @@
                 <div th:text="${projet.description}" class="text-pre-wrap">-</div>
             </div>
             <div class="col-md-3">
-                <div class="text-muted small">Date de depart</div>
+                <div class="text-muted small">Date de départ</div>
                 <div th:text="${#temporals.format(projet.dateDepart, 'dd/MM/yyyy HH:mm')}">-</div>
             </div>
             <div class="col-md-3">
-                <div class="text-muted small">Lieu de depart</div>
+                <div class="text-muted small">Lieu de départ</div>
                 <div th:text="${projet.lieuDepart}">-</div>
             </div>
             <div class="col-md-3">
@@ -75,14 +75,14 @@
             <th:block th:if="${not #strings.isEmpty(projet.organismeNom) or not #strings.isEmpty(projet.organismeTelephone) or not #strings.isEmpty(projet.organismeEmail)}">
                 <div class="col-12">
                     <hr class="my-2">
-                    <h6 class="text-muted mb-0"><i class="bi bi-building me-1"></i>Coordonnees de l'organisme ou du referent</h6>
+                    <h6 class="text-muted mb-0"><i class="bi bi-building me-1"></i>Coordonnées de l'organisme ou du référent</h6>
                 </div>
                 <div class="col-md-4" th:if="${not #strings.isEmpty(projet.organismeNom)}">
                     <div class="text-muted small">Nom</div>
                     <div th:text="${projet.organismeNom}">-</div>
                 </div>
                 <div class="col-md-4" th:if="${not #strings.isEmpty(projet.organismeTelephone)}">
-                    <div class="text-muted small">Telephone</div>
+                    <div class="text-muted small">Téléphone</div>
                     <div th:text="${projet.organismeTelephone}">-</div>
                 </div>
                 <div class="col-md-4" th:if="${not #strings.isEmpty(projet.organismeEmail)}">
@@ -106,7 +106,7 @@
                 <div th:text="${projet.organisateurEmail}">-</div>
             </div>
             <div class="col-md-4">
-                <div class="text-muted small">Telephone</div>
+                <div class="text-muted small">Téléphone</div>
                 <div th:text="${projet.telephoneOrganisateur}">-</div>
             </div>
         </div>
@@ -117,11 +117,11 @@
         <div class="card-header fw-semibold"><i class="bi bi-people me-2"></i>Le Groupe</div>
         <div class="card-body row g-3">
             <div class="col-md-6">
-                <div class="text-muted small">Classes concernees</div>
+                <div class="text-muted small">Classes concernées</div>
                 <div th:text="${projet.classesConcernees}">-</div>
             </div>
             <div class="col-md-6">
-                <div class="text-muted small">Effectif eleves</div>
+                <div class="text-muted small">Effectif élèves</div>
                 <div th:text="${projet.effectif}">-</div>
             </div>
             <div class="col-12" th:if="${not #lists.isEmpty(projet.accompagnateurs)}">
@@ -138,11 +138,11 @@
         <div class="card-header fw-semibold"><i class="bi bi-cash-coin me-2"></i>Le Budget</div>
         <div class="card-body row g-3">
             <div class="col-md-4">
-                <div class="text-muted small">Cout global</div>
+                <div class="text-muted small">Coût global</div>
                 <div th:text="${projet.coutGlobal} + ' €'">-</div>
             </div>
             <div class="col-md-4">
-                <div class="text-muted small">Cout par eleve</div>
+                <div class="text-muted small">Coût par élève</div>
                 <div th:text="${projet.coutParEleve} + ' €'">-</div>
             </div>
             <div class="col-md-4">
@@ -151,7 +151,7 @@
             </div>
             <div class="col-12">
                 <span class="badge" th:classappend="${projet.eligiblePassCulture} ? 'bg-success' : 'bg-secondary'"
-                      th:text="${projet.eligiblePassCulture} ? 'Eligible Pass Culture' : 'Non eligible Pass Culture'">-</span>
+                      th:text="${projet.eligiblePassCulture} ? 'Éligible Pass Culture' : 'Non éligible Pass Culture'">-</span>
             </div>
         </div>
     </div>
@@ -184,17 +184,17 @@
                 </li>
                 <li th:if="${projet.dateValidationCompta != null}" class="mb-1">
                     <i class="bi bi-check-circle-fill text-success me-2"></i>
-                    Valide par la Comptabilite le
+                    Validé par la Comptabilité le
                     <span th:text="${#temporals.format(projet.dateValidationCompta, 'dd/MM/yyyy HH:mm')}">-</span>
                 </li>
                 <li th:if="${projet.dateValidationVieScolaire != null}" class="mb-1">
                     <i class="bi bi-check-circle-fill text-success me-2"></i>
-                    Valide par la Vie Scolaire le
+                    Validé par la Vie Scolaire le
                     <span th:text="${#temporals.format(projet.dateValidationVieScolaire, 'dd/MM/yyyy HH:mm')}">-</span>
                 </li>
                 <li th:if="${projet.dateValidationDirection != null}" class="mb-1">
                     <i class="bi bi-check-circle-fill text-success me-2"></i>
-                    Valide definitivement par la Direction le
+                    Validé définitivement par la Direction le
                     <span th:text="${#temporals.format(projet.dateValidationDirection, 'dd/MM/yyyy HH:mm')}">-</span>
                 </li>
             </ul>
@@ -203,7 +203,7 @@
 
     <!-- Carte : Pieces jointes (lien Drive gere hors de l'application) -->
     <div class="card carte-formulaire shadow-sm">
-        <div class="card-header fw-semibold"><i class="bi bi-folder2-open me-2"></i>Pieces jointes (Google Drive)</div>
+        <div class="card-header fw-semibold"><i class="bi bi-folder2-open me-2"></i>Pièces jointes (Google Drive)</div>
         <div class="card-body">
             <div th:if="${not #strings.isEmpty(projet.lienDrive)}" class="mb-3">
                 <a th:href="${projet.lienDrive}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary">
@@ -211,7 +211,7 @@
                 </a>
             </div>
             <p th:if="${#strings.isEmpty(projet.lienDrive)}" class="text-muted small mb-3">
-                Aucun dossier Drive renseigne pour ce projet.
+                Aucun dossier Drive renseigné pour ce projet.
             </p>
 
             <form th:if="${peutModifierLienDrive}" th:action="@{/projets/{id}/lien-drive(id=${projet.id})}"
@@ -222,7 +222,7 @@
                            placeholder="https://drive.google.com/drive/folders/..."
                            th:classappend="${#fields.hasErrors('lienDrive')} ? 'is-invalid'">
                     <div class="invalid-feedback" th:if="${#fields.hasErrors('lienDrive')}" th:errors="*{lienDrive}"></div>
-                    <div class="form-text">Colle ici le lien de partage du dossier Drive du projet (cree a la main), laisse vide pour le retirer.</div>
+                    <div class="form-text">Colle ici le lien de partage du dossier Drive du projet (créé à la main), laisse vide pour le retirer.</div>
                 </div>
                 <div class="col-md-3">
                     <button type="submit" class="btn btn-outline-primary w-100">Enregistrer</button>

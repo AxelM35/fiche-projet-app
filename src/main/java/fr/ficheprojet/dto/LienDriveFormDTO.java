@@ -17,6 +17,6 @@ public class LienDriveFormDTO {
      */
     @Size(max = 500, message = "Le lien est trop long.")
     @Pattern(regexp = "^$|^https://(drive|docs)\\.google\\.com/.*$",
-            message = "Le lien doit etre une URL Google Drive (https://drive.google.com/...).")
+            message = "Le lien doit être une URL Google Drive (https://drive.google.com/...).")
     private String lienDrive;
 }
