@@ -60,6 +60,21 @@ class AdminControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
+    void unProfNAccedePasALarchivageGroupeParAnneeScolaire() throws Exception {
+        mockMvc.perform(post("/admin/archives/archiver-annee").with(csrf()).param("anneeScolaire", "2024-2025"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "amorvan@college-sthelier.fr", authorities = {"ROLE_PROF", "ROLE_ADMIN"})
+    void unAdminDeclencheLarchivageGroupeParAnneeScolaireEtRedirigeVersLesArchives() throws Exception {
+        mockMvc.perform(post("/admin/archives/archiver-annee").with(csrf()).param("anneeScolaire", "2024-2025"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(view().name("redirect:/admin/archives"));
+    }
+
+    @Test
     @WithMockUser(username = "amorvan@college-sthelier.fr", authorities = {"ROLE_PROF", "ROLE_ADMIN"})
     void unAdminAccedeALaPageDesDossiersBloques() throws Exception {
         mockMvc.perform(get("/admin/dossiers-bloques"))

@@ -273,12 +273,12 @@ class ProjetServiceTest {
 
         assertThat(projetService.projetsPourTableauDeBord().get(StatutProjet.BROUILLON))
                 .extracting(Projet::getId).doesNotContain(id);
-        assertThat(projetService.listerArchives()).extracting(Projet::getId).contains(id);
+        assertThat(projetService.listerArchives(null)).extracting(Projet::getId).contains(id);
 
         projetService.desarchiver(id);
         assertThat(projetService.projetsPourTableauDeBord().get(StatutProjet.BROUILLON))
                 .extracting(Projet::getId).contains(id);
-        assertThat(projetService.listerArchives()).extracting(Projet::getId).doesNotContain(id);
+        assertThat(projetService.listerArchives(null)).extracting(Projet::getId).doesNotContain(id);
     }
 
     @Test
@@ -360,12 +360,65 @@ class ProjetServiceTest {
         connecterEnTantQue("amorvan@college-sthelier.fr", "ROLE_ADMIN");
         projetService.archiver(id);
 
-        assertThat(projetService.rechercherPourAdmin("kyoto", null, null, null, null))
+        assertThat(projetService.rechercherPourAdmin("kyoto", null, null, null, null, null))
                 .extracting(Projet::getId).contains(id);
-        assertThat(projetService.rechercherPourAdmin(null, null, "3B", null, true))
+        assertThat(projetService.rechercherPourAdmin(null, null, "3B", null, true, null))
                 .extracting(Projet::getId).contains(id);
-        assertThat(projetService.rechercherPourAdmin(null, null, null, null, false))
+        assertThat(projetService.rechercherPourAdmin(null, null, null, null, false, null))
                 .extracting(Projet::getId).doesNotContain(id);
+    }
+
+    /**
+     * Archivage groupe par annee scolaire (voir AnneeScolaireUtil) : deux
+     * dossiers VALIDE d'annees scolaires differentes, seul celui de l'annee
+     * ciblee doit etre archive.
+     */
+    @Test
+    void archiverDossiersValidesDeLAnneeScolaireNarchiveQueLannéeCiblée() {
+        connecterEnTantQue("martin@college-sthelier.fr", "ROLE_PROF");
+        ProjetFormDTO dtoAncien = dtoValide();
+        dtoAncien.setNomProjet("Voyage a Berlin");
+        dtoAncien.setDateDepart(LocalDateTime.of(2024, 10, 10, 8, 0));
+        dtoAncien.setDateRetour(LocalDateTime.of(2024, 10, 14, 18, 0));
+        Long idAncien = validerCompletement(dtoAncien);
+
+        ProjetFormDTO dtoRecent = dtoValide();
+        dtoRecent.setNomProjet("Voyage a Madrid");
+        dtoRecent.setDateDepart(LocalDateTime.of(2025, 11, 5, 8, 0));
+        dtoRecent.setDateRetour(LocalDateTime.of(2025, 11, 9, 18, 0));
+        Long idRecent = validerCompletement(dtoRecent);
+
+        connecterEnTantQue("amorvan@college-sthelier.fr", "ROLE_ADMIN");
+        int nombreArchive = projetService.archiverDossiersValidesDeLAnneeScolaire("2024-2025");
+
+        assertThat(nombreArchive).isEqualTo(1);
+        assertThat(projetService.trouverParId(idAncien).isArchive()).isTrue();
+        assertThat(projetService.trouverParId(idRecent).isArchive()).isFalse();
+
+        assertThat(projetService.listerArchives("2024-2025")).extracting(Projet::getId).contains(idAncien);
+        assertThat(projetService.listerArchives("2025-2026")).extracting(Projet::getId).doesNotContain(idAncien);
+    }
+
+    /**
+     * Cree un dossier et le fait passer par tout le workflow jusqu'a VALIDE,
+     * en reconnectant a chaque etape sous le role metier concerne (comme
+     * laValidationCompletePasseParTousLesStatutsJusquaValide), pour tester
+     * l'archivage groupe sur des dossiers realistes.
+     */
+    private Long validerCompletement(ProjetFormDTO dto) {
+        connecterEnTantQue("martin@college-sthelier.fr", "ROLE_PROF");
+        Long id = projetService.creerProjet(dto).getId();
+        projetService.soumettre(id);
+
+        connecterEnTantQue("compta@college-sthelier.fr", "ROLE_COMPTA");
+        projetService.validerCompta(id);
+
+        connecterEnTantQue("viesco@college-sthelier.fr", "ROLE_VIESCO");
+        projetService.validerVieScolaire(id);
+
+        connecterEnTantQue("direction@college-sthelier.fr", "ROLE_DIRECTION");
+        projetService.validerDirection(id);
+        return id;
     }
 
     @Test

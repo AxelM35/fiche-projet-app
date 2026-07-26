@@ -95,11 +95,41 @@ public class ProjetService {
 
     /**
      * Dossiers archives par un Admin (retires du tableau de bord mais
-     * toujours en base, recuperables via desarchiver()).
+     * toujours en base, recuperables via desarchiver()), filtres sur une
+     * annee scolaire si precisee (voir AnneeScolaireUtil).
      */
     @Transactional(readOnly = true)
-    public List<Projet> listerArchives() {
-        return projetRepository.findByArchiveTrueOrderByDateDepartDesc();
+    public List<Projet> listerArchives(String anneeScolaire) {
+        return projetRepository.findByArchiveTrueOrderByDateDepartDesc().stream()
+                .filter(p -> anneeScolaire == null || anneeScolaire.equals(AnneeScolaireUtil.calculer(p.getDateDepart())))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Annees scolaires distinctes presentes parmi les dossiers archives,
+     * pour alimenter le filtre de /admin/archives.
+     */
+    @Transactional(readOnly = true)
+    public List<String> listerAnneesScolairesDesArchives() {
+        return anneesScolairesDistinctes(projetRepository.findByArchiveTrueOrderByDateDepartDesc());
+    }
+
+    /**
+     * Annees scolaires distinctes parmi les dossiers VALIDE non encore
+     * archives, pour alimenter le selecteur de l'archivage groupe.
+     */
+    @Transactional(readOnly = true)
+    public List<String> listerAnneesScolairesDesDossiersValidesActifs() {
+        return anneesScolairesDistinctes(projetRepository.findByStatutAndArchiveFalseOrderByDateDepartAsc(StatutProjet.VALIDE));
+    }
+
+    private List<String> anneesScolairesDistinctes(List<Projet> projets) {
+        return projets.stream()
+                .map(p -> AnneeScolaireUtil.calculer(p.getDateDepart()))
+                .filter(Objects::nonNull)
+                .distinct()
+                .sorted(Comparator.reverseOrder())
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -450,6 +480,28 @@ public class ProjetService {
         journalService.enregistrer("Archivage", projet.getId(), projet.getNomProjet(), null);
     }
 
+    /**
+     * Archivage groupe de tous les dossiers VALIDE non deja archives d'une
+     * annee scolaire donnee (voir AnneeScolaireUtil) : action Admin depuis
+     * /admin/archives, pour eviter d'archiver dossier par dossier a chaque
+     * fin d'annee. Volontairement pas automatique (voir decision du cahier
+     * des charges §3) : l'Admin choisit quand declencher l'archivage.
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
+    public int archiverDossiersValidesDeLAnneeScolaire(String anneeScolaire) {
+        List<Projet> candidats = projetRepository.findByStatutAndArchiveFalseOrderByDateDepartAsc(StatutProjet.VALIDE).stream()
+                .filter(p -> anneeScolaire.equals(AnneeScolaireUtil.calculer(p.getDateDepart())))
+                .toList();
+        for (Projet projet : candidats) {
+            projet.setArchive(true);
+            projetRepository.save(projet);
+            journalService.enregistrer("Archivage", projet.getId(), projet.getNomProjet(),
+                    "Archivage groupé — année scolaire " + anneeScolaire);
+        }
+        return candidats.size();
+    }
+
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public void desarchiver(Long id) {
@@ -569,15 +621,25 @@ public class ProjetService {
      */
     @Transactional(readOnly = true)
     public List<Projet> rechercherPourAdmin(String nom, String organisateur, String classe,
-                                             StatutProjet statut, Boolean archive) {
+                                             StatutProjet statut, Boolean archive, String anneeScolaire) {
         return projetRepository.findAll().stream()
                 .filter(p -> contient(p.getNomProjet(), nom))
                 .filter(p -> contient(p.getOrganisateurNom(), organisateur) || contient(p.getOrganisateurEmail(), organisateur))
                 .filter(p -> contient(p.getClassesConcernees(), classe))
                 .filter(p -> statut == null || p.getStatut() == statut)
                 .filter(p -> archive == null || p.isArchive() == archive)
+                .filter(p -> anneeScolaire == null || anneeScolaire.equals(AnneeScolaireUtil.calculer(p.getDateDepart())))
                 .sorted(Comparator.comparing(Projet::getId).reversed())
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Annees scolaires distinctes, tous statuts/archivage confondus, pour
+     * alimenter le filtre de /admin/recherche.
+     */
+    @Transactional(readOnly = true)
+    public List<String> listerAnneesScolaires() {
+        return anneesScolairesDistinctes(projetRepository.findAll());
     }
 
     private boolean contient(String valeur, String recherche) {
