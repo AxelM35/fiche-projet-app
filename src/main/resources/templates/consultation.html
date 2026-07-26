@@ -15,7 +15,7 @@
 
 <nav th:replace="~{fragments/navbar :: navbar}"></nav>
 
-<div class="container px-4" style="padding-bottom: 5rem;">
+<div class="container px-4 pb-footer-sticky">
 
     <div class="alert alert-success alert-dismissible fade show" role="alert"
          th:if="${messageSucces}" th:text="${messageSucces}">
@@ -53,7 +53,7 @@
             </div>
             <div class="col-12" th:if="${not #strings.isEmpty(projet.description)}">
                 <div class="text-muted small">Description</div>
-                <div th:text="${projet.description}" style="white-space: pre-wrap;">-</div>
+                <div th:text="${projet.description}" class="text-pre-wrap">-</div>
             </div>
             <div class="col-md-3">
                 <div class="text-muted small">Date de depart</div>
@@ -160,7 +160,7 @@
     <div class="card carte-formulaire shadow-sm" th:if="${not #strings.isEmpty(projet.commentaire)}">
         <div class="card-header fw-semibold"><i class="bi bi-chat-left-text me-2"></i>Commentaire</div>
         <div class="card-body">
-            <p class="mb-0" style="white-space: pre-wrap;" th:text="${projet.commentaire}">-</p>
+            <p class="mb-0 text-pre-wrap" th:text="${projet.commentaire}">-</p>
         </div>
     </div>
 
@@ -168,7 +168,7 @@
     <div class="card carte-formulaire shadow-sm" th:if="${projet.statut.name() == 'A_CORRIGER'}">
         <div class="card-header fw-semibold"><i class="bi bi-exclamation-triangle text-danger me-2"></i>Motif du refus</div>
         <div class="card-body">
-            <p class="mb-0" style="white-space: pre-wrap;" th:text="${projet.motifRefus}">-</p>
+            <p class="mb-0 text-pre-wrap" th:text="${projet.motifRefus}">-</p>
         </div>
     </div>
 

@@ -15,7 +15,7 @@
 
 <nav th:replace="~{fragments/navbar :: navbar}"></nav>
 
-<div class="container px-4" style="padding-bottom: 3rem;">
+<div class="container px-4 pb-page">
 
     <h1 class="h4 mb-4"><i class="bi bi-heart-pulse me-2"></i>Sante de l'application</h1>
 
@@ -34,7 +34,7 @@
                 <div class="stat-tile-icon bg-info-subtle text-info"><i class="bi bi-tag"></i></div>
                 <div>
                     <div class="stat-tile-label">Version deployee</div>
-                    <div class="stat-tile-value" style="font-size: 1.1rem;" th:text="${version}">-</div>
+                    <div class="stat-tile-value stat-value-compact" th:text="${version}">-</div>
                 </div>
             </div>
         </div>
@@ -45,7 +45,7 @@
                 </div>
                 <div>
                     <div class="stat-tile-label">Derniere sauvegarde</div>
-                    <div class="stat-tile-value" style="font-size: 1.1rem;">
+                    <div class="stat-tile-value stat-value-compact">
                         <span th:if="${derniereSauvegarde} != null" th:text="${#temporals.format(derniereSauvegarde, 'dd/MM/yyyy HH:mm')}">-</span>
                         <span th:unless="${derniereSauvegarde} != null">Inconnue</span>
                     </div>

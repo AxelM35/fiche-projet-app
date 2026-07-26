@@ -61,15 +61,17 @@ public class SecurityConfig {
                         .permitAll()
                 )
                 .headers(headers -> headers
-                        // Bootstrap/bootstrap-icons/Google Fonts sont charges depuis un CDN et
-                        // les templates contiennent quelques scripts/styles inline : la CSP
-                        // reste donc en 'unsafe-inline' pour l'instant plutot que de casser
-                        // l'UI. Un durcissement ulterieur consisterait a externaliser ces
-                        // scripts/styles et passer a une CSP par nonce.
+                        // Tous les scripts/styles sont desormais externes (fichiers sous
+                        // /js, /css, ou CDN Bootstrap/Google Fonts) : plus aucun script,
+                        // style ou gestionnaire d'evenement inline dans les templates
+                        // (voir static/js/*.js), donc plus besoin de 'unsafe-inline'.
+                        // Seul le template d'email (email/notification.html) garde des
+                        // styles inline, hors de portee de cette CSP (ce n'est pas une
+                        // reponse HTTP de l'application).
                         .contentSecurityPolicy(csp -> csp.policyDirectives(
                                 "default-src 'self'; "
-                                        + "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
-                                        + "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; "
+                                        + "script-src 'self' https://cdn.jsdelivr.net; "
+                                        + "style-src 'self' https://cdn.jsdelivr.net https://fonts.googleapis.com; "
                                         + "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; "
                                         + "img-src 'self' data:; "
                                         + "connect-src 'self'; "

@@ -15,6 +15,11 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
 
   app:
     build: .
@@ -53,6 +58,11 @@ services:
       # Lecture seule : uniquement pour que la page admin "Sante" affiche la
       # date de la derniere sauvegarde. L'application n'ecrit jamais ici.
       - ./backups:/backups:ro
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
 
   db-backup:
     image: prodrigestivill/postgres-backup-local:16-alpine
@@ -71,6 +81,11 @@ services:
       BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS:-7}
       BACKUP_KEEP_WEEKS: ${BACKUP_KEEP_WEEKS:-4}
       BACKUP_KEEP_MONTHS: ${BACKUP_KEEP_MONTHS:-6}
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
 
 volumes:
   db_data:
