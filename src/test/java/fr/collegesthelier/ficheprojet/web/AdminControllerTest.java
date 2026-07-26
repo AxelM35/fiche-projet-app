@@ -165,4 +165,19 @@ class AdminControllerTest {
         mockMvc.perform(get("/admin/sante"))
                 .andExpect(status().isForbidden());
     }
+
+    @Test
+    @WithMockUser(username = "amorvan@college-sthelier.fr", authorities = {"ROLE_PROF", "ROLE_ADMIN"})
+    void unAdminAccedeALaPageStatistiques() throws Exception {
+        mockMvc.perform(get("/admin/statistiques"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin-statistiques"));
+    }
+
+    @Test
+    @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
+    void unProfNAccedePasALaPageStatistiques() throws Exception {
+        mockMvc.perform(get("/admin/statistiques"))
+                .andExpect(status().isForbidden());
+    }
 }
