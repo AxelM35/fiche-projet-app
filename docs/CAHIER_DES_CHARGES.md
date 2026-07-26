@@ -120,6 +120,60 @@ Idées à évaluer, aucune n'est engagée — à trier selon la valeur perçue.
 - ✅ **Feedback visuel** sur les boutons de validation/refus/soumission — fait. `static/js/boutons-validation.js` : un seul écouteur délégué sur l'événement `submit` (via `event.submitter`, identifie le bouton réellement à l'origine même pour un bouton associé par l'attribut `form="..."` comme "Soumettre pour validation"), désactive le bouton et affiche un spinner Bootstrap + "Traitement..." dès que le formulaire est réellement soumis (jamais avant une validation HTML5 bloquante, ex. champ requis vide). Classe marqueur `js-bouton-validation` posée sur : Soumettre, Valider Budget/Vie Scolaire/Direction, Confirmer le refus (dashboard et formulaire), Confirmer et soumettre (récapitulatif). Volontairement pas étendu à "Enregistrer"/"Dupliquer"/"Archiver"/"Supprimer" (hors du périmètre demandé).
 - **Aide contextuelle** pour les nouveaux professeurs à la première connexion (tooltip ou courte visite guidée expliquant le workflow).
 
+## 4bis. Audit UX — parcours utilisateur pour un public non technique (juillet 2026)
+
+Audit réalisé après le lancement de la v1, à la demande du porteur du projet : rendre l'app facile à
+prendre en main par tout le personnel de l'établissement (pas seulement les profils à l'aise avec le
+numérique), sans remettre en cause le stepper visuel ni le responsive mobile déjà livrés (§4). Public
+concerné : profs organisateurs (usage occasionnel, 1-2 fois/an), Comptabilité/Vie Scolaire/Direction
+(usage récurrent mais rapide), Admin (usage approfondi), secrétariat en lecture seule — personne n'a de
+formation dédiée à l'outil. Idées à évaluer, aucune n'est engagée.
+
+**Étapes du parcours jugées les plus à risque a priori** : le formulaire de création (premier contact
+avec l'outil), la lecture du dashboard Kanban (retrouver "mes" dossiers parmi ceux de tout
+l'établissement), la correction d'un dossier `A_CORRIGER` (bien re-soumettre après correction), et tout
+cas d'erreur/autorisation refusée en dehors du flux normal.
+
+**Points de friction identifiés (lecture du code, pas encore vérifié en navigateur réel)** :
+- `formulaire.html` : aucun marquage des champs obligatoires (pas de `*`, pas de légende), sur un
+  formulaire d'une seule longue page (~25 champs, 6 cartes empilées) sans sommaire ni progression.
+  Erreurs de validation (`th:errors`) affichées à côté de chaque champ mais aucun résumé en haut de
+  page ni saut automatique vers la première erreur — sur une page aussi longue, un échec de
+  soumission peut passer inaperçu.
+- `dashboard.html` / `ProjetController.tableauDeBord` : le Kanban montre tous les projets de tous les
+  organisateurs, sans filtre par utilisateur côté serveur ; un prof doit taper son propre nom dans le
+  filtre "Organisateur" pour isoler ses dossiers, ce qui n'est pas découvrable sans qu'on le lui montre.
+- Dossier `A_CORRIGER` : le motif de refus est bien mis en évidence en haut de la fiche (bon point),
+  mais rien ne rappelle, au niveau du bouton d'action en bas de page, qu'il faut re-soumettre après
+  correction (pas seulement "Enregistrer").
+- Gestion des erreurs : `GlobalExceptionHandler` traduit déjà bien les erreurs métier connues
+  (dossier introuvable, conflit de version, transition invalide) en messages français clairs et
+  redirige proprement. En revanche, aucun `AccessDeniedHandler` ni page 403/404/500 personnalisée
+  n'est configuré dans `SecurityConfig` : un utilisateur tombant sur un lien expiré ou une action non
+  autorisée atterrit sur la page d'erreur Spring Boot par défaut (technique, en anglais).
+- Couleurs officielles du collège toujours pas appliquées (violet M3 générique, déjà cité en §2.5/§4).
+
+**Pistes d'amélioration proposées (aucune codée à ce stade)** :
+- ⬜ **Aide contextuelle / onboarding** à la première connexion d'un Prof (tooltip ou courte visite
+  guidée expliquant les 4 étapes du workflow) — reprend la piste déjà notée en §4.
+- ⬜ **Clarté du formulaire** : légende "champs obligatoires" + astérisques, résumé d'erreurs en haut
+  de page avec ancre vers le premier champ en erreur après un "Enregistrer" échoué.
+- ⬜ **Vue "Mes dossiers" par défaut pour les profs** sur le dashboard (filtre pré-rempli avec leur
+  propre nom, ou onglet séparé du Kanban global), plutôt que de partir du Kanban complet de
+  l'établissement.
+- ⬜ **Pages d'erreur personnalisées** (403/404/500) en français, ton rassurant, avec lien de retour
+  au tableau de bord et contact en cas de blocage.
+- ⬜ **Rappel de re-soumission** sur un dossier `A_CORRIGER`, visible au niveau de l'action elle-même
+  (pas seulement en haut de page), pour éviter qu'un dossier corrigé reste bloqué en silence faute de
+  re-soumission.
+- ⬜ **Couleurs officielles du collège** — reprend la piste déjà notée en §2.5/§4, dépend toujours de
+  la charte graphique à confirmer avec le client (§6).
+
+Captures d'écran demandées pour affiner cet audit avant priorisation : formulaire de création vierge
+(desktop + mobile), formulaire après un "Enregistrer" en échec, dashboard vu par un compte Prof, fiche
+`A_CORRIGER`, rendu réel d'un email de notification dans Gmail/Outlook, et un cas d'erreur 403/404
+rencontré si possible.
+
 ## 5. Priorisation proposée (à valider)
 
 | Phase | Contenu | Objectif |
