@@ -203,11 +203,15 @@ formulaire en échec de validation, dashboard vu par un compte Prof, fiche `A_CO
   sans astérisque. Résumé d'erreurs (`#resumeErreursFormulaire`) affiché en haut de page uniquement après
   un échec de soumission, complémentaire des messages par champ existants. `static/js/formulaire.js`
   amène automatiquement le focus/scroll sur le premier champ en erreur au chargement.
-- ⬜ **Pages d'erreur personnalisées** (403/404/500) en français, ton rassurant, avec lien de retour
-  au tableau de bord et contact en cas de blocage.
-- ⬜ **Hiérarchie visuelle Enregistrer / Soumettre pour validation** sur un dossier `A_CORRIGER` (ex.
-  mettre "Soumettre pour validation" seul en avant, "Enregistrer" en style secondaire discret, ou un
-  texte d'aide rappelant qu'il faut soumettre à nouveau après correction).
+- ✅ **Pages d'erreur personnalisées** (403/404/500) — fait (P2). `templates/error/{403,404,500}.html`,
+  résolues par convention (`DefaultErrorViewResolver` de Spring Boot, aucun contrôleur ni changement de
+  `SecurityConfig`) : message clair en français, ton rassurant, lien de retour au tableau de bord, mention
+  de contacter la personne en charge de l'application en cas de blocage persistant. Reprend le style de la
+  page de connexion (carte unique centrée). Tests dédiés (`ErrorPagesTest`).
+- ✅ **Hiérarchie visuelle Enregistrer / Soumettre pour validation** sur un dossier `A_CORRIGER` — fait
+  (P2). "Enregistrer" passe en style secondaire discret (`btn-outline-secondary`) uniquement dans ce
+  statut précis (inchangé pour `BROUILLON`/`VALIDE`) ; "Soumettre pour validation" reste seul en
+  `btn-success`, sans changement.
 - ⬜ **Message de validation téléphone** : n'afficher "Le format du téléphone est invalide" que si le
   champ n'est pas vide, pour ne pas doubler inutilement le message "obligatoire".
 - ⬜ **Couleurs officielles du collège** — reprend la piste déjà notée en §2.5/§4, dépend toujours de
@@ -220,7 +224,7 @@ formulaire en échec de validation, dashboard vu par un compte Prof, fiche `A_CO
 | Priorité | Contenu | Pourquoi |
 |---|---|---|
 | **P1 — fort impact quotidien** | 1. ✅ Vue "Mes dossiers" par défaut sur le dashboard (fait) · 2. ✅ Aide contextuelle / onboarding première connexion (fait) · 3. ✅ Clarté du formulaire (fait) | Ce qui touche le plus souvent un prof occasionnel, dès sa première utilisation — **P1 entièrement livrée** |
-| **P2 — confiance et clarté avant ouverture large** | 4. Pages d'erreur personnalisées 403/404/500 · 5. Hiérarchie Enregistrer / Soumettre sur un dossier `A_CORRIGER` | À traiter avant que tout le personnel utilise l'outil sans accompagnement |
+| **P2 — confiance et clarté avant ouverture large** | 4. ✅ Pages d'erreur personnalisées 403/404/500 (fait) · 5. ✅ Hiérarchie Enregistrer / Soumettre sur un dossier `A_CORRIGER` (fait) | À traiter avant que tout le personnel utilise l'outil sans accompagnement — **P2 entièrement livrée** |
 | **P3 — confort, peut attendre les retours terrain** | 6. Message de validation téléphone redondant · 7. Couleurs officielles du collège (bloqué sur confirmation client, §6) · 8. Champ Subvention sans valeur par défaut | Améliorations mineures, aucune urgence |
 
 ## 5. Priorisation proposée (à valider)
