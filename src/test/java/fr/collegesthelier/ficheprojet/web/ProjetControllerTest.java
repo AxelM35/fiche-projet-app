@@ -398,6 +398,44 @@ class ProjetControllerTest {
     }
 
     /**
+     * Hierarchie visuelle Enregistrer / Soumettre pour validation (audit UX,
+     * docs/CAHIER_DES_CHARGES.md S4bis) : sur un dossier A_CORRIGER, les deux
+     * boutons avaient un poids visuel comparable, sans rien pour indiquer
+     * lequel des deux referme reellement la correction. "Enregistrer" passe
+     * en style secondaire discret dans ce statut precis, "Soumettre pour
+     * validation" reste seul en btn-success.
+     */
+    @Test
+    @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
+    void leBoutonEnregistrerEstDiscretSurUnDossierACorriger() throws Exception {
+        Long id = projetService.creerProjet(dtoBase()).getId();
+        projetService.soumettre(id);
+
+        connecterEnTantQue("compta@college-sthelier.fr", "ROLE_COMPTA");
+        projetService.refuser(id, "Pas assez de budget");
+
+        connecterEnTantQue("prof@college-sthelier.fr", "ROLE_PROF");
+        MvcResult resultat = mockMvc.perform(get("/projets/{id}", id))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String html = resultat.getResponse().getContentAsString();
+        assertThat(html).contains("form=\"formProjet\" class=\"btn btn-outline-secondary\"");
+        assertThat(html).contains("btn-success js-bouton-validation");
+    }
+
+    @Test
+    @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
+    void leBoutonEnregistrerResteEnAvantSurUnBrouillon() throws Exception {
+        MvcResult resultat = mockMvc.perform(get("/projets/nouveau"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        assertThat(resultat.getResponse().getContentAsString())
+                .contains("form=\"formProjet\" class=\"btn btn-primary\"");
+    }
+
+    /**
      * Un dossier deja engage dans le circuit de validation n'a plus rien a
      * relire avant soumission : le recapitulatif redirige simplement vers la
      * fiche plutot que d'afficher une page vide de sens pour ce statut.

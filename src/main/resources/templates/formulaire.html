@@ -317,8 +317,13 @@
         <div class="d-flex flex-wrap gap-2">
             <!-- Enregistrer : reserve a l'organisateur du dossier tant qu'il est modifiable.
                  Un dossier VALIDE n'atteint ce formulaire (au lieu de consultation.html) que
-                 pour un Admin (voir ProjetController.formulaireEdition), d'ou ce cas ajoute ici. -->
-            <button type="submit" form="formProjet" class="btn btn-primary" sec:authorize="hasRole('PROF')"
+                 pour un Admin (voir ProjetController.formulaireEdition), d'ou ce cas ajoute ici.
+                 Style secondaire discret sur un dossier A_CORRIGER (au lieu du plein "btn-primary") :
+                 a cote de "Soumettre pour validation" (seul bouton qui renvoie reellement le
+                 dossier en validation), les deux boutons avaient sinon un poids visuel
+                 comparable, sans rien pour indiquer lequel des deux referme la correction. -->
+            <button type="submit" form="formProjet" class="btn" sec:authorize="hasRole('PROF')"
+                    th:classappend="${statutCourant != null and statutCourant.name() == 'A_CORRIGER'} ? 'btn-outline-secondary' : 'btn-primary'"
                     th:if="${statutCourant == null or statutCourant.name() == 'BROUILLON' or statutCourant.name() == 'A_CORRIGER' or statutCourant.name() == 'VALIDE'}">
                 Enregistrer
             </button>
