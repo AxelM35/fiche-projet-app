@@ -505,6 +505,15 @@ a {
     background-color: var(--md-surface);
 }
 
+/* Sur les cartes ou .card-body porte aussi .row.g-3 (grille de champs), la
+   marge negative du systeme de gouttiere Bootstrap remonte le card-body de
+   1rem et son fond opaque recouvre alors le bas du bandeau de titre juste
+   au-dessus - les descendantes des lettres (j, p, g...) du titre se
+   retrouvaient rognees ("Le Projet" affiche "Le Proiet"). */
+.carte-formulaire .card-body.row {
+    margin-top: 0;
+}
+
 .carte-formulaire .card-header .bi {
     color: var(--md-primary);
 }
