@@ -102,6 +102,31 @@ class ProjetControllerTest {
     }
 
     /**
+     * Aide contextuelle (onboarding) : le bouton "Comment ca marche ?" et la
+     * modale associee ne s'affichent qu'a un Prof (public vise, cf. cahier
+     * des charges) - un role de validation sans PROF ne doit rien en voir.
+     */
+    @Test
+    @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
+    void leDashboardExposeLaideContextuellePourUnProf() throws Exception {
+        mockMvc.perform(get("/dashboard"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"modalOnboarding\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Comment ça marche ?")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("/js/onboarding.js")));
+    }
+
+    @Test
+    @WithMockUser(username = "secretariat@college-sthelier.fr", authorities = "ROLE_LECTURE_SEULE")
+    void leDashboardNexposePasLaideContextuellePourUnRoleSansProf() throws Exception {
+        MvcResult resultat = mockMvc.perform(get("/dashboard"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        assertThat(resultat.getResponse().getContentAsString()).doesNotContain("id=\"modalOnboarding\"");
+    }
+
+    /**
      * Filtres avances du dashboard (classe, organisateur, periode de
      * depart) : verifie que les champs de filtre sont bien presents et que
      * chaque carte porte les attributs data-* necessaires au filtrage cote
