@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,8 +47,9 @@ class ProjetControllerTest {
     @Autowired
     private ProjetService projetService;
 
-    private void connecterEnTantQue(String email, String role) {
-        Authentication authentication = new TestingAuthenticationToken(email, null, List.of(new SimpleGrantedAuthority(role)));
+    private void connecterEnTantQue(String email, String... roles) {
+        List<SimpleGrantedAuthority> authorities = Arrays.stream(roles).map(SimpleGrantedAuthority::new).toList();
+        Authentication authentication = new TestingAuthenticationToken(email, null, authorities);
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
@@ -102,6 +104,31 @@ class ProjetControllerTest {
     }
 
     /**
+     * Aide contextuelle (onboarding) : le bouton "Comment ca marche ?" et la
+     * modale associee ne s'affichent qu'a un Prof (public vise, cf. cahier
+     * des charges) - un role de validation sans PROF ne doit rien en voir.
+     */
+    @Test
+    @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
+    void leDashboardExposeLaideContextuellePourUnProf() throws Exception {
+        mockMvc.perform(get("/dashboard"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"modalOnboarding\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Comment ça marche ?")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("/js/onboarding.js")));
+    }
+
+    @Test
+    @WithMockUser(username = "secretariat@college-sthelier.fr", authorities = "ROLE_LECTURE_SEULE")
+    void leDashboardNexposePasLaideContextuellePourUnRoleSansProf() throws Exception {
+        MvcResult resultat = mockMvc.perform(get("/dashboard"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        assertThat(resultat.getResponse().getContentAsString()).doesNotContain("id=\"modalOnboarding\"");
+    }
+
+    /**
      * Filtres avances du dashboard (classe, organisateur, periode de
      * depart) : verifie que les champs de filtre sont bien presents et que
      * chaque carte porte les attributs data-* necessaires au filtrage cote
@@ -119,10 +146,36 @@ class ProjetControllerTest {
                 .andReturn();
         String html = resultat.getResponse().getContentAsString();
 
-        assertThat(html).contains("id=\"filtreClasse\"", "id=\"filtreOrganisateur\"",
+        assertThat(html).contains("id=\"filtreMesDossiers\"", "id=\"filtreClasse\"", "id=\"filtreOrganisateur\"",
                 "id=\"filtreDateDepartDebut\"", "id=\"filtreDateDepartFin\"");
         assertThat(html).contains("data-classe=\"6a\"", "data-organisateur=\"m. prof\"",
-                "data-date-depart=\"" + dateDepartAttendue + "\"");
+                "data-date-depart=\"" + dateDepartAttendue + "\"", "data-mon-dossier=\"true\"");
+    }
+
+    /**
+     * Le filtre "Mes dossiers uniquement" est coche par defaut pour un Prof
+     * sans role de validation (le seul public pour qui le Kanban complet de
+     * l'etablissement n'est jamais le point de depart utile), mais pas pour
+     * un role de validation qui doit voir tous les dossiers des l'arrivee.
+     */
+    @Test
+    @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
+    void leFiltreMesDossiersEstCocheParDefautPourUnProfSeul() throws Exception {
+        mockMvc.perform(get("/dashboard"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "id=\"filtreMesDossiers\" checked=\"checked\"")));
+    }
+
+    @Test
+    @WithMockUser(username = "compta@college-sthelier.fr", authorities = {"ROLE_PROF", "ROLE_COMPTA"})
+    void leFiltreMesDossiersNestPasCocheParDefautPourUnRoleDeValidation() throws Exception {
+        MvcResult resultat = mockMvc.perform(get("/dashboard"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        assertThat(resultat.getResponse().getContentAsString())
+                .doesNotContain("id=\"filtreMesDossiers\" checked=\"checked\"");
     }
 
     /**
@@ -183,12 +236,117 @@ class ProjetControllerTest {
                 .andExpect(status().is3xxRedirection());
     }
 
+    /**
+     * "Je ne connais pas encore le budget" (audit UX S4bis) : la creation
+     * reussit sans coutGlobal/coutParEleve quand la case est cochee, mais
+     * ces deux champs redeviennent obligatoires sans elle (voir
+     * ProjetController.validerCoherenceBudget).
+     */
+    @Test
+    @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
+    void laCreationSansBudgetReussitQuandBudgetInconnuEstCoche() throws Exception {
+        mockMvc.perform(post("/projets/nouveau")
+                        .with(csrf())
+                        .param("nomProjet", "Voyage a Londres")
+                        .param("dateDepart", "2026-10-01T08:00")
+                        .param("dateRetour", "2026-10-05T18:00")
+                        .param("lieuDepart", "Collège Saint-Helier")
+                        .param("lieuRetour", "Collège Saint-Helier")
+                        .param("transport", "Car")
+                        .param("organisateurNom", "M. Dupont")
+                        .param("organisateurEmail", "dupont@college-sthelier.fr")
+                        .param("telephoneOrganisateur", "0102030405")
+                        .param("classesConcernees", "5A, 5B")
+                        .param("effectif", "30")
+                        .param("budgetInconnu", "true"))
+                .andExpect(status().is3xxRedirection());
+    }
+
+    @Test
+    @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
+    void laCreationSansBudgetEchoueSansBudgetInconnuCoche() throws Exception {
+        MvcResult resultat = mockMvc.perform(post("/projets/nouveau")
+                        .with(csrf())
+                        .param("nomProjet", "Voyage a Londres")
+                        .param("dateDepart", "2026-10-01T08:00")
+                        .param("dateRetour", "2026-10-05T18:00")
+                        .param("lieuDepart", "Collège Saint-Helier")
+                        .param("lieuRetour", "Collège Saint-Helier")
+                        .param("transport", "Car")
+                        .param("organisateurNom", "M. Dupont")
+                        .param("organisateurEmail", "dupont@college-sthelier.fr")
+                        .param("telephoneOrganisateur", "0102030405")
+                        .param("classesConcernees", "5A, 5B")
+                        .param("effectif", "30"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("formulaire"))
+                .andReturn();
+
+        assertThat(resultat.getResponse().getContentAsString()).contains("Le coût global est obligatoire.");
+    }
+
+    /**
+     * Une fois le dossier engage dans le circuit (plus de bouton
+     * "Enregistrer"), la carte "Compléter le budget" permet a la
+     * Comptabilite de renseigner le budget manquant (audit UX S4bis).
+     */
+    @Test
+    @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
+    void laComptabilitePeutCompleterLeBudgetDunDossierEnAttente() throws Exception {
+        ProjetFormDTO dto = dtoBase();
+        dto.setCoutGlobal(null);
+        dto.setCoutParEleve(null);
+        Long id = projetService.creerProjet(dto).getId();
+        projetService.soumettre(id);
+
+        connecterEnTantQue("compta@college-sthelier.fr", "ROLE_PROF", "ROLE_COMPTA");
+        MvcResult ficheAvantCompletion = mockMvc.perform(get("/projets/{id}", id))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertThat(ficheAvantCompletion.getResponse().getContentAsString()).contains("Compléter le budget");
+
+        mockMvc.perform(post("/projets/{id}/completer-budget", id).with(csrf())
+                        .param("coutGlobal", "1800")
+                        .param("coutParEleve", "60"))
+                .andExpect(status().is3xxRedirection());
+
+        assertThat(projetService.trouverParId(id).getCoutGlobal()).isEqualByComparingTo("1800");
+    }
+
     @Test
     @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
     void laCreationDunProjetInvalideReaffichleFormulaireAvecErreurs() throws Exception {
         mockMvc.perform(post("/projets/nouveau").with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(view().name("formulaire"));
+    }
+
+    /**
+     * Clarte du formulaire (audit UX, docs/CAHIER_DES_CHARGES.md S4bis) :
+     * legende des champs obligatoires toujours visible, et resume d'erreurs
+     * en haut de page uniquement affiche apres un echec de soumission (pas
+     * sur un formulaire vierge).
+     */
+    @Test
+    @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
+    void leFormulaireVierneAfficheJamaisLeResumeDerreurs() throws Exception {
+        MvcResult resultat = mockMvc.perform(get("/projets/nouveau"))
+                .andExpect(status().isOk())
+                .andReturn();
+        String html = resultat.getResponse().getContentAsString();
+
+        assertThat(html).contains("Champs obligatoires");
+        assertThat(html).doesNotContain("id=\"resumeErreursFormulaire\"");
+    }
+
+    @Test
+    @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
+    void laCreationDunProjetInvalideAfficheLeResumeDerreursEnHautDePage() throws Exception {
+        MvcResult resultat = mockMvc.perform(post("/projets/nouveau").with(csrf()))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        assertThat(resultat.getResponse().getContentAsString()).contains("id=\"resumeErreursFormulaire\"");
     }
 
     /**
@@ -316,6 +474,44 @@ class ProjetControllerTest {
         mockMvc.perform(post("/projets/{id}/preparer-soumission", id).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(view().name("formulaire"));
+    }
+
+    /**
+     * Hierarchie visuelle Enregistrer / Soumettre pour validation (audit UX,
+     * docs/CAHIER_DES_CHARGES.md S4bis) : sur un dossier A_CORRIGER, les deux
+     * boutons avaient un poids visuel comparable, sans rien pour indiquer
+     * lequel des deux referme reellement la correction. "Enregistrer" passe
+     * en style secondaire discret dans ce statut precis, "Soumettre pour
+     * validation" reste seul en btn-success.
+     */
+    @Test
+    @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
+    void leBoutonEnregistrerEstDiscretSurUnDossierACorriger() throws Exception {
+        Long id = projetService.creerProjet(dtoBase()).getId();
+        projetService.soumettre(id);
+
+        connecterEnTantQue("compta@college-sthelier.fr", "ROLE_COMPTA");
+        projetService.refuser(id, "Pas assez de budget");
+
+        connecterEnTantQue("prof@college-sthelier.fr", "ROLE_PROF");
+        MvcResult resultat = mockMvc.perform(get("/projets/{id}", id))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String html = resultat.getResponse().getContentAsString();
+        assertThat(html).contains("form=\"formProjet\" class=\"btn btn-outline-secondary\"");
+        assertThat(html).contains("btn-success js-bouton-validation");
+    }
+
+    @Test
+    @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
+    void leBoutonEnregistrerResteEnAvantSurUnBrouillon() throws Exception {
+        MvcResult resultat = mockMvc.perform(get("/projets/nouveau"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        assertThat(resultat.getResponse().getContentAsString())
+                .contains("form=\"formProjet\" class=\"btn btn-primary\"");
     }
 
     /**

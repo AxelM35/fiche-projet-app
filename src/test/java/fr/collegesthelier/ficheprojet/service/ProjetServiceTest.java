@@ -136,6 +136,62 @@ class ProjetServiceTest {
         assertThat(valide.getDateValidationDirection()).isNotNull();
     }
 
+    /**
+     * "Je ne connais pas encore le budget" (voir ProjetFormDTO.budgetInconnu,
+     * audit UX S4bis) : un dossier peut etre soumis sans budget connu, mais
+     * la Comptabilite ne peut pas le valider tant qu'il manque - completerBudget
+     * (meme perimetre d'autorisation que le lien Drive) permet de le
+     * renseigner apres coup, y compris par la Comptabilite elle-meme,
+     * puisque le formulaire principal n'a plus de bouton "Enregistrer" une
+     * fois le dossier engage dans le circuit.
+     */
+    @Test
+    void unDossierSansBudgetPeutEtreSoumisMaisPasValideTantQuIlManque() {
+        connecterEnTantQue("martin@college-sthelier.fr", "ROLE_PROF");
+        ProjetFormDTO dto = dtoValide();
+        dto.setCoutGlobal(null);
+        dto.setCoutParEleve(null);
+        dto.setMontantSubvention(null);
+        Long id = projetService.creerProjet(dto).getId();
+        projetService.soumettre(id);
+        assertThat(projetService.trouverParId(id).getStatut()).isEqualTo(StatutProjet.EN_ATTENTE_COMPTA);
+
+        connecterEnTantQue("compta@college-sthelier.fr", "ROLE_COMPTA");
+        assertThatThrownBy(() -> projetService.validerCompta(id)).isInstanceOf(TransitionInvalideException.class);
+    }
+
+    @Test
+    void completerBudgetPermetALaComptabiliteDeRenseignerPuisDeValider() {
+        connecterEnTantQue("martin@college-sthelier.fr", "ROLE_PROF");
+        ProjetFormDTO dto = dtoValide();
+        dto.setCoutGlobal(null);
+        dto.setCoutParEleve(null);
+        Long id = projetService.creerProjet(dto).getId();
+        projetService.soumettre(id);
+
+        connecterEnTantQue("compta@college-sthelier.fr", "ROLE_PROF", "ROLE_COMPTA");
+        projetService.completerBudget(id, new BigDecimal("2000"), new BigDecimal("80"), BigDecimal.ZERO);
+        Projet complete = projetService.trouverParId(id);
+        assertThat(complete.getCoutGlobal()).isEqualByComparingTo("2000");
+        assertThat(complete.getCoutParEleve()).isEqualByComparingTo("80");
+
+        projetService.validerCompta(id);
+        assertThat(projetService.trouverParId(id).getStatut()).isEqualTo(StatutProjet.EN_ATTENTE_VIE_SCOLAIRE);
+    }
+
+    @Test
+    void completerBudgetEstReserveALorganisateurOuAUnRoleDeValidation() {
+        connecterEnTantQue("martin@college-sthelier.fr", "ROLE_PROF");
+        ProjetFormDTO dto = dtoValide();
+        dto.setCoutGlobal(null);
+        dto.setCoutParEleve(null);
+        Long id = projetService.creerProjet(dto).getId();
+
+        connecterEnTantQue("collegue@college-sthelier.fr", "ROLE_PROF");
+        assertThatThrownBy(() -> projetService.completerBudget(id, new BigDecimal("2000"), new BigDecimal("80"), null))
+                .isInstanceOf(AccessDeniedException.class);
+    }
+
     @Test
     void unAdminPeutValiderNimporteQuelleEtapeALaPlaceDuRoleMetier() {
         connecterEnTantQue("martin@college-sthelier.fr", "ROLE_PROF");

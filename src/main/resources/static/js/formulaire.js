@@ -44,3 +44,42 @@
         }
     });
 })();
+
+// "Je ne connais pas encore le budget" (voir formulaire.html) : desactive
+// les 3 champs concernes tant que la case est cochee, pour qu'ils ne soient
+// pas soumis (un champ desactive est exclu de la requete par le navigateur,
+// coherent avec ProjetController.validerCoherenceBudget qui les rend
+// facultatifs uniquement dans ce cas) et eviter une saisie partielle
+// incoherente. Applique l'etat initial au chargement (dossier deja
+// enregistre avec la case cochee), puis a chaque changement.
+(function () {
+    const caseBudgetInconnu = document.getElementById('budgetInconnu');
+    if (!caseBudgetInconnu) {
+        return;
+    }
+
+    const champsBudget = ['coutGlobal', 'coutParEleve', 'montantSubvention']
+        .map(function (id) { return document.getElementById(id); })
+        .filter(Boolean);
+
+    function appliquerEtatChampsBudget() {
+        champsBudget.forEach(function (champ) {
+            champ.disabled = caseBudgetInconnu.checked;
+        });
+    }
+
+    caseBudgetInconnu.addEventListener('change', appliquerEtatChampsBudget);
+    appliquerEtatChampsBudget();
+})();
+
+// Amene le focus sur le premier champ en erreur au chargement (apres un
+// "Enregistrer" echoue) : sur un formulaire aussi long, le premier champ
+// invalide pouvait rester hors ecran sans que rien ne le signale, meme avec
+// le resume d'erreurs en haut de page (voir formulaire.html).
+(function () {
+    const premierChampInvalide = document.querySelector('#formProjet .is-invalid');
+    if (premierChampInvalide) {
+        premierChampInvalide.scrollIntoView({behavior: 'smooth', block: 'center'});
+        premierChampInvalide.focus({preventScroll: true});
+    }
+})();

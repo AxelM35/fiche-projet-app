@@ -46,6 +46,8 @@
 
     <div th:replace="~{fragments/stepper :: stepper(${etapesWorkflow})}"></div>
 
+    <p class="text-muted small mb-3"><span class="text-danger">*</span> Champs obligatoires</p>
+
     <!-- Reaffectation d'organisateur : reservee a l'Admin (ex. professeur ayant quitte l'etablissement) -->
     <div class="card carte-formulaire shadow-sm" th:if="${projet.id} != null" sec:authorize="hasRole('ADMIN')">
         <div class="card-header fw-semibold"><i class="bi bi-person-gear me-2"></i>Réaffecter l'organisateur (Admin)</div>
@@ -72,18 +74,28 @@
 
         <input type="hidden" th:if="${projet.version} != null" th:field="*{version}">
 
+        <!-- Resume d'erreurs en haut du formulaire : sur une page aussi
+             longue, un echec de soumission passait sinon inapercu si le
+             premier champ en erreur etait hors ecran. Complementaire des
+             messages par champ, pas un remplacement (ceux-ci restent la
+             source precise de chaque erreur). -->
+        <div class="alert alert-danger" role="alert" id="resumeErreursFormulaire" th:if="${#fields.hasErrors('*')}">
+            <i class="bi bi-exclamation-triangle me-2"></i>Certains champs doivent être corrigés, ils sont indiqués en
+            rouge ci-dessous.
+        </div>
+
         <!-- Carte : Le Voyage -->
         <div class="card carte-formulaire shadow-sm">
             <div class="card-header fw-semibold"><i class="bi bi-airplane me-2"></i>Le Voyage</div>
             <div class="card-body row g-3">
                 <div class="col-md-6">
-                    <label class="form-label">Nom du projet</label>
+                    <label class="form-label">Nom du projet <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" th:field="*{nomProjet}"
                            th:classappend="${#fields.hasErrors('nomProjet')} ? 'is-invalid'">
                     <div class="invalid-feedback" th:if="${#fields.hasErrors('nomProjet')}" th:errors="*{nomProjet}"></div>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label">Transport</label>
+                    <label class="form-label">Transport <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" th:field="*{transport}" placeholder="Car, train, avion..."
                            th:classappend="${#fields.hasErrors('transport')} ? 'is-invalid'">
                     <div class="invalid-feedback" th:if="${#fields.hasErrors('transport')}" th:errors="*{transport}"></div>
@@ -97,25 +109,25 @@
                 </div>
 
                 <div class="col-md-3">
-                    <label class="form-label">Date de départ</label>
+                    <label class="form-label">Date de départ <span class="text-danger">*</span></label>
                     <input type="datetime-local" class="form-control" th:field="*{dateDepart}"
                            th:classappend="${#fields.hasErrors('dateDepart')} ? 'is-invalid'">
                     <div class="invalid-feedback" th:if="${#fields.hasErrors('dateDepart')}" th:errors="*{dateDepart}"></div>
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label">Lieu de départ</label>
+                    <label class="form-label">Lieu de départ <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" th:field="*{lieuDepart}"
                            th:classappend="${#fields.hasErrors('lieuDepart')} ? 'is-invalid'">
                     <div class="invalid-feedback" th:if="${#fields.hasErrors('lieuDepart')}" th:errors="*{lieuDepart}"></div>
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label">Date de retour</label>
+                    <label class="form-label">Date de retour <span class="text-danger">*</span></label>
                     <input type="datetime-local" class="form-control" th:field="*{dateRetour}"
                            th:classappend="${#fields.hasErrors('dateRetour')} ? 'is-invalid'">
                     <div class="invalid-feedback" th:if="${#fields.hasErrors('dateRetour')}" th:errors="*{dateRetour}"></div>
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label">Lieu de retour</label>
+                    <label class="form-label">Lieu de retour <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" th:field="*{lieuRetour}"
                            th:classappend="${#fields.hasErrors('lieuRetour')} ? 'is-invalid'">
                     <div class="invalid-feedback" th:if="${#fields.hasErrors('lieuRetour')}" th:errors="*{lieuRetour}"></div>
@@ -154,19 +166,19 @@
             <div class="card-header fw-semibold"><i class="bi bi-person-badge me-2"></i>Le Responsable</div>
             <div class="card-body row g-3">
                 <div class="col-md-4">
-                    <label class="form-label">Nom de l'organisateur</label>
+                    <label class="form-label">Nom de l'organisateur <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" th:field="*{organisateurNom}"
                            th:classappend="${#fields.hasErrors('organisateurNom')} ? 'is-invalid'">
                     <div class="invalid-feedback" th:if="${#fields.hasErrors('organisateurNom')}" th:errors="*{organisateurNom}"></div>
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label">Email de l'organisateur</label>
+                    <label class="form-label">Email de l'organisateur <span class="text-danger">*</span></label>
                     <input type="email" class="form-control" th:field="*{organisateurEmail}"
                            th:classappend="${#fields.hasErrors('organisateurEmail')} ? 'is-invalid'">
                     <div class="invalid-feedback" th:if="${#fields.hasErrors('organisateurEmail')}" th:errors="*{organisateurEmail}"></div>
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label">Téléphone</label>
+                    <label class="form-label">Téléphone <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" th:field="*{telephoneOrganisateur}"
                            th:classappend="${#fields.hasErrors('telephoneOrganisateur')} ? 'is-invalid'">
                     <div class="invalid-feedback" th:if="${#fields.hasErrors('telephoneOrganisateur')}" th:errors="*{telephoneOrganisateur}"></div>
@@ -179,13 +191,13 @@
             <div class="card-header fw-semibold"><i class="bi bi-people me-2"></i>Le Groupe</div>
             <div class="card-body row g-3">
                 <div class="col-md-6">
-                    <label class="form-label">Classes concernées</label>
+                    <label class="form-label">Classes concernées <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" th:field="*{classesConcernees}" placeholder="Ex: 5A, 5B"
                            th:classappend="${#fields.hasErrors('classesConcernees')} ? 'is-invalid'">
                     <div class="invalid-feedback" th:if="${#fields.hasErrors('classesConcernees')}" th:errors="*{classesConcernees}"></div>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label">Effectif élèves</label>
+                    <label class="form-label">Effectif élèves <span class="text-danger">*</span></label>
                     <input type="number" min="1" class="form-control" th:field="*{effectif}"
                            th:classappend="${#fields.hasErrors('effectif')} ? 'is-invalid'">
                     <div class="invalid-feedback" th:if="${#fields.hasErrors('effectif')}" th:errors="*{effectif}"></div>
@@ -215,14 +227,29 @@
         <div class="card carte-formulaire shadow-sm">
             <div class="card-header fw-semibold"><i class="bi bi-cash-coin me-2"></i>Le Budget</div>
             <div class="card-body row g-3">
+                <!-- "Je ne connais pas encore le budget" : un projet se planifie
+                     souvent avant d'avoir les chiffres definitifs. Desactive les
+                     3 champs ci-dessous cote client (static/js/formulaire.js, un
+                     champ desactive n'est pas soumis par le navigateur) ; cote
+                     serveur, ProjetController.validerCoherenceBudget rend
+                     coutGlobal/coutParEleve facultatifs uniquement dans ce cas.
+                     Completable plus tard via la carte "Completer le budget"
+                     ci-dessous (visible une fois le dossier engage dans le
+                     circuit, quand ce formulaire n'a plus de bouton Enregistrer). -->
+                <div class="col-12 form-check">
+                    <input type="checkbox" class="form-check-input" id="budgetInconnu" th:field="*{budgetInconnu}">
+                    <label class="form-check-label" for="budgetInconnu">Je ne connais pas encore le budget</label>
+                    <div class="form-text">Vous pourrez le compléter plus tard, vous-même ou avec la Comptabilité.</div>
+                </div>
+
                 <div class="col-md-4">
-                    <label class="form-label">Coût global (€)</label>
+                    <label class="form-label">Coût global (€) <span class="text-danger">*</span></label>
                     <input type="number" step="0.01" min="0" class="form-control" th:field="*{coutGlobal}"
                            th:classappend="${#fields.hasErrors('coutGlobal')} ? 'is-invalid'">
                     <div class="invalid-feedback" th:if="${#fields.hasErrors('coutGlobal')}" th:errors="*{coutGlobal}"></div>
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label">Coût par élève (€)</label>
+                    <label class="form-label">Coût par élève (€) <span class="text-danger">*</span></label>
                     <input type="number" step="0.01" min="0" class="form-control" th:field="*{coutParEleve}"
                            th:classappend="${#fields.hasErrors('coutParEleve')} ? 'is-invalid'">
                     <div class="invalid-feedback" th:if="${#fields.hasErrors('coutParEleve')}" th:errors="*{coutParEleve}"></div>
@@ -252,6 +279,50 @@
             </div>
         </div>
     </form>
+
+    <!-- Carte : Completer le budget, visible seulement quand il manque
+         encore (dossier soumis avec "Je ne connais pas encore le budget") ET
+         que ce formulaire n'a plus de bouton "Enregistrer" pour le saisir
+         via la carte "Le Budget" ci-dessus (dossier engage dans le circuit,
+         EN_ATTENTE_*) : voir ProjetService.completerBudget, meme perimetre
+         d'autorisation que le lien Drive (organisateur ou role de
+         validation), independant du statut. -->
+    <div class="card carte-formulaire shadow-sm"
+         th:if="${projet.id} != null and ${projet.coutGlobal} == null and ${peutModifierLienDrive}
+                and ${statutCourant} != null and (${statutCourant.name() == 'EN_ATTENTE_COMPTA'}
+                or ${statutCourant.name() == 'EN_ATTENTE_VIE_SCOLAIRE'} or ${statutCourant.name() == 'EN_ATTENTE_DIRECTION'})">
+        <div class="card-header fw-semibold"><i class="bi bi-cash-coin me-2"></i>Compléter le budget</div>
+        <div class="card-body">
+            <p class="text-muted small mb-3">
+                Ce dossier a été soumis sans budget connu. Merci de le renseigner pour permettre à la
+                Comptabilité de le valider.
+            </p>
+            <form th:action="@{/projets/{id}/completer-budget(id=${projet.id})}" th:object="${completerBudgetForm}"
+                  method="post" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label" for="completerCoutGlobal">Coût global (€)</label>
+                    <input type="number" step="0.01" min="0" class="form-control" id="completerCoutGlobal"
+                           th:field="*{coutGlobal}" th:classappend="${#fields.hasErrors('coutGlobal')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('coutGlobal')}" th:errors="*{coutGlobal}"></div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" for="completerCoutParEleve">Coût par élève (€)</label>
+                    <input type="number" step="0.01" min="0" class="form-control" id="completerCoutParEleve"
+                           th:field="*{coutParEleve}" th:classappend="${#fields.hasErrors('coutParEleve')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('coutParEleve')}" th:errors="*{coutParEleve}"></div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" for="completerMontantSubvention">Subvention (€)</label>
+                    <input type="number" step="0.01" min="0" class="form-control" id="completerMontantSubvention"
+                           th:field="*{montantSubvention}" th:classappend="${#fields.hasErrors('montantSubvention')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('montantSubvention')}" th:errors="*{montantSubvention}"></div>
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-outline-primary">Enregistrer le budget</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- Carte : Pieces jointes (lien Drive gere hors de l'application, hors
          du formulaire principal car modifiable independamment du statut du
@@ -305,8 +376,13 @@
         <div class="d-flex flex-wrap gap-2">
             <!-- Enregistrer : reserve a l'organisateur du dossier tant qu'il est modifiable.
                  Un dossier VALIDE n'atteint ce formulaire (au lieu de consultation.html) que
-                 pour un Admin (voir ProjetController.formulaireEdition), d'ou ce cas ajoute ici. -->
-            <button type="submit" form="formProjet" class="btn btn-primary" sec:authorize="hasRole('PROF')"
+                 pour un Admin (voir ProjetController.formulaireEdition), d'ou ce cas ajoute ici.
+                 Style secondaire discret sur un dossier A_CORRIGER (au lieu du plein "btn-primary") :
+                 a cote de "Soumettre pour validation" (seul bouton qui renvoie reellement le
+                 dossier en validation), les deux boutons avaient sinon un poids visuel
+                 comparable, sans rien pour indiquer lequel des deux referme la correction. -->
+            <button type="submit" form="formProjet" class="btn" sec:authorize="hasRole('PROF')"
+                    th:classappend="${statutCourant != null and statutCourant.name() == 'A_CORRIGER'} ? 'btn-outline-secondary' : 'btn-primary'"
                     th:if="${statutCourant == null or statutCourant.name() == 'BROUILLON' or statutCourant.name() == 'A_CORRIGER' or statutCourant.name() == 'VALIDE'}">
                 Enregistrer
             </button>

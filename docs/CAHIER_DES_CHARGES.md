@@ -178,32 +178,81 @@ formulaire en échec de validation, dashboard vu par un compte Prof, fiche `A_CO
   suivi.
 
 **Pistes d'amélioration proposées** :
-- ⬜ **Vue "Mes dossiers" par défaut pour les profs** sur le dashboard (filtre pré-rempli avec leur
-  propre nom, ou onglet séparé du Kanban global), plutôt que de partir du Kanban complet de
-  l'établissement.
-- ⬜ **Aide contextuelle / onboarding** à la première connexion d'un Prof (tooltip ou courte visite
-  guidée expliquant les 4 étapes du workflow) — reprend la piste déjà notée en §4.
-- ⬜ **Clarté du formulaire** : légende "champs obligatoires" + astérisques, résumé d'erreurs en haut
-  de page avec ancre vers le premier champ en erreur après un "Enregistrer" échoué.
-- ⬜ **Pages d'erreur personnalisées** (403/404/500) en français, ton rassurant, avec lien de retour
-  au tableau de bord et contact en cas de blocage.
-- ⬜ **Hiérarchie visuelle Enregistrer / Soumettre pour validation** sur un dossier `A_CORRIGER` (ex.
-  mettre "Soumettre pour validation" seul en avant, "Enregistrer" en style secondaire discret, ou un
-  texte d'aide rappelant qu'il faut soumettre à nouveau après correction).
-- ⬜ **Message de validation téléphone** : n'afficher "Le format du téléphone est invalide" que si le
-  champ n'est pas vide, pour ne pas doubler inutilement le message "obligatoire".
+- ✅ **Vue "Mes dossiers" par défaut pour les profs** sur le dashboard — fait (P1). Case à cocher
+  "Mes dossiers uniquement" ajoutée aux filtres du dashboard, cochée par défaut pour un Prof sans rôle
+  de validation (`ProjetController.tableauDeBord`) : Compta/Vie Scolaire/Direction/Admin gardent le
+  Kanban complet par défaut, nécessaire à leur travail de validation. Filtrage côté client
+  (`dashboard.js`), réutilise l'infrastructure des filtres avancés existants (attribut `data-mon-dossier`
+  par carte, comparé à l'organisateur du dossier). A nécessité de corriger au passage
+  `GlobalModelAttributes.utilisateurConnecte` (dépendait de `@AuthenticationPrincipal OAuth2User`, qui ne
+  résolvait jamais rien avec les principaux de test) pour utiliser `Authentication.getName()`, strictement
+  équivalent en production et rendu testable. Tests dédiés (`leFiltreMesDossiersEstCocheParDefautPourUnProfSeul`,
+  `leFiltreMesDossiersNestPasCocheParDefautPourUnRoleDeValidation`).
+- ✅ **Aide contextuelle / onboarding** à la première connexion d'un Prof — fait (P1). Modale Bootstrap
+  sur le dashboard (bouton "Comment ça marche ?" à côté du titre, réservé à `hasRole('PROF')`), affichée
+  automatiquement à la toute première visite (mémorisée en `localStorage` côté navigateur via
+  `static/js/onboarding.js`, jamais réaffichée automatiquement ensuite), rouvrable à tout moment.
+  Contenu : circuit Soumission → Comptabilité → Vie Scolaire → Direction (réutilise les classes CSS du
+  stepper de la fiche projet sans dépendre de son fragment Thymeleaf, cette modale n'étant attachée à
+  aucun dossier), fonctionnement d'un dossier `A_CORRIGER`, et rappel du filtre "Mes dossiers uniquement"
+  (point précédent). Tests dédiés (`leDashboardExposeLaideContextuellePourUnProf`,
+  `leDashboardNexposePasLaideContextuellePourUnRoleSansProf`).
+- ✅ **Clarté du formulaire** — fait (P1). Légende "* Champs obligatoires" en haut du formulaire et
+  astérisque sur le libellé de chacun des 13 champs réellement obligatoires (`@NotBlank`/`@NotNull` sur
+  `ProjetFormDTO`) ; les champs facultatifs (organisme, Subvention, Commentaire, Accompagnateurs) restent
+  sans astérisque. Résumé d'erreurs (`#resumeErreursFormulaire`) affiché en haut de page uniquement après
+  un échec de soumission, complémentaire des messages par champ existants. `static/js/formulaire.js`
+  amène automatiquement le focus/scroll sur le premier champ en erreur au chargement.
+- ✅ **Pages d'erreur personnalisées** (403/404/500) — fait (P2). `templates/error/{403,404,500}.html`,
+  résolues par convention (`DefaultErrorViewResolver` de Spring Boot, aucun contrôleur ni changement de
+  `SecurityConfig`) : message clair en français, ton rassurant, lien de retour au tableau de bord, mention
+  de contacter la personne en charge de l'application en cas de blocage persistant. Reprend le style de la
+  page de connexion (carte unique centrée). Tests dédiés (`ErrorPagesTest`).
+  - ✅ **Signalement volontaire** (ajout post-priorisation, sur demande) : formulaire libre partagé par
+    les 3 pages (`fragments/signalement-erreur.html`, "Merci d'indiquer ce que vous étiez en train de
+    faire avant d'arriver sur cette page"), transmis par email à l'administrateur
+    (`NotificationService.signalerErreur`, `POST /error/signalement`, ouvert sans authentification car
+    une erreur peut survenir avant même la connexion) avec le chemin d'origine et le code HTTP déjà
+    connus (champs cachés, pas à retrouver par l'utilisateur). Tests dédiés
+    (`SignalementErreurControllerTest`).
+- ✅ **Hiérarchie visuelle Enregistrer / Soumettre pour validation** sur un dossier `A_CORRIGER` — fait
+  (P2). "Enregistrer" passe en style secondaire discret (`btn-outline-secondary`) uniquement dans ce
+  statut précis (inchangé pour `BROUILLON`/`VALIDE`) ; "Soumettre pour validation" reste seul en
+  `btn-success`, sans changement.
+- ✅ **Message de validation téléphone** — fait (P3). `telephoneOrganisateur` utilise désormais le même
+  pattern tolérant au vide que `organismeTelephone` (`^$|^[0-9+ .-]{6,20}$`) : `@NotBlank` porte seul le
+  message "obligatoire" pour un champ vide, la regex ne double plus le message sur le format en même temps.
 - ⬜ **Couleurs officielles du collège** — reprend la piste déjà notée en §2.5/§4, dépend toujours de
   la charte graphique à confirmer avec le client (§6).
-- ⬜ **Champ "Subvention" sans valeur par défaut** : laisser `null` comme les autres montants plutôt
-  que de pré-remplir `0`, pour éviter qu'une subvention non décidée soit enregistrée silencieusement.
+- ✅ **Budget non connu à la création** — fait (P3), étendu sur demande du porteur du projet au-delà du
+  point initial ("Subvention sans valeur par défaut"). Un enseignant planifie souvent un projet avant
+  d'avoir les chiffres définitifs, à compléter plus tard avec la Comptabilité :
+  - Case "Je ne connais pas encore le budget" (`ProjetFormDTO.budgetInconnu`, transitoire, jamais
+    persisté) : rend `coutGlobal`/`coutParEleve` facultatifs à la saisie
+    (`ProjetController.validerCoherenceBudget`), désactive les 3 champs budget côté client tant qu'elle
+    est cochée (`static/js/formulaire.js`, jamais soumis).
+  - Décision retenue (discutée avec le porteur du projet) : un dossier au budget inconnu **peut être
+    soumis** pour validation. En contrepartie, `ProjetService.validerCompta` bloque désormais la
+    validation comptable tant que le budget manque (le formulaire principal n'a plus de bouton
+    "Enregistrer" une fois le dossier engagé dans le circuit).
+  - Nouvelle carte "Compléter le budget" (visible sur un dossier `EN_ATTENTE_*` sans budget connu),
+    `POST /projets/{id}/completer-budget`, même périmètre d'autorisation que le lien Drive (organisateur
+    ou rôle de validation) : permet notamment à la Comptabilité de le renseigner elle-même avant de
+    valider.
+  - Affichage "Non renseigné" (plutôt que "null €" ou un "0 €" trompeur) pour les 3 champs budget sur
+    `consultation.html`, `recapitulatif.html` et l'export PDF, colonne `montant_subvention` déjà
+    nullable en base (`V1__init.sql`), aucune migration nécessaire.
+  - Tests dédiés (service et contrôleur) : soumission sans budget connu, blocage de la validation
+    Comptabilité tant qu'il manque, complétion par la Comptabilité puis validation, restriction d'accès
+    à `completerBudget`.
 
 **Priorisation retenue** (à la demande du porteur du projet, discutée point par point) :
 
 | Priorité | Contenu | Pourquoi |
 |---|---|---|
-| **P1 — fort impact quotidien** | 1. Vue "Mes dossiers" par défaut sur le dashboard · 2. Aide contextuelle / onboarding première connexion · 3. Clarté du formulaire (légende + résumé d'erreurs) | Ce qui touche le plus souvent un prof occasionnel, dès sa première utilisation |
-| **P2 — confiance et clarté avant ouverture large** | 4. Pages d'erreur personnalisées 403/404/500 · 5. Hiérarchie Enregistrer / Soumettre sur un dossier `A_CORRIGER` | À traiter avant que tout le personnel utilise l'outil sans accompagnement |
-| **P3 — confort, peut attendre les retours terrain** | 6. Message de validation téléphone redondant · 7. Couleurs officielles du collège (bloqué sur confirmation client, §6) · 8. Champ Subvention sans valeur par défaut | Améliorations mineures, aucune urgence |
+| **P1 — fort impact quotidien** | 1. ✅ Vue "Mes dossiers" par défaut sur le dashboard (fait) · 2. ✅ Aide contextuelle / onboarding première connexion (fait) · 3. ✅ Clarté du formulaire (fait) | Ce qui touche le plus souvent un prof occasionnel, dès sa première utilisation — **P1 entièrement livrée** |
+| **P2 — confiance et clarté avant ouverture large** | 4. ✅ Pages d'erreur personnalisées 403/404/500 (fait) · 5. ✅ Hiérarchie Enregistrer / Soumettre sur un dossier `A_CORRIGER` (fait) | À traiter avant que tout le personnel utilise l'outil sans accompagnement — **P2 entièrement livrée** |
+| **P3 — confort, peut attendre les retours terrain** | 6. ✅ Message de validation téléphone redondant (fait) · 7. Couleurs officielles du collège (bloqué sur confirmation client, §6) · 8. ✅ Budget non connu à la création, étendu sur demande (fait) | Améliorations mineures, aucune urgence — seul le point 7 reste ouvert (bloqué côté client) |
 
 ## 5. Priorisation proposée (à valider)
 

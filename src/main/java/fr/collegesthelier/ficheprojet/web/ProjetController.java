@@ -1,6 +1,7 @@
 package fr.collegesthelier.ficheprojet.web;
 
 import fr.collegesthelier.ficheprojet.dto.CommentaireFormDTO;
+import fr.collegesthelier.ficheprojet.dto.CompleterBudgetFormDTO;
 import fr.collegesthelier.ficheprojet.dto.LienDriveFormDTO;
 import fr.collegesthelier.ficheprojet.dto.ProjetFormDTO;
 import fr.collegesthelier.ficheprojet.dto.ReaffectationFormDTO;
@@ -51,12 +52,29 @@ public class ProjetController {
     }
 
     @GetMapping("/dashboard")
-    public String tableauDeBord(Model model) {
+    public String tableauDeBord(Model model, Authentication authentication) {
         var tableauDeBord = projetService.projetsPourTableauDeBord();
         model.addAttribute("tableauDeBord", tableauDeBord);
         model.addAttribute("stats", projetService.calculerStatistiques(tableauDeBord));
         model.addAttribute("refus", new RefusFormDTO());
+        model.addAttribute("afficherMesDossiersParDefaut", afficherMesDossiersParDefaut(authentication));
         return "dashboard";
+    }
+
+    /**
+     * Le filtre "Mes dossiers uniquement" du dashboard est coche par defaut
+     * pour un Prof qui n'a aucun role de validation : c'est le seul public
+     * pour qui le Kanban complet de l'etablissement n'est jamais le point de
+     * depart utile (Compta/VieSco/Direction/Admin ont besoin de voir les
+     * dossiers de tout le monde des la premiere seconde pour faire leur
+     * travail de validation).
+     */
+    private boolean afficherMesDossiersParDefaut(Authentication authentication) {
+        return possedeRole(authentication, "ROLE_PROF")
+                && !possedeRole(authentication, "ROLE_COMPTA")
+                && !possedeRole(authentication, "ROLE_VIESCO")
+                && !possedeRole(authentication, "ROLE_DIRECTION")
+                && !possedeRole(authentication, "ROLE_ADMIN");
     }
 
     @GetMapping("/projets/nouveau")
@@ -102,6 +120,7 @@ public class ProjetController {
         model.addAttribute("statutCourant", projet.getStatut());
         model.addAttribute("motifRefus", projet.getMotifRefus());
         model.addAttribute("reaffectation", new ReaffectationFormDTO());
+        model.addAttribute("completerBudgetForm", new CompleterBudgetFormDTO());
         return "formulaire";
     }
 
@@ -149,6 +168,20 @@ public class ProjetController {
         return "redirect:/projets/" + id;
     }
 
+    @PostMapping("/projets/{id}/completer-budget")
+    public String completerBudget(@PathVariable Long id, @Valid @ModelAttribute("completerBudgetForm") CompleterBudgetFormDTO dto,
+                                   BindingResult bindingResult, RedirectAttributes redirectAttributes) {
+        if (bindingResult.hasErrors()) {
+            redirectAttributes.addFlashAttribute("messageErreur",
+                    "Le coût global et le coût par élève sont obligatoires pour compléter le budget.");
+            return "redirect:/projets/" + id;
+        }
+
+        projetService.completerBudget(id, dto.getCoutGlobal(), dto.getCoutParEleve(), dto.getMontantSubvention());
+        redirectAttributes.addFlashAttribute("messageSucces", "Le budget a été complété.");
+        return "redirect:/projets/" + id;
+    }
+
     @PostMapping("/projets/{id}/commentaires")
     public String ajouterCommentaire(@PathVariable Long id, @Valid @ModelAttribute("commentaireForm") CommentaireFormDTO dto,
                                       BindingResult bindingResult, RedirectAttributes redirectAttributes) {
@@ -188,6 +221,7 @@ public class ProjetController {
     public String creer(@Valid @ModelAttribute("projet") ProjetFormDTO dto, BindingResult bindingResult,
                          Model model, RedirectAttributes redirectAttributes) {
         validerCoherenceDates(dto, bindingResult);
+        validerCoherenceBudget(dto, bindingResult);
         if (bindingResult.hasErrors()) {
             model.addAttribute("statutCourant", StatutProjet.BROUILLON);
             model.addAttribute("motifRefus", null);
@@ -204,6 +238,7 @@ public class ProjetController {
     public String modifier(@PathVariable Long id, @Valid @ModelAttribute("projet") ProjetFormDTO dto,
                             BindingResult bindingResult, Model model, RedirectAttributes redirectAttributes) {
         validerCoherenceDates(dto, bindingResult);
+        validerCoherenceBudget(dto, bindingResult);
         if (bindingResult.hasErrors()) {
             remplirModelPourErreurFormulaire(model, projetService.trouverParId(id));
             return "formulaire";
@@ -226,6 +261,7 @@ public class ProjetController {
     public String preparerSoumission(@PathVariable Long id, @Valid @ModelAttribute("projet") ProjetFormDTO dto,
                                       BindingResult bindingResult, Model model) {
         validerCoherenceDates(dto, bindingResult);
+        validerCoherenceBudget(dto, bindingResult);
         if (bindingResult.hasErrors()) {
             remplirModelPourErreurFormulaire(model, projetService.trouverParId(id));
             return "formulaire";
@@ -270,6 +306,7 @@ public class ProjetController {
                 construireEtapesWorkflow(projetExistant.getStatut(), calculerEtapeCourante(projetExistant)));
         model.addAttribute("peutModifierLienDrive", projetService.peutGererLienDrive(projetExistant));
         model.addAttribute("lienDriveForm", lienDriveFormPreRempli(projetExistant));
+        model.addAttribute("completerBudgetForm", new CompleterBudgetFormDTO());
     }
 
     @PostMapping("/projets/{id}/dupliquer")
@@ -347,6 +384,26 @@ public class ProjetController {
                 && dto.getDateRetour().isBefore(dto.getDateDepart())) {
             bindingResult.rejectValue("dateRetour", "date.incoherente",
                     "La date de retour doit être postérieure ou égale à la date de départ.");
+        }
+    }
+
+    /**
+     * coutGlobal/coutParEleve restent obligatoires par defaut, sauf si
+     * l'organisateur coche "Je ne connais pas encore le budget" (dossier
+     * soumissible malgre tout : voir ProjetService.completerBudget, qui
+     * permet a la Comptabilite ou a l'organisateur de le renseigner plus
+     * tard, et ProjetService.validerCompta, qui bloque la validation tant
+     * qu'il manque).
+     */
+    private void validerCoherenceBudget(ProjetFormDTO dto, BindingResult bindingResult) {
+        if (dto.isBudgetInconnu()) {
+            return;
+        }
+        if (dto.getCoutGlobal() == null) {
+            bindingResult.rejectValue("coutGlobal", "budget.obligatoire", "Le coût global est obligatoire.");
+        }
+        if (dto.getCoutParEleve() == null) {
+            bindingResult.rejectValue("coutParEleve", "budget.obligatoire", "Le coût par élève est obligatoire.");
         }
     }
 
