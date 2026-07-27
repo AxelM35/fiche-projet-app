@@ -57,6 +57,24 @@ class ErrorPagesTest {
                 .andExpect(content().string(containsString("Retour au tableau de bord")));
     }
 
+    /**
+     * Formulaire de signalement (voir fragments/signalement-erreur.html) :
+     * present sur la page, avec le code de statut et le chemin d'origine
+     * deja renseignes dans des champs caches (pas a l'utilisateur de les
+     * retrouver lui-meme).
+     */
+    @Test
+    void laPageDerreur403ProposeUnFormulaireDeSignalementAvecLeContexte() throws Exception {
+        mockMvc.perform(get("/error").accept(MediaType.TEXT_HTML)
+                        .requestAttr(RequestDispatcher.ERROR_STATUS_CODE, 403)
+                        .requestAttr(RequestDispatcher.ERROR_REQUEST_URI, "/admin/roles"))
+                .andExpect(status().isForbidden())
+                .andExpect(content().string(containsString("action=\"/error/signalement\"")))
+                .andExpect(content().string(containsString("id=\"messageSignalement\"")))
+                .andExpect(content().string(containsString("name=\"statutHttp\" value=\"403\"")))
+                .andExpect(content().string(containsString("name=\"cheminOrigine\" value=\"/admin/roles\"")));
+    }
+
     @Test
     void laPageDerreur404EstPersonnalisee() throws Exception {
         mockMvc.perform(get("/error").accept(MediaType.TEXT_HTML).requestAttr(RequestDispatcher.ERROR_STATUS_CODE, 404))

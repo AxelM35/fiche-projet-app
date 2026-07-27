@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!--
+    Formulaire de signalement depuis une page d'erreur (403/404/500) :
+    permet a l'utilisateur de decrire ce qu'il faisait avant d'arriver ici,
+    transmis par email a l'administrateur (SignalementErreurController) avec
+    le chemin d'origine et le code de statut deja connus (attributs de
+    modele "status"/"path" fournis par Spring Boot pour toute page d'erreur,
+    pas besoin de les redemander a l'utilisateur). Pas de th:object : deux
+    simples champs caches lies par name="..." suffisent au binding Spring MVC.
+-->
+<form th:fragment="signalement" th:action="@{/error/signalement}" method="post" class="text-start mt-4 pt-4 border-top">
+    <label for="messageSignalement" class="form-label small">
+        Un souci ? Merci d'indiquer ce que vous étiez en train de faire avant d'arriver sur cette page.
+    </label>
+    <textarea class="form-control form-control-sm" id="messageSignalement" name="message" rows="3" required
+              placeholder="Ex : je venais de cliquer sur..."></textarea>
+    <input type="hidden" name="statutHttp" th:value="${status}">
+    <input type="hidden" name="cheminOrigine" th:value="${path}">
+    <button type="submit" class="btn btn-sm btn-outline-primary mt-2">
+        <i class="bi bi-send me-1"></i>Envoyer à l'administrateur
+    </button>
+</form>
+
+</body>
+</html>

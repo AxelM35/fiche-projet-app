@@ -26,6 +26,8 @@
             <a class="btn btn-primary w-100" th:href="@{/dashboard}">
                 <i class="bi bi-arrow-left me-2"></i>Retour au tableau de bord
             </a>
+
+            <div th:replace="~{fragments/signalement-erreur :: signalement}"></div>
         </div>
     </div>
 </div>
