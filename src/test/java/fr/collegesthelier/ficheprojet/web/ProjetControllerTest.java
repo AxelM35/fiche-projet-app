@@ -102,6 +102,31 @@ class ProjetControllerTest {
     }
 
     /**
+     * Aide contextuelle (onboarding) : le bouton "Comment ca marche ?" et la
+     * modale associee ne s'affichent qu'a un Prof (public vise, cf. cahier
+     * des charges) - un role de validation sans PROF ne doit rien en voir.
+     */
+    @Test
+    @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
+    void leDashboardExposeLaideContextuellePourUnProf() throws Exception {
+        mockMvc.perform(get("/dashboard"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"modalOnboarding\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Comment ça marche ?")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("/js/onboarding.js")));
+    }
+
+    @Test
+    @WithMockUser(username = "secretariat@college-sthelier.fr", authorities = "ROLE_LECTURE_SEULE")
+    void leDashboardNexposePasLaideContextuellePourUnRoleSansProf() throws Exception {
+        MvcResult resultat = mockMvc.perform(get("/dashboard"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        assertThat(resultat.getResponse().getContentAsString()).doesNotContain("id=\"modalOnboarding\"");
+    }
+
+    /**
      * Filtres avances du dashboard (classe, organisateur, periode de
      * depart) : verifie que les champs de filtre sont bien presents et que
      * chaque carte porte les attributs data-* necessaires au filtrage cote
@@ -119,10 +144,36 @@ class ProjetControllerTest {
                 .andReturn();
         String html = resultat.getResponse().getContentAsString();
 
-        assertThat(html).contains("id=\"filtreClasse\"", "id=\"filtreOrganisateur\"",
+        assertThat(html).contains("id=\"filtreMesDossiers\"", "id=\"filtreClasse\"", "id=\"filtreOrganisateur\"",
                 "id=\"filtreDateDepartDebut\"", "id=\"filtreDateDepartFin\"");
         assertThat(html).contains("data-classe=\"6a\"", "data-organisateur=\"m. prof\"",
-                "data-date-depart=\"" + dateDepartAttendue + "\"");
+                "data-date-depart=\"" + dateDepartAttendue + "\"", "data-mon-dossier=\"true\"");
+    }
+
+    /**
+     * Le filtre "Mes dossiers uniquement" est coche par defaut pour un Prof
+     * sans role de validation (le seul public pour qui le Kanban complet de
+     * l'etablissement n'est jamais le point de depart utile), mais pas pour
+     * un role de validation qui doit voir tous les dossiers des l'arrivee.
+     */
+    @Test
+    @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
+    void leFiltreMesDossiersEstCocheParDefautPourUnProfSeul() throws Exception {
+        mockMvc.perform(get("/dashboard"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "id=\"filtreMesDossiers\" checked=\"checked\"")));
+    }
+
+    @Test
+    @WithMockUser(username = "compta@college-sthelier.fr", authorities = {"ROLE_PROF", "ROLE_COMPTA"})
+    void leFiltreMesDossiersNestPasCocheParDefautPourUnRoleDeValidation() throws Exception {
+        MvcResult resultat = mockMvc.perform(get("/dashboard"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        assertThat(resultat.getResponse().getContentAsString())
+                .doesNotContain("id=\"filtreMesDossiers\" checked=\"checked\"");
     }
 
     /**
@@ -189,6 +240,34 @@ class ProjetControllerTest {
         mockMvc.perform(post("/projets/nouveau").with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(view().name("formulaire"));
+    }
+
+    /**
+     * Clarte du formulaire (audit UX, docs/CAHIER_DES_CHARGES.md S4bis) :
+     * legende des champs obligatoires toujours visible, et resume d'erreurs
+     * en haut de page uniquement affiche apres un echec de soumission (pas
+     * sur un formulaire vierge).
+     */
+    @Test
+    @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
+    void leFormulaireVierneAfficheJamaisLeResumeDerreurs() throws Exception {
+        MvcResult resultat = mockMvc.perform(get("/projets/nouveau"))
+                .andExpect(status().isOk())
+                .andReturn();
+        String html = resultat.getResponse().getContentAsString();
+
+        assertThat(html).contains("Champs obligatoires");
+        assertThat(html).doesNotContain("id=\"resumeErreursFormulaire\"");
+    }
+
+    @Test
+    @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
+    void laCreationDunProjetInvalideAfficheLeResumeDerreursEnHautDePage() throws Exception {
+        MvcResult resultat = mockMvc.perform(post("/projets/nouveau").with(csrf()))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        assertThat(resultat.getResponse().getContentAsString()).contains("id=\"resumeErreursFormulaire\"");
     }
 
     /**
@@ -316,6 +395,44 @@ class ProjetControllerTest {
         mockMvc.perform(post("/projets/{id}/preparer-soumission", id).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(view().name("formulaire"));
+    }
+
+    /**
+     * Hierarchie visuelle Enregistrer / Soumettre pour validation (audit UX,
+     * docs/CAHIER_DES_CHARGES.md S4bis) : sur un dossier A_CORRIGER, les deux
+     * boutons avaient un poids visuel comparable, sans rien pour indiquer
+     * lequel des deux referme reellement la correction. "Enregistrer" passe
+     * en style secondaire discret dans ce statut precis, "Soumettre pour
+     * validation" reste seul en btn-success.
+     */
+    @Test
+    @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
+    void leBoutonEnregistrerEstDiscretSurUnDossierACorriger() throws Exception {
+        Long id = projetService.creerProjet(dtoBase()).getId();
+        projetService.soumettre(id);
+
+        connecterEnTantQue("compta@college-sthelier.fr", "ROLE_COMPTA");
+        projetService.refuser(id, "Pas assez de budget");
+
+        connecterEnTantQue("prof@college-sthelier.fr", "ROLE_PROF");
+        MvcResult resultat = mockMvc.perform(get("/projets/{id}", id))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String html = resultat.getResponse().getContentAsString();
+        assertThat(html).contains("form=\"formProjet\" class=\"btn btn-outline-secondary\"");
+        assertThat(html).contains("btn-success js-bouton-validation");
+    }
+
+    @Test
+    @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
+    void leBoutonEnregistrerResteEnAvantSurUnBrouillon() throws Exception {
+        MvcResult resultat = mockMvc.perform(get("/projets/nouveau"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        assertThat(resultat.getResponse().getContentAsString())
+                .contains("form=\"formProjet\" class=\"btn btn-primary\"");
     }
 
     /**
