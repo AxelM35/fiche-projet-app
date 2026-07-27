@@ -188,8 +188,15 @@ formulaire en échec de validation, dashboard vu par un compte Prof, fiche `A_CO
   résolvait jamais rien avec les principaux de test) pour utiliser `Authentication.getName()`, strictement
   équivalent en production et rendu testable. Tests dédiés (`leFiltreMesDossiersEstCocheParDefautPourUnProfSeul`,
   `leFiltreMesDossiersNestPasCocheParDefautPourUnRoleDeValidation`).
-- ⬜ **Aide contextuelle / onboarding** à la première connexion d'un Prof (tooltip ou courte visite
-  guidée expliquant les 4 étapes du workflow) — reprend la piste déjà notée en §4.
+- ✅ **Aide contextuelle / onboarding** à la première connexion d'un Prof — fait (P1). Modale Bootstrap
+  sur le dashboard (bouton "Comment ça marche ?" à côté du titre, réservé à `hasRole('PROF')`), affichée
+  automatiquement à la toute première visite (mémorisée en `localStorage` côté navigateur via
+  `static/js/onboarding.js`, jamais réaffichée automatiquement ensuite), rouvrable à tout moment.
+  Contenu : circuit Soumission → Comptabilité → Vie Scolaire → Direction (réutilise les classes CSS du
+  stepper de la fiche projet sans dépendre de son fragment Thymeleaf, cette modale n'étant attachée à
+  aucun dossier), fonctionnement d'un dossier `A_CORRIGER`, et rappel du filtre "Mes dossiers uniquement"
+  (point précédent). Tests dédiés (`leDashboardExposeLaideContextuellePourUnProf`,
+  `leDashboardNexposePasLaideContextuellePourUnRoleSansProf`).
 - ⬜ **Clarté du formulaire** : légende "champs obligatoires" + astérisques, résumé d'erreurs en haut
   de page avec ancre vers le premier champ en erreur après un "Enregistrer" échoué.
 - ⬜ **Pages d'erreur personnalisées** (403/404/500) en français, ton rassurant, avec lien de retour
@@ -208,7 +215,7 @@ formulaire en échec de validation, dashboard vu par un compte Prof, fiche `A_CO
 
 | Priorité | Contenu | Pourquoi |
 |---|---|---|
-| **P1 — fort impact quotidien** | 1. ✅ Vue "Mes dossiers" par défaut sur le dashboard (fait) · 2. Aide contextuelle / onboarding première connexion · 3. Clarté du formulaire (légende + résumé d'erreurs) | Ce qui touche le plus souvent un prof occasionnel, dès sa première utilisation |
+| **P1 — fort impact quotidien** | 1. ✅ Vue "Mes dossiers" par défaut sur le dashboard (fait) · 2. ✅ Aide contextuelle / onboarding première connexion (fait) · 3. Clarté du formulaire (légende + résumé d'erreurs) | Ce qui touche le plus souvent un prof occasionnel, dès sa première utilisation |
 | **P2 — confiance et clarté avant ouverture large** | 4. Pages d'erreur personnalisées 403/404/500 · 5. Hiérarchie Enregistrer / Soumettre sur un dossier `A_CORRIGER` | À traiter avant que tout le personnel utilise l'outil sans accompagnement |
 | **P3 — confort, peut attendre les retours terrain** | 6. Message de validation téléphone redondant · 7. Couleurs officielles du collège (bloqué sur confirmation client, §6) · 8. Champ Subvention sans valeur par défaut | Améliorations mineures, aucune urgence |
 
