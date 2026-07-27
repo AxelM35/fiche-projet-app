@@ -178,9 +178,16 @@ formulaire en échec de validation, dashboard vu par un compte Prof, fiche `A_CO
   suivi.
 
 **Pistes d'amélioration proposées** :
-- ⬜ **Vue "Mes dossiers" par défaut pour les profs** sur le dashboard (filtre pré-rempli avec leur
-  propre nom, ou onglet séparé du Kanban global), plutôt que de partir du Kanban complet de
-  l'établissement.
+- ✅ **Vue "Mes dossiers" par défaut pour les profs** sur le dashboard — fait (P1). Case à cocher
+  "Mes dossiers uniquement" ajoutée aux filtres du dashboard, cochée par défaut pour un Prof sans rôle
+  de validation (`ProjetController.tableauDeBord`) : Compta/Vie Scolaire/Direction/Admin gardent le
+  Kanban complet par défaut, nécessaire à leur travail de validation. Filtrage côté client
+  (`dashboard.js`), réutilise l'infrastructure des filtres avancés existants (attribut `data-mon-dossier`
+  par carte, comparé à l'organisateur du dossier). A nécessité de corriger au passage
+  `GlobalModelAttributes.utilisateurConnecte` (dépendait de `@AuthenticationPrincipal OAuth2User`, qui ne
+  résolvait jamais rien avec les principaux de test) pour utiliser `Authentication.getName()`, strictement
+  équivalent en production et rendu testable. Tests dédiés (`leFiltreMesDossiersEstCocheParDefautPourUnProfSeul`,
+  `leFiltreMesDossiersNestPasCocheParDefautPourUnRoleDeValidation`).
 - ⬜ **Aide contextuelle / onboarding** à la première connexion d'un Prof (tooltip ou courte visite
   guidée expliquant les 4 étapes du workflow) — reprend la piste déjà notée en §4.
 - ⬜ **Clarté du formulaire** : légende "champs obligatoires" + astérisques, résumé d'erreurs en haut
@@ -201,7 +208,7 @@ formulaire en échec de validation, dashboard vu par un compte Prof, fiche `A_CO
 
 | Priorité | Contenu | Pourquoi |
 |---|---|---|
-| **P1 — fort impact quotidien** | 1. Vue "Mes dossiers" par défaut sur le dashboard · 2. Aide contextuelle / onboarding première connexion · 3. Clarté du formulaire (légende + résumé d'erreurs) | Ce qui touche le plus souvent un prof occasionnel, dès sa première utilisation |
+| **P1 — fort impact quotidien** | 1. ✅ Vue "Mes dossiers" par défaut sur le dashboard (fait) · 2. Aide contextuelle / onboarding première connexion · 3. Clarté du formulaire (légende + résumé d'erreurs) | Ce qui touche le plus souvent un prof occasionnel, dès sa première utilisation |
 | **P2 — confiance et clarté avant ouverture large** | 4. Pages d'erreur personnalisées 403/404/500 · 5. Hiérarchie Enregistrer / Soumettre sur un dossier `A_CORRIGER` | À traiter avant que tout le personnel utilise l'outil sans accompagnement |
 | **P3 — confort, peut attendre les retours terrain** | 6. Message de validation téléphone redondant · 7. Couleurs officielles du collège (bloqué sur confirmation client, §6) · 8. Champ Subvention sans valeur par défaut | Améliorations mineures, aucune urgence |
 
