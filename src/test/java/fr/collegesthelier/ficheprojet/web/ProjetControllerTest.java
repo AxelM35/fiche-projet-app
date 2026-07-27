@@ -243,6 +243,34 @@ class ProjetControllerTest {
     }
 
     /**
+     * Clarte du formulaire (audit UX, docs/CAHIER_DES_CHARGES.md S4bis) :
+     * legende des champs obligatoires toujours visible, et resume d'erreurs
+     * en haut de page uniquement affiche apres un echec de soumission (pas
+     * sur un formulaire vierge).
+     */
+    @Test
+    @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
+    void leFormulaireVierneAfficheJamaisLeResumeDerreurs() throws Exception {
+        MvcResult resultat = mockMvc.perform(get("/projets/nouveau"))
+                .andExpect(status().isOk())
+                .andReturn();
+        String html = resultat.getResponse().getContentAsString();
+
+        assertThat(html).contains("Champs obligatoires");
+        assertThat(html).doesNotContain("id=\"resumeErreursFormulaire\"");
+    }
+
+    @Test
+    @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
+    void laCreationDunProjetInvalideAfficheLeResumeDerreursEnHautDePage() throws Exception {
+        MvcResult resultat = mockMvc.perform(post("/projets/nouveau").with(csrf()))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        assertThat(resultat.getResponse().getContentAsString()).contains("id=\"resumeErreursFormulaire\"");
+    }
+
+    /**
      * Reproduit le scenario signale en test manuel : ouvrir la fiche d'un
      * projet DEJA enregistre (et non un formulaire vierge) declenchait un
      * org.hibernate.LazyInitializationException sur la collection

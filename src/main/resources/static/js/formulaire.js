@@ -44,3 +44,15 @@
         }
     });
 })();
+
+// Amene le focus sur le premier champ en erreur au chargement (apres un
+// "Enregistrer" echoue) : sur un formulaire aussi long, le premier champ
+// invalide pouvait rester hors ecran sans que rien ne le signale, meme avec
+// le resume d'erreurs en haut de page (voir formulaire.html).
+(function () {
+    const premierChampInvalide = document.querySelector('#formProjet .is-invalid');
+    if (premierChampInvalide) {
+        premierChampInvalide.scrollIntoView({behavior: 'smooth', block: 'center'});
+        premierChampInvalide.focus({preventScroll: true});
+    }
+})();
