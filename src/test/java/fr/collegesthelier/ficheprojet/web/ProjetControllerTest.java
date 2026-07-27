@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,8 +47,9 @@ class ProjetControllerTest {
     @Autowired
     private ProjetService projetService;
 
-    private void connecterEnTantQue(String email, String role) {
-        Authentication authentication = new TestingAuthenticationToken(email, null, List.of(new SimpleGrantedAuthority(role)));
+    private void connecterEnTantQue(String email, String... roles) {
+        List<SimpleGrantedAuthority> authorities = Arrays.stream(roles).map(SimpleGrantedAuthority::new).toList();
+        Authentication authentication = new TestingAuthenticationToken(email, null, authorities);
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
@@ -232,6 +234,83 @@ class ProjetControllerTest {
                         .param("coutParEleve", "100")
                         .param("montantSubvention", "0"))
                 .andExpect(status().is3xxRedirection());
+    }
+
+    /**
+     * "Je ne connais pas encore le budget" (audit UX S4bis) : la creation
+     * reussit sans coutGlobal/coutParEleve quand la case est cochee, mais
+     * ces deux champs redeviennent obligatoires sans elle (voir
+     * ProjetController.validerCoherenceBudget).
+     */
+    @Test
+    @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
+    void laCreationSansBudgetReussitQuandBudgetInconnuEstCoche() throws Exception {
+        mockMvc.perform(post("/projets/nouveau")
+                        .with(csrf())
+                        .param("nomProjet", "Voyage a Londres")
+                        .param("dateDepart", "2026-10-01T08:00")
+                        .param("dateRetour", "2026-10-05T18:00")
+                        .param("lieuDepart", "Collège Saint-Helier")
+                        .param("lieuRetour", "Collège Saint-Helier")
+                        .param("transport", "Car")
+                        .param("organisateurNom", "M. Dupont")
+                        .param("organisateurEmail", "dupont@college-sthelier.fr")
+                        .param("telephoneOrganisateur", "0102030405")
+                        .param("classesConcernees", "5A, 5B")
+                        .param("effectif", "30")
+                        .param("budgetInconnu", "true"))
+                .andExpect(status().is3xxRedirection());
+    }
+
+    @Test
+    @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
+    void laCreationSansBudgetEchoueSansBudgetInconnuCoche() throws Exception {
+        MvcResult resultat = mockMvc.perform(post("/projets/nouveau")
+                        .with(csrf())
+                        .param("nomProjet", "Voyage a Londres")
+                        .param("dateDepart", "2026-10-01T08:00")
+                        .param("dateRetour", "2026-10-05T18:00")
+                        .param("lieuDepart", "Collège Saint-Helier")
+                        .param("lieuRetour", "Collège Saint-Helier")
+                        .param("transport", "Car")
+                        .param("organisateurNom", "M. Dupont")
+                        .param("organisateurEmail", "dupont@college-sthelier.fr")
+                        .param("telephoneOrganisateur", "0102030405")
+                        .param("classesConcernees", "5A, 5B")
+                        .param("effectif", "30"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("formulaire"))
+                .andReturn();
+
+        assertThat(resultat.getResponse().getContentAsString()).contains("Le coût global est obligatoire.");
+    }
+
+    /**
+     * Une fois le dossier engage dans le circuit (plus de bouton
+     * "Enregistrer"), la carte "Compléter le budget" permet a la
+     * Comptabilite de renseigner le budget manquant (audit UX S4bis).
+     */
+    @Test
+    @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
+    void laComptabilitePeutCompleterLeBudgetDunDossierEnAttente() throws Exception {
+        ProjetFormDTO dto = dtoBase();
+        dto.setCoutGlobal(null);
+        dto.setCoutParEleve(null);
+        Long id = projetService.creerProjet(dto).getId();
+        projetService.soumettre(id);
+
+        connecterEnTantQue("compta@college-sthelier.fr", "ROLE_PROF", "ROLE_COMPTA");
+        MvcResult ficheAvantCompletion = mockMvc.perform(get("/projets/{id}", id))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertThat(ficheAvantCompletion.getResponse().getContentAsString()).contains("Compléter le budget");
+
+        mockMvc.perform(post("/projets/{id}/completer-budget", id).with(csrf())
+                        .param("coutGlobal", "1800")
+                        .param("coutParEleve", "60"))
+                .andExpect(status().is3xxRedirection());
+
+        assertThat(projetService.trouverParId(id).getCoutGlobal()).isEqualByComparingTo("1800");
     }
 
     @Test

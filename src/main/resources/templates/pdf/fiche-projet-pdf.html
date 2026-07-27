@@ -166,13 +166,13 @@
     <table class="champs">
         <tr>
             <td><span class="libelle">Coût global</span>
-                <span th:text="${projet.coutGlobal} + ' €'">-</span></td>
+                <span th:text="${projet.coutGlobal != null ? projet.coutGlobal + ' €' : 'Non renseigné'}">-</span></td>
             <td><span class="libelle">Coût par élève</span>
-                <span th:text="${projet.coutParEleve} + ' €'">-</span></td>
+                <span th:text="${projet.coutParEleve != null ? projet.coutParEleve + ' €' : 'Non renseigné'}">-</span></td>
         </tr>
         <tr>
             <td><span class="libelle">Subvention</span>
-                <span th:text="${projet.montantSubvention} + ' €'">-</span></td>
+                <span th:text="${projet.montantSubvention != null ? projet.montantSubvention + ' €' : 'Non renseigné'}">-</span></td>
             <td><span class="libelle">Pass Culture</span>
                 <span th:text="${projet.eligiblePassCulture} ? 'Éligible' : 'Non éligible'">-</span></td>
         </tr>

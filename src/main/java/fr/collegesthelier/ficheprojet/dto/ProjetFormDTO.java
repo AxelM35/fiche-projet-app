@@ -76,8 +76,12 @@ public class ProjetFormDTO {
     @Email(message = "L'email de l'organisateur doit être une adresse valide.")
     private String organisateurEmail;
 
+    // Pattern tolerant au vide (comme organismeTelephone) bien que le champ
+    // soit obligatoire : @NotBlank porte deja le message "obligatoire" pour
+    // un champ vide, la regex ne doit alors pas en ajouter un second sur le
+    // format en meme temps (redondant, voir audit UX S4bis).
     @NotBlank(message = "Le téléphone de l'organisateur est obligatoire.")
-    @Pattern(regexp = "^[0-9+ .-]{6,20}$", message = "Le format du téléphone est invalide.")
+    @Pattern(regexp = "^$|^[0-9+ .-]{6,20}$", message = "Le format du téléphone est invalide.")
     private String telephoneOrganisateur;
 
     // --- Groupe ---
@@ -96,16 +100,32 @@ public class ProjetFormDTO {
     private List<String> accompagnateurs = new ArrayList<>();
 
     // --- Budget ---
-    @NotNull(message = "Le coût global est obligatoire.")
+    // coutGlobal/coutParEleve obligatoires sauf si budgetInconnu est coche :
+    // pas de @NotNull ici, verifie de façon conditionnelle par
+    // ProjetController.validerCoherenceBudget (equivalent a
+    // validerCoherenceDates, meme fichier).
+    /**
+     * Case "Je ne connais pas encore le budget" du formulaire : permet de
+     * laisser coutGlobal/coutParEleve vides (l'organisateur planifie souvent
+     * un projet avant d'avoir les chiffres). Transitoire, jamais persiste :
+     * apres enregistrement, coutGlobal == null porte a lui seul exactement
+     * la meme information (voir ProjetService.versDTO/completerBudget).
+     */
+    private boolean budgetInconnu;
+
     @PositiveOrZero(message = "Le coût global doit être positif ou nul.")
     private BigDecimal coutGlobal;
 
-    @NotNull(message = "Le coût par élève est obligatoire.")
     @PositiveOrZero(message = "Le coût par élève doit être positif ou nul.")
     private BigDecimal coutParEleve;
 
+    // Pas de valeur par defaut (contrairement aux autres montants, deja
+    // nuls tant que non saisis) : un "0" pre-rempli silencieusement se
+    // distinguait mal d'une subvention reellement decidee a 0€ (voir audit
+    // UX S4bis). La colonne montant_subvention est nullable en base
+    // (V1__init.sql), aucune migration necessaire.
     @PositiveOrZero(message = "Le montant de la subvention doit être positif ou nul.")
-    private BigDecimal montantSubvention = BigDecimal.ZERO;
+    private BigDecimal montantSubvention;
 
     private boolean eligiblePassCulture;
 
