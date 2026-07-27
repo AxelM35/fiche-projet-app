@@ -208,6 +208,13 @@ formulaire en échec de validation, dashboard vu par un compte Prof, fiche `A_CO
   `SecurityConfig`) : message clair en français, ton rassurant, lien de retour au tableau de bord, mention
   de contacter la personne en charge de l'application en cas de blocage persistant. Reprend le style de la
   page de connexion (carte unique centrée). Tests dédiés (`ErrorPagesTest`).
+  - ✅ **Signalement volontaire** (ajout post-priorisation, sur demande) : formulaire libre partagé par
+    les 3 pages (`fragments/signalement-erreur.html`, "Merci d'indiquer ce que vous étiez en train de
+    faire avant d'arriver sur cette page"), transmis par email à l'administrateur
+    (`NotificationService.signalerErreur`, `POST /error/signalement`, ouvert sans authentification car
+    une erreur peut survenir avant même la connexion) avec le chemin d'origine et le code HTTP déjà
+    connus (champs cachés, pas à retrouver par l'utilisateur). Tests dédiés
+    (`SignalementErreurControllerTest`).
 - ✅ **Hiérarchie visuelle Enregistrer / Soumettre pour validation** sur un dossier `A_CORRIGER` — fait
   (P2). "Enregistrer" passe en style secondaire discret (`btn-outline-secondary`) uniquement dans ce
   statut précis (inchangé pour `BROUILLON`/`VALIDE`) ; "Soumettre pour validation" reste seul en
