@@ -4,7 +4,7 @@ Fiche Projet numérique : application web de gestion et de validation des projet
 
 ## Stack technique
 
-- **Backend** : Java 17, Spring Boot 3 (Web, Data JPA, Security, Mail, Validation)
+- **Backend** : Java 17, Spring Boot 4 (Web, Data JPA, Security, Mail, Validation)
 - **Base de donnees** : PostgreSQL, pilotee via Hibernate
 - **Frontend** : Thymeleaf + Bootstrap 5 (CDN)
 - **Securite** : Spring Security avec authentification Google OAuth2, RBAC par role
