@@ -51,12 +51,29 @@ public class ProjetController {
     }
 
     @GetMapping("/dashboard")
-    public String tableauDeBord(Model model) {
+    public String tableauDeBord(Model model, Authentication authentication) {
         var tableauDeBord = projetService.projetsPourTableauDeBord();
         model.addAttribute("tableauDeBord", tableauDeBord);
         model.addAttribute("stats", projetService.calculerStatistiques(tableauDeBord));
         model.addAttribute("refus", new RefusFormDTO());
+        model.addAttribute("afficherMesDossiersParDefaut", afficherMesDossiersParDefaut(authentication));
         return "dashboard";
+    }
+
+    /**
+     * Le filtre "Mes dossiers uniquement" du dashboard est coche par defaut
+     * pour un Prof qui n'a aucun role de validation : c'est le seul public
+     * pour qui le Kanban complet de l'etablissement n'est jamais le point de
+     * depart utile (Compta/VieSco/Direction/Admin ont besoin de voir les
+     * dossiers de tout le monde des la premiere seconde pour faire leur
+     * travail de validation).
+     */
+    private boolean afficherMesDossiersParDefaut(Authentication authentication) {
+        return possedeRole(authentication, "ROLE_PROF")
+                && !possedeRole(authentication, "ROLE_COMPTA")
+                && !possedeRole(authentication, "ROLE_VIESCO")
+                && !possedeRole(authentication, "ROLE_DIRECTION")
+                && !possedeRole(authentication, "ROLE_ADMIN");
     }
 
     @GetMapping("/projets/nouveau")

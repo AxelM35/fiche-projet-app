@@ -150,6 +150,30 @@ public class NotificationService {
                 null, null));
     }
 
+    /**
+     * Signalement volontaire depuis une page d'erreur (403/404/500, voir
+     * SignalementErreurController et fragments/signalement-erreur.html) :
+     * transmis aux administrateurs configurés (rolesProperties.getAdmin(),
+     * même source que les autres notifications de ce service) avec le
+     * contexte technique déjà connu (chemin d'origine, code HTTP) en plus du
+     * message libre de l'utilisateur.
+     */
+    @Async("mailExecutor")
+    public void signalerErreur(String emailUtilisateur, Integer statutHttp, String cheminOrigine, String messageUtilisateur) {
+        if (!notificationToggleService.sontActives()) {
+            log.info("Notifications désactivées (interrupteur admin) : signalement d'erreur non transmis ({})",
+                    cheminOrigine);
+            return;
+        }
+        String sujet = "Signalement depuis une page d'erreur"
+                + (statutHttp != null ? " (" + statutHttp + ")" : "");
+        String corps = "Utilisateur : " + emailUtilisateur
+                + "\nPage à l'origine : " + (cheminOrigine != null && !cheminOrigine.isBlank() ? cheminOrigine : "inconnue")
+                + "\nCode HTTP : " + (statutHttp != null ? statutHttp : "inconnu")
+                + "\n\nMessage :\n" + messageUtilisateur;
+        notifier(rolesProperties.getAdmin(), sujet, corps, null, null);
+    }
+
     private MimeMessage construireMessage(List<String> destinataires, String sujet, String message,
                                            String motifRefus, String lienDossier) {
         MimeMessage mimeMessage = mailSender.createMimeMessage();
