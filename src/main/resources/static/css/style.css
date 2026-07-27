@@ -494,8 +494,15 @@ a {
 }
 
 .carte-formulaire .card-header {
-    background-color: var(--md-surface);
+    /* Bandeau de titre en retrait (teinte du fond de page) : le contenu
+       (card-body ci-dessous) est desormais la zone la plus lumineuse de la
+       carte, a l'inverse du reglage precedent - demande client. */
+    background-color: var(--md-surface-container-low);
     border-bottom: 1px solid var(--md-outline-variant);
+}
+
+.carte-formulaire .card-body {
+    background-color: var(--md-surface);
 }
 
 .carte-formulaire .card-header .bi {
