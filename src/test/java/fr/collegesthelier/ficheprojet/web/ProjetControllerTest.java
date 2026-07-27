@@ -119,10 +119,36 @@ class ProjetControllerTest {
                 .andReturn();
         String html = resultat.getResponse().getContentAsString();
 
-        assertThat(html).contains("id=\"filtreClasse\"", "id=\"filtreOrganisateur\"",
+        assertThat(html).contains("id=\"filtreMesDossiers\"", "id=\"filtreClasse\"", "id=\"filtreOrganisateur\"",
                 "id=\"filtreDateDepartDebut\"", "id=\"filtreDateDepartFin\"");
         assertThat(html).contains("data-classe=\"6a\"", "data-organisateur=\"m. prof\"",
-                "data-date-depart=\"" + dateDepartAttendue + "\"");
+                "data-date-depart=\"" + dateDepartAttendue + "\"", "data-mon-dossier=\"true\"");
+    }
+
+    /**
+     * Le filtre "Mes dossiers uniquement" est coche par defaut pour un Prof
+     * sans role de validation (le seul public pour qui le Kanban complet de
+     * l'etablissement n'est jamais le point de depart utile), mais pas pour
+     * un role de validation qui doit voir tous les dossiers des l'arrivee.
+     */
+    @Test
+    @WithMockUser(username = "prof@college-sthelier.fr", authorities = "ROLE_PROF")
+    void leFiltreMesDossiersEstCocheParDefautPourUnProfSeul() throws Exception {
+        mockMvc.perform(get("/dashboard"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "id=\"filtreMesDossiers\" checked=\"checked\"")));
+    }
+
+    @Test
+    @WithMockUser(username = "compta@college-sthelier.fr", authorities = {"ROLE_PROF", "ROLE_COMPTA"})
+    void leFiltreMesDossiersNestPasCocheParDefautPourUnRoleDeValidation() throws Exception {
+        MvcResult resultat = mockMvc.perform(get("/dashboard"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        assertThat(resultat.getResponse().getContentAsString())
+                .doesNotContain("id=\"filtreMesDossiers\" checked=\"checked\"");
     }
 
     /**
