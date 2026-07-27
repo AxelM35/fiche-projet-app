@@ -508,8 +508,10 @@ a {
     border-color: var(--md-primary);
 }
 
-/* Page de connexion : carte unique centree, pas de top app bar. */
-.login-page {
+/* Page de connexion et pages d'erreur (403/404/500) : carte unique centree,
+   pas de top app bar - ces pages doivent rester lisibles meme sans session
+   valide (utilisateur deconnecte, erreur d'authentification...). */
+.login-page, .page-standalone {
     min-height: 100vh;
     display: flex;
     align-items: center;
@@ -517,7 +519,7 @@ a {
     padding: 1rem;
 }
 
-.login-card {
+.login-card, .carte-standalone {
     width: 100%;
     max-width: 24rem;
 }

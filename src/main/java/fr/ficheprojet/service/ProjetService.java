@@ -339,6 +339,7 @@ public class ProjetService {
         dto.setClassesConcernees(projet.getClassesConcernees());
         dto.setEffectif(projet.getEffectif());
         dto.setAccompagnateurs(new ArrayList<>(projet.getAccompagnateurs()));
+        dto.setBudgetInconnu(projet.getCoutGlobal() == null);
         dto.setCoutGlobal(projet.getCoutGlobal());
         dto.setCoutParEleve(projet.getCoutParEleve());
         dto.setMontantSubvention(projet.getMontantSubvention());
@@ -394,6 +395,15 @@ public class ProjetService {
         Projet projet = trouverParId(id);
         if (projet.getStatut() != StatutProjet.EN_ATTENTE_COMPTA) {
             throw new TransitionInvalideException("Ce dossier n'est pas (ou plus) en attente de validation comptable.");
+        }
+        // Le budget peut avoir ete laisse vide a la soumission ("Je ne
+        // connais pas encore le budget", voir ProjetFormDTO.budgetInconnu) :
+        // completerBudget() permet de le renseigner avant d'en arriver la,
+        // mais la Comptabilite ne peut pas valider un budget qui n'existe
+        // toujours pas.
+        if (projet.getCoutGlobal() == null || projet.getCoutParEleve() == null) {
+            throw new TransitionInvalideException(
+                    "Le budget doit être renseigné avant de pouvoir être validé par la Comptabilité.");
         }
 
         StatutProjet ancienStatut = projet.getStatut();
@@ -579,6 +589,33 @@ public class ProjetService {
         Projet enregistre = projetRepository.save(projet);
         journalService.enregistrer("Lien Drive", enregistre.getId(), enregistre.getNomProjet(),
                 enregistre.getLienDrive() != null ? enregistre.getLienDrive() : "Lien retiré");
+        return enregistre;
+    }
+
+    /**
+     * Complete le budget d'un dossier laisse vide a la creation (case
+     * "Je ne connais pas encore le budget" du formulaire, voir
+     * ProjetFormDTO.budgetInconnu) : meme perimetre d'autorisation et meme
+     * independance vis-a-vis du statut que le lien Drive ci-dessus
+     * (peutGererLienDrive), puisque le formulaire principal n'est plus
+     * modifiable une fois le dossier engage dans le circuit de validation
+     * (aucun bouton "Enregistrer" en EN_ATTENTE_*, voir formulaire.html) -
+     * indispensable notamment a la Comptabilite pour renseigner le budget
+     * avant de pouvoir le valider (voir validerCompta ci-dessus).
+     */
+    @PreAuthorize("hasRole('PROF')")
+    @Transactional
+    public Projet completerBudget(Long id, BigDecimal coutGlobal, BigDecimal coutParEleve, BigDecimal montantSubvention) {
+        Projet projet = trouverParId(id);
+        if (!peutGererLienDrive(projet)) {
+            throw new AccessDeniedException("Vous n'êtes pas autorisé à compléter le budget de ce dossier.");
+        }
+
+        projet.setCoutGlobal(coutGlobal);
+        projet.setCoutParEleve(coutParEleve);
+        projet.setMontantSubvention(montantSubvention);
+        Projet enregistre = projetRepository.save(projet);
+        journalService.enregistrer("Budget complété", enregistre.getId(), enregistre.getNomProjet(), null);
         return enregistre;
     }
 
