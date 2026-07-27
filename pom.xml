@@ -123,15 +123,21 @@
             <version>1.22.2</version>
         </dependency>
 
-        <!-- Tests -->
+        <!-- Tests : spring-boot-starter-webmvc-test (Spring Boot 4, module
+             dedie au support MockMvc/@AutoConfigureMockMvc, plus disponible
+             via spring-boot-starter-test seul depuis la modularisation de la
+             4.0) apporte spring-boot-starter-test de facon transitive. -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
+            <artifactId>spring-boot-starter-webmvc-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- @WithMockUser/@WithUserDetails requiert desormais ce starter
+             dedie (Spring Boot 4), spring-security-test seul ne suffit plus
+             a les faire fonctionner avec MockMvc. -->
         <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-test</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security-test</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

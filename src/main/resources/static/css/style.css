@@ -45,6 +45,11 @@
     --bs-body-font-family: 'Roboto', 'Segoe UI', sans-serif;
     --bs-body-color: var(--md-on-surface);
     --bs-body-bg: var(--md-surface-container-low);
+    /* Sans cette ligne, --bs-card-bg retombe sur --bs-body-bg (defaut
+       Bootstrap 5.3) : le corps des cartes (carte-formulaire, kanban-column,
+       stat-tile...) se confondait alors avec le fond de page, les deux
+       valant --md-surface-container-low (#F7F2FA). */
+    --bs-card-bg: var(--md-surface);
     --bs-primary: var(--md-primary);
     --bs-primary-rgb: 103, 80, 164;
     --bs-secondary: var(--md-secondary);
@@ -251,6 +256,11 @@ a {
 }
 
 .project-card {
+    /* Fond distinct de .kanban-body (--md-surface, blanc quasi pur) : sans
+       cette ligne, --bs-card-bg (retheme ci-dessus sur --md-surface pour
+       .carte-formulaire) rendrait les deux identiques et les cartes-dossier
+       se fondraient dans le fond de leur colonne. */
+    background-color: var(--md-surface-container-low);
     border: none;
     border-left: 4px solid var(--md-outline);
     border-radius: 0.75rem;
