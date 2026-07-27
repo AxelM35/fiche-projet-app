@@ -150,6 +150,27 @@
     <build>
         <finalName>fiche-projet</finalName>
         <plugins>
+            <!-- Depuis le JDK 23, javac ne lance plus les processeurs
+                 d'annotations par defaut (il faut les declarer explicitement) :
+                 sans ce bloc, Lombok (@Getter/@Setter/@Slf4j/
+                 @RequiredArgsConstructor...) n'est simplement plus applique,
+                 avec des erreurs de compilation "cannot find symbol" sur
+                 a peu pres toute la base de code. Invisible en local sous un
+                 JDK plus ancien (21 par exemple), mais bloquant avec l'image
+                 Docker de build (eclipse-temurin:25-jdk-jammy). -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
