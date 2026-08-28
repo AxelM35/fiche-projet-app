@@ -1,5 +1,7 @@
 package fr.ficheprojet.web;
 
+import fr.ficheprojet.config.EtablissementProperties;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -15,10 +17,23 @@ import org.springframework.web.bind.annotation.ModelAttribute;
  * TestingAuthenticationToken), qui ne sont jamais des OAuth2User.
  */
 @ControllerAdvice
+@RequiredArgsConstructor
 public class GlobalModelAttributes {
+
+    private final EtablissementProperties etablissement;
 
     @ModelAttribute("utilisateurConnecte")
     public String utilisateurConnecte(Authentication authentication) {
         return authentication != null ? authentication.getName() : null;
+    }
+
+    /**
+     * Nom de l'établissement, disponible dans toutes les vues (navbar, page de
+     * connexion). Chaîne vide si non configuré : les gabarits masquent alors
+     * la mention.
+     */
+    @ModelAttribute("nomEtablissement")
+    public String nomEtablissement() {
+        return etablissement.getNom();
     }
 }

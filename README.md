@@ -1,6 +1,8 @@
 # fiche-projet-app
 
-Fiche Projet numérique : application web de gestion et de validation des projets de voyages scolaires du Collège Exemple, en remplacement du workflow historique basé sur Google Sheets.
+Fiche Projet numérique : application web de gestion et de validation des projets de voyages scolaires, en remplacement d'un workflow sur tableur.
+
+L'application est conçue pour être déployée telle quelle par n'importe quel établissement du second degré : aucun nom d'établissement, domaine ou adresse n'est écrit en dur. Tout se configure dans `.env` (voir `.env.example`), et chaque déploiement dispose de sa propre instance et de sa propre base.
 
 ## Aperçu
 
@@ -37,7 +39,7 @@ Un tableau de bord Kanban (`/dashboard`) affiche les projets regroupés par éta
 
 ## Rôles (RBAC)
 
-Tout utilisateur Google authentifié avec une adresse du domaine autorisé reçoit `ROLE_PROF`. Des listes d'emails configurées dans `application.properties` (ou via variables d'environnement) attribuent en plus :
+Tout utilisateur Google authentifié avec une adresse du domaine autorisé (`ALLOWED_EMAIL_DOMAIN`) reçoit `ROLE_PROF`. Des listes d'emails configurées dans `application.properties` (ou via variables d'environnement) attribuent en plus :
 
 - `ROLE_COMPTA` : validation budgétaire
 - `ROLE_VIESCO` : validation vie scolaire
@@ -56,11 +58,23 @@ navigation), sans redémarrage. Ces attributions sont stockées en base et
 s'ajoutent toujours aux listes `.env` (jamais ne les remplacent) : retirer
 quelqu'un ajouté via `.env` nécessite toujours de modifier `.env`.
 
+## Configuration d'un établissement
+
+Tout ce qui identifie l'établissement se règle dans `.env` :
+
+| Variable | Rôle |
+|---|---|
+| `ETABLISSEMENT_NOM` | Nom affiché dans la barre de navigation, sur la page de connexion et dans les emails. Vide : la mention est masquée. |
+| `ALLOWED_EMAIL_DOMAIN` | Seul domaine Google autorisé à se connecter. **Sans cette variable, aucune connexion n'est possible** (refus par défaut). |
+| `ROLES_ADMIN` / `ROLES_COMPTA` / `ROLES_VIESCO` / `ROLES_DIRECTION` | Adresses des valideurs de chaque étape. |
+| `MAIL_FROM`, `APP_BASE_URL` | Expéditeur des notifications et URL publique de l'instance. |
+
 ## Démarrage local avec Docker Compose
 
 ```bash
 cp .env.example .env
-# compléter .env : mot de passe DB, identifiants Google OAuth2, SMTP...
+# compléter .env : nom de l'établissement, domaine autorisé, mot de passe DB,
+# identifiants Google OAuth2, SMTP...
 docker compose up --build
 ```
 
@@ -112,7 +126,7 @@ Le détail de chaque fonctionnalité (décisions, fichiers concernés, tests) es
 src/main/java/fr/ficheprojet/
 ├── FicheProjetApplication.java Point d'entrée Spring Boot (@EnableScheduling pour les relances)
 ├── config/                     Sécurité (SecurityConfig), Async, propriétés (@ConfigurationProperties :
-│                                rôles, notifications, relances, Drive, sécurité)
+│                                établissement, rôles, notifications, relances, Drive, sécurité)
 ├── security/                   CustomOAuth2UserService (authentification + RBAC), LoginRateLimitingFilter
 ├── model/                      Entités JPA : Projet, Commentaire, JournalEntree, RoleAttribution,
 │                                enums StatutProjet / RoleMetier

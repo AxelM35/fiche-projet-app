@@ -7,7 +7,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * Point d'entrée de l'application Fiche Projet numérique (gestion et
- * validation des projets de voyages scolaires du Collège Exemple).
+ * validation des projets de voyages scolaires).
  * <p>
  * @EnableScheduling : nécessaire pour RelanceService.relancerDossiersBloques()
  * (@Scheduled, relances automatiques quotidiennes des dossiers bloqués).

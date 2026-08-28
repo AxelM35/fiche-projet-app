@@ -54,7 +54,7 @@ class RoleAdminServiceTest {
     void unAdminPeutAjouterEtRetirerUneAttributionEtLEmailEstNormalise() {
         connecterEnTantQue("admin@exemple.fr", "ROLE_ADMIN");
 
-        roleAdminService.ajouter("  Secretariat@exemple.fr  ", RoleMetier.LECTURE_SEULE);
+        roleAdminService.ajouter("  Secretariat@Exemple.fr  ", RoleMetier.LECTURE_SEULE);
 
         Map<RoleMetier, List<RoleAttribution>> parRole = roleAdminService.listerParRole();
         assertThat(parRole.get(RoleMetier.LECTURE_SEULE))

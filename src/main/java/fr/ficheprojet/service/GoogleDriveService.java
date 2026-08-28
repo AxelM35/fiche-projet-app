@@ -34,7 +34,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class GoogleDriveService {
 
-    private static final String APPLICATION_NAME = "Fiche Projet numérique - Collège Exemple";
+    private static final String APPLICATION_NAME = "Fiche Projet numérique";
     private static final List<String> SCOPES = List.of(DriveScopes.DRIVE_FILE);
 
     private final GoogleDriveProperties driveProperties;

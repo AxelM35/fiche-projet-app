@@ -1,5 +1,6 @@
 package fr.ficheprojet.service;
 
+import fr.ficheprojet.config.EtablissementProperties;
 import fr.ficheprojet.config.NotificationProperties;
 import fr.ficheprojet.config.RolesProperties;
 import fr.ficheprojet.event.CommentaireEvent;
@@ -44,6 +45,7 @@ public class NotificationService {
     private final NotificationProperties notificationProperties;
     private final NotificationToggleService notificationToggleService;
     private final TemplateEngine templateEngine;
+    private final EtablissementProperties etablissementProperties;
 
     @Async("mailExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -200,6 +202,7 @@ public class NotificationService {
         contexte.setVariable("message", message);
         contexte.setVariable("motifRefus", motifRefus);
         contexte.setVariable("lienDossier", lienDossier);
+        contexte.setVariable("nomEtablissement", etablissementProperties.getNom());
         return templateEngine.process("email/notification", contexte);
     }
 
