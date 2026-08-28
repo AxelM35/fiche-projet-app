@@ -131,6 +131,10 @@ public class NotificationService {
             log.warn("Aucun destinataire configure pour la notification : {}", sujet);
             return;
         }
+        if (!expediteurConfigure()) {
+            log.warn("Aucune adresse d'expediteur configuree (MAIL_FROM) : notification \"{}\" non envoyee", sujet);
+            return;
+        }
 
         try {
             mailSender.send(construireMessage(destinataires, sujet, message, motifRefus, lienDossier));
@@ -146,6 +150,12 @@ public class NotificationService {
      */
     @PreAuthorize("hasRole('ADMIN')")
     public void envoyerEmailTest(String destinataire) {
+        if (!expediteurConfigure()) {
+            // Envoi synchrone : l'administrateur doit lire une cause exploitable
+            // plutot que l'AddressException brute de Jakarta Mail sur une adresse vide.
+            throw new MailPreparationException(
+                    "Aucune adresse d'expediteur n'est configuree : renseignez MAIL_FROM dans .env.");
+        }
         mailSender.send(construireMessage(List.of(destinataire), "Email de test - Fiche Projet numérique",
                 "Ceci est un email de test envoyé depuis le dashboard admin de l'application "
                         + "Fiche Projet numérique, pour vérifier la configuration SMTP.",
@@ -174,6 +184,18 @@ public class NotificationService {
                 + "\nCode HTTP : " + (statutHttp != null ? statutHttp : "inconnu")
                 + "\n\nMessage :\n" + messageUtilisateur;
         notifier(rolesProperties.getAdmin(), sujet, corps, null, null);
+    }
+
+    /**
+     * L'adresse d'expediteur n'a pas de valeur par defaut : chaque
+     * etablissement renseigne la sienne (MAIL_FROM). Sans elle,
+     * MimeMessageHelper.setFrom("") echouerait sur une AddressException peu
+     * parlante ; les notifications sont donc simplement passees, comme
+     * lorsqu'aucun destinataire n'est configure.
+     */
+    private boolean expediteurConfigure() {
+        String expediteur = notificationProperties.getEmailExpediteur();
+        return expediteur != null && !expediteur.isBlank();
     }
 
     private MimeMessage construireMessage(List<String> destinataires, String sujet, String message,
