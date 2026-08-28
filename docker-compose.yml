@@ -9,7 +9,10 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      # Publie uniquement sur la boucle locale du serveur : l'application
+      # joint la base par le reseau interne Docker (hote "db"), ce port n'est
+      # expose que pour un acces administrateur depuis le serveur lui-meme.
+      - "127.0.0.1:5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-fiche_projet_user} -d ${DB_NAME:-fiche_projet}"]
       interval: 5s
