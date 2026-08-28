@@ -188,7 +188,7 @@ class ProjetControllerTest {
      * directe sur le HTML rendu).
      */
     @Test
-    @WithMockUser(username = "amorvan@exemple.fr", authorities = {"ROLE_PROF", "ROLE_ADMIN"})
+    @WithMockUser(username = "admin@exemple.fr", authorities = {"ROLE_PROF", "ROLE_ADMIN"})
     void lesFormulairesDeGestionAdminContiennentLeJetonCsrf() throws Exception {
         MvcResult resultat = mockMvc.perform(get("/dashboard"))
                 .andExpect(status().isOk())

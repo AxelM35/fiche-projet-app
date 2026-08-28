@@ -52,7 +52,7 @@ class RoleAdminServiceTest {
 
     @Test
     void unAdminPeutAjouterEtRetirerUneAttributionEtLEmailEstNormalise() {
-        connecterEnTantQue("amorvan@exemple.fr", "ROLE_ADMIN");
+        connecterEnTantQue("admin@exemple.fr", "ROLE_ADMIN");
 
         roleAdminService.ajouter("  Secretariat@exemple.fr  ", RoleMetier.LECTURE_SEULE);
 

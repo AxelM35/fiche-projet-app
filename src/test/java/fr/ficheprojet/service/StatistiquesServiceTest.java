@@ -122,7 +122,7 @@ class StatistiquesServiceTest {
         brouillon.setCoutGlobal(new BigDecimal("9999"));
         projetService.creerProjet(brouillon);
 
-        connecterEnTantQue("amorvan@exemple.fr", "ROLE_ADMIN");
+        connecterEnTantQue("admin@exemple.fr", "ROLE_ADMIN");
         StatistiquesDTO stats = statistiquesService.calculer();
 
         assertThat(trouver(stats.budgetParAnneeScolaire(), "2099-2100"))
@@ -139,7 +139,7 @@ class StatistiquesServiceTest {
 
     @Test
     void leTauxDeRefusParEtapeCompteLesValidationsEtLesRefusDeCetteEtape() {
-        connecterEnTantQue("amorvan@exemple.fr", "ROLE_ADMIN");
+        connecterEnTantQue("admin@exemple.fr", "ROLE_ADMIN");
         StatistiquesDTO avant = statistiquesService.calculer();
         StatistiquesDTO.TauxRefusParEtape baseline = tauxPourEtape(avant, "Comptabilité");
 
@@ -157,7 +157,7 @@ class StatistiquesServiceTest {
         connecterEnTantQue("compta@exemple.fr", "ROLE_COMPTA");
         projetService.refuser(idRefuse, "Devis manquant.");
 
-        connecterEnTantQue("amorvan@exemple.fr", "ROLE_ADMIN");
+        connecterEnTantQue("admin@exemple.fr", "ROLE_ADMIN");
         StatistiquesDTO.TauxRefusParEtape apres = tauxPourEtape(statistiquesService.calculer(), "Comptabilité");
 
         assertThat(apres.nombreValidations()).isEqualTo(baseline.nombreValidations() + 1);
@@ -173,7 +173,7 @@ class StatistiquesServiceTest {
 
     @Test
     void leDelaiMoyenDeTraitementEstCalculeADepuisLesDatesDeValidation() {
-        connecterEnTantQue("amorvan@exemple.fr", "ROLE_ADMIN");
+        connecterEnTantQue("admin@exemple.fr", "ROLE_ADMIN");
         StatistiquesDTO avant = statistiquesService.calculer();
         StatistiquesDTO.DelaiParEtape baseline = delaiPourEtape(avant, "Comptabilité");
 
@@ -192,7 +192,7 @@ class StatistiquesServiceTest {
         connecterEnTantQue("compta@exemple.fr", "ROLE_COMPTA");
         projetService.validerCompta(id);
 
-        connecterEnTantQue("amorvan@exemple.fr", "ROLE_ADMIN");
+        connecterEnTantQue("admin@exemple.fr", "ROLE_ADMIN");
         StatistiquesDTO.DelaiParEtape apres = delaiPourEtape(statistiquesService.calculer(), "Comptabilité");
 
         assertThat(apres.nombreDossiersMesures()).isEqualTo(baseline.nombreDossiersMesures() + 1);

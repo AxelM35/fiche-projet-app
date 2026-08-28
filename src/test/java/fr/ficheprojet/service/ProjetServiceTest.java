@@ -200,7 +200,7 @@ class ProjetServiceTest {
 
         // Un ADMIN peut debloquer un dossier a n'importe quelle etape, sans
         // avoir a endosser le role metier (COMPTA/VIESCO/DIRECTION).
-        connecterEnTantQue("amorvan@exemple.fr", "ROLE_ADMIN");
+        connecterEnTantQue("admin@exemple.fr", "ROLE_ADMIN");
         projetService.validerCompta(id);
         projetService.validerVieScolaire(id);
         projetService.validerDirection(id);
@@ -324,7 +324,7 @@ class ProjetServiceTest {
         connecterEnTantQue("martin@exemple.fr", "ROLE_PROF");
         Long id = projetService.creerProjet(dtoValide()).getId();
 
-        connecterEnTantQue("amorvan@exemple.fr", "ROLE_ADMIN");
+        connecterEnTantQue("admin@exemple.fr", "ROLE_ADMIN");
         projetService.archiver(id);
 
         assertThat(projetService.projetsPourTableauDeBord().get(StatutProjet.BROUILLON))
@@ -342,7 +342,7 @@ class ProjetServiceTest {
         connecterEnTantQue("martin@exemple.fr", "ROLE_PROF");
         Long id = projetService.creerProjet(dtoValide()).getId();
 
-        connecterEnTantQue("amorvan@exemple.fr", "ROLE_ADMIN");
+        connecterEnTantQue("admin@exemple.fr", "ROLE_ADMIN");
         projetService.supprimerDefinitivement(id);
 
         assertThatThrownBy(() -> projetService.trouverParId(id)).isInstanceOf(ProjetNotFoundException.class);
@@ -371,7 +371,7 @@ class ProjetServiceTest {
         // Un admin, si : correction exceptionnelle apres validation. Un
         // admin recoit aussi ROLE_PROF en production (CustomOAuth2UserService) :
         // modifierProjet() l'exige au niveau @PreAuthorize.
-        connecterEnTantQue("amorvan@exemple.fr", "ROLE_ADMIN", "ROLE_PROF");
+        connecterEnTantQue("admin@exemple.fr", "ROLE_ADMIN", "ROLE_PROF");
         dto.setNomProjet("Correction admin post-validation");
         projetService.modifierProjet(id, dto);
         assertThat(projetService.trouverParId(id).getNomProjet()).isEqualTo("Correction admin post-validation");
@@ -382,7 +382,7 @@ class ProjetServiceTest {
         connecterEnTantQue("martin@exemple.fr", "ROLE_PROF");
         Long id = projetService.creerProjet(dtoValide()).getId();
 
-        connecterEnTantQue("amorvan@exemple.fr", "ROLE_ADMIN");
+        connecterEnTantQue("admin@exemple.fr", "ROLE_ADMIN");
         projetService.reaffecterOrganisateur(id, "remplacant@exemple.fr", "Mme Remplacante");
 
         Projet projet = projetService.trouverParId(id);
@@ -413,7 +413,7 @@ class ProjetServiceTest {
         dto.setClassesConcernees("3B");
         Long id = projetService.creerProjet(dto).getId();
 
-        connecterEnTantQue("amorvan@exemple.fr", "ROLE_ADMIN");
+        connecterEnTantQue("admin@exemple.fr", "ROLE_ADMIN");
         projetService.archiver(id);
 
         assertThat(projetService.rechercherPourAdmin("kyoto", null, null, null, null, null))
@@ -444,7 +444,7 @@ class ProjetServiceTest {
         dtoRecent.setDateRetour(LocalDateTime.of(2025, 11, 9, 18, 0));
         Long idRecent = validerCompletement(dtoRecent);
 
-        connecterEnTantQue("amorvan@exemple.fr", "ROLE_ADMIN");
+        connecterEnTantQue("admin@exemple.fr", "ROLE_ADMIN");
         int nombreArchive = projetService.archiverDossiersValidesDeLAnneeScolaire("2024-2025");
 
         assertThat(nombreArchive).isEqualTo(1);
@@ -483,7 +483,7 @@ class ProjetServiceTest {
         Long id = projetService.creerProjet(dtoValide()).getId();
         projetService.soumettre(id);
 
-        connecterEnTantQue("amorvan@exemple.fr", "ROLE_ADMIN");
+        connecterEnTantQue("admin@exemple.fr", "ROLE_ADMIN");
         projetService.archiver(id);
         projetService.desarchiver(id);
 

@@ -39,7 +39,7 @@ services:
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       ALLOWED_EMAIL_DOMAIN: ${ALLOWED_EMAIL_DOMAIN:-exemple.fr}
-      ROLES_ADMIN: ${ROLES_ADMIN:-amorvan@exemple.fr}
+      ROLES_ADMIN: ${ROLES_ADMIN:-admin@domaine.com}
       ROLES_COMPTA: ${ROLES_COMPTA:-compta@exemple.fr}
       ROLES_VIESCO: ${ROLES_VIESCO:-viesco@exemple.fr}
       ROLES_DIRECTION: ${ROLES_DIRECTION:-direction@exemple.fr}
