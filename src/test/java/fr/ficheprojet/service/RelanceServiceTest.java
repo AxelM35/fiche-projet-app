@@ -22,9 +22,9 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Relances automatiques (RelanceService) : le seuil et la periode par
- * defaut sont 7 jours (voir application-test.properties non surcharge,
- * RelanceProperties). "En attente depuis" est simule en re-ecrivant
+ * Relances automatiques (RelanceService) : le seuil et la période par
+ * défaut sont 7 jours (voir application-test.properties non surchargé,
+ * RelanceProperties). "En attente depuis" est simulé en ré-écrivant
  * directement dateValidationProf via le repository (aucune API publique ne
  * permet d'antidater une soumission).
  */
@@ -107,9 +107,9 @@ class RelanceServiceTest {
         relanceService.relancerDossiersBloques();
         assertThat(relanceJournaliseePour(id)).isTrue();
 
-        // Antidate la relance qui vient d'etre journalisee pour simuler
-        // qu'elle a ete envoyee il y a plus longtemps que la periode de
-        // repetition (7 jours par defaut).
+        // Antidate la relance qui vient d'être journalisée pour simuler
+        // qu'elle a été envoyée il y a plus longtemps que la période de
+        // répétition (7 jours par défaut).
         JournalEntree derniereRelance = journalEntreeRepository.findTop200ByOrderByDateEvenementDesc().stream()
                 .filter(entree -> "Relance".equals(entree.getAction()) && id.equals(entree.getProjetId()))
                 .findFirst().orElseThrow();

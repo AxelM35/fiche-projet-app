@@ -5,9 +5,9 @@ import fr.ficheprojet.model.StatutProjet;
 import java.time.LocalDateTime;
 
 /**
- * Ligne de la vue admin "Dossiers bloques" : un projet en attente de
+ * Ligne de la vue admin "Dossiers bloqués" : un projet en attente de
  * validation depuis un certain temps, pour permettre une relance manuelle
- * en attendant d'eventuelles relances automatiques.
+ * en attendant d'éventuelles relances automatiques.
  */
 public record ProjetBloqueDTO(
         Long id,

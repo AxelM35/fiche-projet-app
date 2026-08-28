@@ -7,8 +7,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import java.util.List;
 
 /**
- * Listes d'emails (une par role metier) lues depuis application.properties,
- * utilisees a la fois pour l'attribution des roles RBAC a la connexion
+ * Listés d'emails (une par rôle métier) lues depuis application.properties,
+ * utilisées à la fois pour l'attribution des rôles RBAC à la connexion
  * (CustomOAuth2UserService) et pour le routage des notifications
  * (NotificationService).
  */

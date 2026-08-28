@@ -12,15 +12,15 @@ public interface JournalEntreeRepository extends JpaRepository<JournalEntree, Lo
     List<JournalEntree> findTop200ByOrderByDateEvenementDesc();
 
     /**
-     * Historique complet d'un dossier (utilise pour l'export PDF), du plus
-     * ancien au plus recent.
+     * Historique complet d'un dossier (utilisé pour l'export PDF), du plus
+     * ancien au plus récent.
      */
     List<JournalEntree> findByProjetIdOrderByDateEvenementAsc(Long projetId);
 
     /**
-     * Derniere relance automatique envoyee pour ce projet depuis qu'il est
+     * Dernière relance automatique envoyée pour ce projet depuis qu'il est
      * entre dans son statut de blocage courant (voir RelanceService) : permet
-     * de savoir si/quand relancer sans ajouter de champ dedie sur Projet.
+     * de savoir si/quand relancer sans ajouter de champ dédié sur Projet.
      */
     Optional<JournalEntree> findTopByProjetIdAndActionAndDateEvenementAfterOrderByDateEvenementDesc(
             Long projetId, String action, LocalDateTime after);

@@ -16,10 +16,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 /**
- * Le dashboard admin (gestion des roles) doit rester inaccessible a tout
+ * Le dashboard admin (gestion des rôles) doit rester inaccessible à tout
  * utilisateur autre que ROLE_ADMIN, y compris par simple navigation directe
- * vers l'URL (contrairement au reste de l'application, ouvert en lecture a
- * tout utilisateur authentifie).
+ * vers l'URL (contrairement au reste de l'application, ouvert en lecture à
+ * tout utilisateur authentifié).
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -124,7 +124,7 @@ class AdminControllerTest {
                 .andExpect(view().name("admin-notifications"));
 
         // Aucun vrai serveur SMTP en test (voir application-test.properties) :
-        // l'envoi echoue forcement, mais le controleur doit rattraper la
+        // l'envoi échoue forcément, mais le contrôleur doit rattraper la
         // MailException et rediriger avec un message d'erreur, pas planter.
         mockMvc.perform(post("/admin/notifications/test").with(csrf()).param("destinataire", "admin@exemple.fr"))
                 .andExpect(status().is3xxRedirection());
@@ -146,9 +146,9 @@ class AdminControllerTest {
     }
 
     /**
-     * Regression : admin-sante.html n'incluait pas le bundle JS de Bootstrap
-     * (seule page admin dans ce cas), rendant inoperant le menu deroulant
-     * "Administration" de la navbar (data-bs-toggle="dropdown", qui depend
+     * Régression : admin-sante.html n'incluait pas le bundle JS de Bootstrap
+     * (seule page admin dans ce cas), rendant inopérant le menu déroulant
+     * "Administration" de la navbar (data-bs-toggle="dropdown", qui dépend
      * de ce script pour fonctionner).
      */
     @Test

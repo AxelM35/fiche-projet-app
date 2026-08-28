@@ -15,10 +15,10 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * Gestion des attributions de roles depuis le dashboard admin. S'ajoute
- * toujours aux listes d'emails configurees en variables d'environnement
+ * Gestion des attributions de rôles depuis le dashboard admin. S'ajoute
+ * toujours aux listés d'emails configurées en variables d'environnement
  * (RolesProperties), jamais ne les remplace : voir CustomOAuth2UserService,
- * qui verifie l'union des deux sources a chaque connexion.
+ * qui vérifie l'union des deux sources à chaque connexion.
  */
 @Service
 @RequiredArgsConstructor

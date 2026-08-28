@@ -13,11 +13,11 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 /**
- * Entree du journal d'audit (dashboard admin). Le nom du projet est
- * denormalise (copie au moment de l'evenement, pas de relation JPA vers
- * Projet) pour deux raisons : rester lisible meme apres une suppression
- * definitive du dossier concerne, et ne jamais faire porter au journal une
- * contrainte referentielle qui empecherait cette suppression.
+ * Entrée du journal d'audit (dashboard admin). Le nom du projet est
+ * dénormalisé (copie au moment de l'événement, pas de relation JPA vers
+ * Projet) pour deux raisons : rester lisible même après une suppression
+ * définitive du dossier concerné, et ne jamais faire porter au journal une
+ * contrainte référentielle qui empêcherait cette suppression.
  */
 @Entity
 @Table(name = "journal_entrees")

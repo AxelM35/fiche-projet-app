@@ -14,12 +14,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 /**
  * Signalement volontaire depuis une page d'erreur (403/404/500, voir
  * templates/error/ et fragments/signalement-erreur.html) : l'utilisateur
- * decrit ce qu'il faisait avant d'arriver sur l'erreur, transmis par email a
- * l'administrateur avec le contexte technique deja connu (chemin d'origine,
- * code HTTP fournis par des champs caches, voir le fragment) plutot que de
- * lui demander de le retrouver lui-meme. Route ouverte sans authentification
- * (voir SecurityConfig) : une erreur peut survenir avant meme la connexion
- * (lien perime, session expiree...).
+ * décrit ce qu'il faisait avant d'arriver sur l'erreur, transmis par email à
+ * l'administrateur avec le contexte technique déjà connu (chemin d'origine,
+ * code HTTP fournis par des champs cachés, voir le fragment) plutôt que de
+ * lui demander de le retrouver lui-même. Route ouverte sans authentification
+ * (voir SecurityConfig) : une erreur peut survenir avant même la connexion
+ * (lien périmé, session expirée...).
  */
 @Controller
 @RequiredArgsConstructor

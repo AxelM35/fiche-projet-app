@@ -27,11 +27,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- * Verifie le workflow lineaire complet ainsi que les deux garde-fous de
- * concurrence/securite : verrouillage optimiste et controle de propriete
- * d'un dossier. Le contexte de securite est bascule manuellement d'un role
- * a l'autre au sein d'un meme test (@WithMockUser ne s'applique qu'au
- * demarrage d'une methode @Test, pas a des appels internes).
+ * Vérifie le workflow linéaire complet ainsi que les deux garde-fous de
+ * concurrence/sécurité : verrouillage optimiste et contrôle de propriété
+ * d'un dossier. Le contexte de sécurité est basculé manuellement d'un rôle
+ * à l'autre au sein d'un même test (@WithMockUser ne s'applique qu'au
+ * démarrage d'une méthode @Test, pas à des appels internes).
  */
 @SpringBootTest
 @ActiveProfiles("test")
@@ -80,12 +80,12 @@ class ProjetServiceTest {
     void lesChampsOrganismeEtCommentaireSontFacultatifsEtBienPersistesQuandRenseignes() {
         connecterEnTantQue("martin@exemple.fr", "ROLE_PROF");
 
-        // Facultatifs : la creation reussit sans eux (dtoValide() ne les renseigne pas).
+        // Facultatifs : la création réussit sans eux (dtoValide() ne les renseigne pas).
         Projet sansOrganisme = projetService.creerProjet(dtoValide());
         assertThat(sansOrganisme.getOrganismeNom()).isNull();
         assertThat(sansOrganisme.getCommentaire()).isNull();
 
-        // Quand ils sont renseignes, l'aller-retour DTO <-> Entite les conserve.
+        // Quand ils sont renseignés, l'aller-retour DTO <-> Entité les conserve.
         ProjetFormDTO dto = dtoValide();
         dto.setOrganismeNom("Voyages Culture Plus");
         dto.setOrganismeTelephone("0102030405");
@@ -138,12 +138,12 @@ class ProjetServiceTest {
 
     /**
      * "Je ne connais pas encore le budget" (voir ProjetFormDTO.budgetInconnu,
-     * audit UX S4bis) : un dossier peut etre soumis sans budget connu, mais
-     * la Comptabilite ne peut pas le valider tant qu'il manque - completerBudget
-     * (meme perimetre d'autorisation que le lien Drive) permet de le
-     * renseigner apres coup, y compris par la Comptabilite elle-meme,
+     * audit UX S4bis) : un dossier peut être soumis sans budget connu, mais
+     * la Comptabilité ne peut pas le valider tant qu'il manque - completerBudget
+     * (même périmètre d'autorisation que le lien Drive) permet de le
+     * renseigner après coup, y compris par la Comptabilité elle-même,
      * puisque le formulaire principal n'a plus de bouton "Enregistrer" une
-     * fois le dossier engage dans le circuit.
+     * fois le dossier engagé dans le circuit.
      */
     @Test
     void unDossierSansBudgetPeutEtreSoumisMaisPasValideTantQuIlManque() {
@@ -198,8 +198,8 @@ class ProjetServiceTest {
         Long id = projetService.creerProjet(dtoValide()).getId();
         projetService.soumettre(id);
 
-        // Un ADMIN peut debloquer un dossier a n'importe quelle etape, sans
-        // avoir a endosser le role metier (COMPTA/VIESCO/DIRECTION).
+        // Un ADMIN peut débloquer un dossier à n'importe quelle étape, sans
+        // avoir à endosser le rôle métier (COMPTA/VIESCO/DIRECTION).
         connecterEnTantQue("admin@exemple.fr", "ROLE_ADMIN");
         projetService.validerCompta(id);
         projetService.validerVieScolaire(id);
@@ -223,8 +223,8 @@ class ProjetServiceTest {
         Projet refuse = projetService.trouverParId(id);
         assertThat(refuse.getStatut()).isEqualTo(StatutProjet.A_CORRIGER);
         assertThat(refuse.getMotifRefus()).isEqualTo("Effectif incoherent avec les autorisations de sortie.");
-        // La validation comptable, obtenue avant ce refus, est conservee :
-        // elle ne sera pas redemandee a la resoumission.
+        // La validation comptable, obtenue avant ce refus, est conservée :
+        // elle ne sera pas redemandée à la resoumission.
         assertThat(refuse.getDateValidationCompta()).isNotNull();
         assertThat(refuse.getDateValidationVieScolaire()).isNull();
     }
@@ -246,7 +246,7 @@ class ProjetServiceTest {
         projetService.soumettre(id);
 
         Projet resoumis = projetService.trouverParId(id);
-        // Reprend directement a Vie Scolaire : pas de retour a Comptabilite.
+        // Reprend directement à Vie Scolaire : pas de retour à Comptabilité.
         assertThat(resoumis.getStatut()).isEqualTo(StatutProjet.EN_ATTENTE_VIE_SCOLAIRE);
         assertThat(resoumis.getMotifRefus()).isNull();
         assertThat(resoumis.getDateValidationCompta()).isEqualTo(dateValidationComptaInitiale);
@@ -273,8 +273,8 @@ class ProjetServiceTest {
         Long id = projetService.creerProjet(dtoValide()).getId();
 
         // Le projet est encore en BROUILLON : la validation comptable directe
-        // (par un utilisateur qui a pourtant bien le role COMPTA) doit echouer
-        // sur la regle metier, pas sur les droits d'acces.
+        // (par un utilisateur qui a pourtant bien le rôle COMPTA) doit échouer
+        // sur la règle métier, pas sur les droits d'accès.
         connecterEnTantQue("compta@exemple.fr", "ROLE_COMPTA");
         assertThatThrownBy(() -> projetService.validerCompta(id)).isInstanceOf(TransitionInvalideException.class);
     }
@@ -300,11 +300,11 @@ class ProjetServiceTest {
 
         connecterEnTantQue("secretariat@exemple.fr", "ROLE_LECTURE_SEULE");
 
-        // La consultation reste ouverte a tout utilisateur authentifie.
+        // La consultation reste ouverte à tout utilisateur authentifié.
         assertThat(projetService.trouverParId(id).getStatut()).isEqualTo(StatutProjet.EN_ATTENTE_COMPTA);
         assertThat(projetService.projetsPourTableauDeBord()).isNotEmpty();
 
-        // Mais aucune action de creation ou de workflow ne lui est ouverte.
+        // Mais aucune action de création ou de workflow ne lui est ouverte.
         assertThatThrownBy(() -> projetService.creerProjet(dtoValide())).isInstanceOf(AccessDeniedException.class);
         assertThatThrownBy(() -> projetService.validerCompta(id)).isInstanceOf(AccessDeniedException.class);
         assertThatThrownBy(() -> projetService.dupliquer(id)).isInstanceOf(AccessDeniedException.class);
@@ -361,15 +361,15 @@ class ProjetServiceTest {
         projetService.validerDirection(id);
         Projet valide = projetService.trouverParId(id);
 
-        // Un prof (meme organisateur) ne peut plus toucher a un dossier valide.
+        // Un prof (même organisateur) ne peut plus toucher à un dossier validé.
         connecterEnTantQue("martin@exemple.fr", "ROLE_PROF");
         ProjetFormDTO dto = dtoValide();
         dto.setVersion(valide.getVersion());
         dto.setNomProjet("Tentative de modification par le prof");
         assertThatThrownBy(() -> projetService.modifierProjet(id, dto)).isInstanceOf(TransitionInvalideException.class);
 
-        // Un admin, si : correction exceptionnelle apres validation. Un
-        // admin recoit aussi ROLE_PROF en production (CustomOAuth2UserService) :
+        // Un admin, si : correction exceptionnelle après validation. Un
+        // admin reçoit aussi ROLE_PROF en production (CustomOAuth2UserService) :
         // modifierProjet() l'exige au niveau @PreAuthorize.
         connecterEnTantQue("admin@exemple.fr", "ROLE_ADMIN", "ROLE_PROF");
         dto.setNomProjet("Correction admin post-validation");
@@ -425,9 +425,9 @@ class ProjetServiceTest {
     }
 
     /**
-     * Archivage groupe par annee scolaire (voir AnneeScolaireUtil) : deux
-     * dossiers VALIDE d'annees scolaires differentes, seul celui de l'annee
-     * ciblee doit etre archive.
+     * Archivage groupe par année scolaire (voir AnneeScolaireUtil) : deux
+     * dossiers VALIDE d'années scolaires différentes, seul celui de l'année
+     * ciblée doit être archivé.
      */
     @Test
     void archiverDossiersValidesDeLAnneeScolaireNarchiveQueLannéeCiblée() {
@@ -456,10 +456,10 @@ class ProjetServiceTest {
     }
 
     /**
-     * Cree un dossier et le fait passer par tout le workflow jusqu'a VALIDE,
-     * en reconnectant a chaque etape sous le role metier concerne (comme
+     * Crée un dossier et le fait passer par tout le workflow jusqu'a VALIDE,
+     * en reconnectant à chaque étape sous le rôle métier concerne (comme
      * laValidationCompletePasseParTousLesStatutsJusquaValide), pour tester
-     * l'archivage groupe sur des dossiers realistes.
+     * l'archivage groupé sur des dossiers réalistes.
      */
     private Long validerCompletement(ProjetFormDTO dto) {
         connecterEnTantQue("martin@exemple.fr", "ROLE_PROF");
@@ -502,15 +502,15 @@ class ProjetServiceTest {
         Long id = projet.getId();
 
         // Le professeur ouvre le formulaire (version courante), puis une
-        // premiere modification aboutit et fait progresser la version...
+        // première modification aboutit et fait progresser la version...
         ProjetFormDTO premiereModification = dtoValide();
         premiereModification.setVersion(projet.getVersion());
         premiereModification.setNomProjet("Voyage a Rome (premiere modification)");
         projetService.modifierProjet(id, premiereModification);
 
-        // ...puis une seconde soumission, restee sur l'ancienne version
+        // ...puis une seconde soumission, restée sur l'ancienne version
         // (onglet du navigateur reste ouvert sur le formulaire d'origine),
-        // doit etre rejetee au lieu d'ecraser silencieusement le premier
+        // doit être rejetée au lieu d'écraser silencieusement le premier
         // changement.
         ProjetFormDTO secondeModificationPerimee = dtoValide();
         secondeModificationPerimee.setVersion(projet.getVersion());

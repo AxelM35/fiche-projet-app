@@ -20,10 +20,10 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Verifie que l'export PDF (bouton "Exporter en PDF" sur la fiche projet)
+ * Vérifie que l'export PDF (bouton "Exporter en PDF" sur la fiche projet)
  * produit bien un document PDF valide, aussi bien pour un dossier en
  * brouillon (sans historique de validation) que pour un dossier ayant
- * franchi des etapes du workflow (avec historique).
+ * franchi des étapes du workflow (avec historique).
  */
 @SpringBootTest
 @ActiveProfiles("test")

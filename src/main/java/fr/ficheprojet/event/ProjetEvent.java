@@ -4,9 +4,9 @@ import fr.ficheprojet.model.StatutProjet;
 import lombok.Getter;
 
 /**
- * Evenement metier publie par ProjetService a chaque changement de statut.
- * Consomme uniquement par NotificationService pour router les emails de
- * notification, en dehors du thread de la requete web (voir @Async).
+ * Événement métier publié par ProjetService à chaque changement de statut.
+ * Consommé uniquement par NotificationService pour router les emails de
+ * notification, en dehors du thread de la requête web (voir @Async).
  */
 @Getter
 public class ProjetEvent {

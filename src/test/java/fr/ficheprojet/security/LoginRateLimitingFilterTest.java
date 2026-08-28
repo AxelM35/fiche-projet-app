@@ -13,14 +13,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Le filtre est un singleton partage entre toutes les requetes de la
- * chaine de securite (voir LoginRateLimitingFilter, instancie une seule
+ * Le filtre est un singleton partagé entre toutes les requêtes de la
+ * chaîne de sécurité (voir LoginRateLimitingFilter, instancie une seule
  * fois dans SecurityConfig), avec un compteur par adresse IP : chaque test
- * utilise donc sa propre IP simulee (RequestPostProcessor) pour ne pas
- * interferer avec d'autres tests qui appellent /login depuis l'IP par
- * defaut de MockMvc (127.0.0.1), notamment dans le meme contexte Spring
- * reutilise entre classes de test. @DirtiesContext par securite
- * supplementaire (ne mise pas uniquement sur l'isolation par IP).
+ * utilise donc sa propre IP simulée (RequestPostProcessor) pour ne pas
+ * interférer avec d'autres tests qui appellent /login depuis l'IP par
+ * défaut de MockMvc (127.0.0.1), notamment dans le même contexte Spring
+ * reutilise entre classes de test. @DirtiesContext par sécurité
+ * supplémentaire (ne mise pas uniquement sur l'isolation par IP).
  */
 @SpringBootTest
 @AutoConfigureMockMvc

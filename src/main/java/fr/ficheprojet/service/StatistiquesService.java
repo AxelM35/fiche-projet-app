@@ -22,8 +22,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * Statistiques consolidees du dashboard Admin (/admin/statistiques),
- * calculees uniquement sur les dossiers actifs (les dossiers archives sont
+ * Statistiques consolidées du dashboard Admin (/admin/statistiques),
+ * calculées uniquement sur les dossiers actifs (les dossiers archivés sont
  * exclus, y compris de l'historique de refus - voir filtrage sur
  * projetIdsActifs ci-dessous).
  */
@@ -51,8 +51,8 @@ public class StatistiquesService {
     }
 
     /**
-     * Budget "engage" : cout global des dossiers VALIDE uniquement (meme
-     * definition que la tuile "Budget total engagé" du tableau de bord).
+     * Budget "engagé" : coût global des dossiers VALIDE uniquement (même
+     * définition que la tuile "Budget total engagé" du tableau de bord).
      */
     private List<StatistiquesDTO.Repartition> budgetParAnneeScolaire(List<Projet> actifs) {
         return regrouperBudget(actifs, p -> AnneeScolaireUtil.calculer(p.getDateDepart()))
@@ -86,10 +86,10 @@ public class StatistiquesService {
     }
 
     /**
-     * Taux de refus par etape = nb de refus survenus a cette etape / (nb de
-     * validations + nb de refus a cette etape), a partir du journal d'audit
-     * (voir ProjetService.refuser, action "Refus (Etape)"). Les dossiers
-     * archives (ou definitivement supprimes) sont exclus en filtrant sur les
+     * Taux de refus par étape = nb de refus survenus à cette étape / (nb de
+     * validations + nb de refus à cette étape), à partir du journal d'audit
+     * (voir ProjetService.refuser, action "Refus (Étape)"). Les dossiers
+     * archivés (ou définitivement supprimés) sont exclus en filtrant sur les
      * projetId encore actifs.
      */
     private List<StatistiquesDTO.TauxRefusParEtape> tauxDeRefusParEtape(List<Projet> actifs) {
@@ -123,11 +123,11 @@ public class StatistiquesService {
     }
 
     /**
-     * Delai moyen entre l'entree dans l'etape et sa validation, calcule
-     * directement a partir des dates de validation deja presentes sur
-     * Projet (pas besoin du journal) : couvre aussi bien les dossiers deja
-     * VALIDE que ceux encore en cours d'instruction ayant deja franchi
-     * l'etape mesuree.
+     * Délai moyen entre l'entrée dans l'étape et sa validation, calcule
+     * directement à partir des dates de validation déjà présentes sur
+     * Projet (pas besoin du journal) : couvre aussi bien les dossiers déjà
+     * VALIDE que ceux encore en cours d'instruction ayant déjà franchi
+     * l'étape mesurée.
      */
     private List<StatistiquesDTO.DelaiParEtape> delaiMoyenDeTraitementParEtape(List<Projet> actifs) {
         return List.of(

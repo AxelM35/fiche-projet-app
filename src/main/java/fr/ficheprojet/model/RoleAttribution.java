@@ -16,12 +16,12 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 /**
- * Attribution d'un role metier a un email, geree dynamiquement par un Admin
+ * Attribution d'un rôle métier à un email, gérée dynamiquement par un Admin
  * depuis le dashboard admin. S'ajoute (sans jamais les remplacer) aux listes
- * d'emails configurees en variables d'environnement (RolesProperties) :
- * CustomOAuth2UserService verifie l'union des deux sources pour chaque role,
+ * d'emails configurées en variables d'environnement (RolesProperties) :
+ * CustomOAuth2UserService vérifie l'union des deux sources pour chaque rôle,
  * de sorte qu'une erreur de manipulation ici ne puisse jamais retirer
- * l'acces attribue via .env.
+ * l'accès attribué via .env.
  */
 @Entity
 @Table(name = "role_attributions", uniqueConstraints = @UniqueConstraint(columnNames = {"email", "role"}))

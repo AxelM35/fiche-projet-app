@@ -30,7 +30,7 @@ class NotificationToggleServiceTest {
 
     @AfterEach
     void nettoyer() {
-        // Remet l'etat par defaut pour ne pas impacter d'autres tests (bean singleton).
+        // Remet l'état par défaut pour ne pas impacter d'autres tests (bean singleton).
         connecterEnTantQue("admin@exemple.fr", "ROLE_ADMIN");
         notificationToggleService.activer();
         SecurityContextHolder.clearContext();

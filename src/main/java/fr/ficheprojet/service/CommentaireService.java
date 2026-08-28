@@ -18,16 +18,16 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Fil de commentaires d'un dossier : echanges libres entre l'organisateur et
- * les valideurs (ex. la Direction demande une precision sans forcement
- * refuser), independants du motif de refus. Disponible quel que soit le
+ * Fil de commentaires d'un dossier : échanges libres entre l'organisateur et
+ * les valideurs (ex. la Direction demande une précision sans forcément
+ * refuser), indépendants du motif de refus. Disponible quel que soit le
  * statut du workflow.
  * <p>
- * Autorisation d'ajouter un commentaire : exactement le meme perimetre que
+ * Autorisation d'ajouter un commentaire : exactement le même périmètre que
  * ProjetService.peutGererLienDrive (organisateur du dossier ou n'importe
- * quel role de validation, ROLE_LECTURE_SEULE volontairement exclu). La
- * modification/suppression, elle, ne depend que de la propriete du
- * commentaire (son auteur), quels que soient ses roles actuels.
+ * quel rôle de validation, ROLE_LECTURE_SEULE volontairement exclu). La
+ * modification/suppression, elle, ne dépend que de la propriété du
+ * commentaire (son auteur), quels que soient ses rôles actuels.
  */
 @Service
 @RequiredArgsConstructor

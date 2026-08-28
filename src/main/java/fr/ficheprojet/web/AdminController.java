@@ -36,12 +36,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Dashboard admin : gestion des attributions de roles et des dossiers
- * archives. Reserve a ROLE_ADMIN au niveau du controleur (et non seulement
- * du service) car il expose des donnees (emails par role, dossiers retires
- * du tableau de bord) a toute personne qui en devinerait l'URL, contrairement
- * au reste de l'application ou les donnees des dossiers actifs sont
- * volontairement consultables par tout utilisateur authentifie.
+ * Dashboard admin : gestion des attributions de rôles et des dossiers
+ * archivés. Réservé à ROLE_ADMIN au niveau du contrôleur (et non seulement
+ * du service) car il expose des données (emails par rôle, dossiers retirés
+ * du tableau de bord) à toute personne qui en devinerait l'URL, contrairement
+ * au reste de l'application où les données des dossiers actifs sont
+ * volontairement consultables par tout utilisateur authentifié.
  */
 @Controller
 @RequiredArgsConstructor
@@ -81,8 +81,8 @@ public class AdminController {
     }
 
     /**
-     * Archivage groupe (Admin) : archive en une fois tous les dossiers
-     * VALIDE non deja archives d'une annee scolaire donnee.
+     * Archivage groupé (Admin) : archivé en une fois tous les dossiers
+     * VALIDE non déjà archivés d'une année scolaire donnée.
      */
     @PostMapping("/admin/archives/archiver-annee")
     public String archiverAnnee(@RequestParam String anneeScolaire, RedirectAttributes redirectAttributes) {
