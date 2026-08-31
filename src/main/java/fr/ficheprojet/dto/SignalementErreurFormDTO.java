@@ -8,8 +8,8 @@ import lombok.Setter;
 /**
  * DTO du formulaire de signalement depuis une page d'erreur (403/404/500,
  * voir fragments/signalement-erreur.html) : statutHttp et cheminOrigine sont
- * portes par des champs caches remplis automatiquement depuis les attributs
- * de modele "status"/"path" fournis par Spring Boot, pas saisis par
+ * portés par des champs cachés remplis automatiquement depuis les attributs
+ * de modèle "status"/"path" fournis par Spring Boot, pas saisis par
  * l'utilisateur.
  */
 @Getter

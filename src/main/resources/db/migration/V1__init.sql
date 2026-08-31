@@ -1,5 +1,5 @@
 -- Baseline correspondant au schema genere jusqu'ici par Hibernate en
--- ddl-auto=update, a partir des annotations JPA de fr.ficheprojet.voyages.model.Projet.
+-- ddl-auto=update, a partir des annotations JPA de fr.ficheprojet.model.Projet.
 -- A partir de cette migration, le schema est gere par Flyway (ddl-auto=validate).
 
 CREATE TABLE projets (

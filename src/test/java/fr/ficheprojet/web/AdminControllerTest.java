@@ -16,10 +16,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 /**
- * Le dashboard admin (gestion des roles) doit rester inaccessible a tout
+ * Le dashboard admin (gestion des rôles) doit rester inaccessible à tout
  * utilisateur autre que ROLE_ADMIN, y compris par simple navigation directe
- * vers l'URL (contrairement au reste de l'application, ouvert en lecture a
- * tout utilisateur authentifie).
+ * vers l'URL (contrairement au reste de l'application, ouvert en lecture à
+ * tout utilisateur authentifié).
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -37,7 +37,7 @@ class AdminControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "amorvan@exemple.fr", authorities = {"ROLE_PROF", "ROLE_ADMIN"})
+    @WithMockUser(username = "admin@exemple.fr", authorities = {"ROLE_PROF", "ROLE_ADMIN"})
     void unAdminAccedeAuDashboardAdmin() throws Exception {
         mockMvc.perform(get("/admin/roles"))
                 .andExpect(status().isOk())
@@ -52,7 +52,7 @@ class AdminControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "amorvan@exemple.fr", authorities = {"ROLE_PROF", "ROLE_ADMIN"})
+    @WithMockUser(username = "admin@exemple.fr", authorities = {"ROLE_PROF", "ROLE_ADMIN"})
     void unAdminAccedeALaPageDesArchives() throws Exception {
         mockMvc.perform(get("/admin/archives"))
                 .andExpect(status().isOk())
@@ -67,7 +67,7 @@ class AdminControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "amorvan@exemple.fr", authorities = {"ROLE_PROF", "ROLE_ADMIN"})
+    @WithMockUser(username = "admin@exemple.fr", authorities = {"ROLE_PROF", "ROLE_ADMIN"})
     void unAdminDeclencheLarchivageGroupeParAnneeScolaireEtRedirigeVersLesArchives() throws Exception {
         mockMvc.perform(post("/admin/archives/archiver-annee").with(csrf()).param("anneeScolaire", "2024-2025"))
                 .andExpect(status().is3xxRedirection())
@@ -75,7 +75,7 @@ class AdminControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "amorvan@exemple.fr", authorities = {"ROLE_PROF", "ROLE_ADMIN"})
+    @WithMockUser(username = "admin@exemple.fr", authorities = {"ROLE_PROF", "ROLE_ADMIN"})
     void unAdminAccedeALaPageDesDossiersBloques() throws Exception {
         mockMvc.perform(get("/admin/dossiers-bloques"))
                 .andExpect(status().isOk())
@@ -83,7 +83,7 @@ class AdminControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "amorvan@exemple.fr", authorities = {"ROLE_PROF", "ROLE_ADMIN"})
+    @WithMockUser(username = "admin@exemple.fr", authorities = {"ROLE_PROF", "ROLE_ADMIN"})
     void unAdminAccedeAuJournalDaudit() throws Exception {
         mockMvc.perform(get("/admin/journal"))
                 .andExpect(status().isOk())
@@ -98,7 +98,7 @@ class AdminControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "amorvan@exemple.fr", authorities = {"ROLE_PROF", "ROLE_ADMIN"})
+    @WithMockUser(username = "admin@exemple.fr", authorities = {"ROLE_PROF", "ROLE_ADMIN"})
     void unAdminAccedeALaRechercheEtALexportCsv() throws Exception {
         mockMvc.perform(get("/admin/recherche").param("nom", "voyage"))
                 .andExpect(status().isOk())
@@ -117,16 +117,16 @@ class AdminControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "amorvan@exemple.fr", authorities = {"ROLE_PROF", "ROLE_ADMIN"})
+    @WithMockUser(username = "admin@exemple.fr", authorities = {"ROLE_PROF", "ROLE_ADMIN"})
     void unAdminAccedeALaPageNotificationsEtPeutEnvoyerUnTestSansPlanter() throws Exception {
         mockMvc.perform(get("/admin/notifications"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("admin-notifications"));
 
         // Aucun vrai serveur SMTP en test (voir application-test.properties) :
-        // l'envoi echoue forcement, mais le controleur doit rattraper la
+        // l'envoi échoue forcément, mais le contrôleur doit rattraper la
         // MailException et rediriger avec un message d'erreur, pas planter.
-        mockMvc.perform(post("/admin/notifications/test").with(csrf()).param("destinataire", "amorvan@exemple.fr"))
+        mockMvc.perform(post("/admin/notifications/test").with(csrf()).param("destinataire", "admin@exemple.fr"))
                 .andExpect(status().is3xxRedirection());
     }
 
@@ -138,7 +138,7 @@ class AdminControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "amorvan@exemple.fr", authorities = {"ROLE_PROF", "ROLE_ADMIN"})
+    @WithMockUser(username = "admin@exemple.fr", authorities = {"ROLE_PROF", "ROLE_ADMIN"})
     void unAdminAccedeALaPageSante() throws Exception {
         mockMvc.perform(get("/admin/sante"))
                 .andExpect(status().isOk())
@@ -146,13 +146,13 @@ class AdminControllerTest {
     }
 
     /**
-     * Regression : admin-sante.html n'incluait pas le bundle JS de Bootstrap
-     * (seule page admin dans ce cas), rendant inoperant le menu deroulant
-     * "Administration" de la navbar (data-bs-toggle="dropdown", qui depend
+     * Régression : admin-sante.html n'incluait pas le bundle JS de Bootstrap
+     * (seule page admin dans ce cas), rendant inopérant le menu déroulant
+     * "Administration" de la navbar (data-bs-toggle="dropdown", qui dépend
      * de ce script pour fonctionner).
      */
     @Test
-    @WithMockUser(username = "amorvan@exemple.fr", authorities = {"ROLE_PROF", "ROLE_ADMIN"})
+    @WithMockUser(username = "admin@exemple.fr", authorities = {"ROLE_PROF", "ROLE_ADMIN"})
     void laPageSanteChargeLeBundleJsDeBootstrap() throws Exception {
         mockMvc.perform(get("/admin/sante"))
                 .andExpect(status().isOk())
@@ -167,7 +167,7 @@ class AdminControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "amorvan@exemple.fr", authorities = {"ROLE_PROF", "ROLE_ADMIN"})
+    @WithMockUser(username = "admin@exemple.fr", authorities = {"ROLE_PROF", "ROLE_ADMIN"})
     void unAdminAccedeALaPageStatistiques() throws Exception {
         mockMvc.perform(get("/admin/statistiques"))
                 .andExpect(status().isOk())

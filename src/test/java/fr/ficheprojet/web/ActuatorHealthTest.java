@@ -15,7 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * /actuator/health doit rester accessible sans authentification (sonde de
  * monitoring du conteneur, voir SecurityConfig) et ne jamais exposer le
- * detail des composants verifies a un appelant anonyme (show-details=never).
+ * détail des composants vérifiés à un appelant anonyme (show-détails=never).
  */
 @SpringBootTest
 @AutoConfigureMockMvc

@@ -3,9 +3,9 @@ package fr.ficheprojet.service;
 import java.time.LocalDateTime;
 
 /**
- * Calcule l'annee scolaire (ex. "2025-2026") a laquelle rattacher un projet,
- * a partir de sa date de depart : pas de nouveau champ sur Projet, l'annee
- * scolaire va de septembre (mois >= 9) a aout inclus de l'annee suivante.
+ * Calcule l'année scolaire (ex. "2025-2026") à laquelle rattacher un projet,
+ * à partir de sa date de départ : pas de nouveau champ sur Projet, l'année
+ * scolaire va de septembre (mois >= 9) à août inclus de l'année suivante.
  */
 public final class AnneeScolaireUtil {
 

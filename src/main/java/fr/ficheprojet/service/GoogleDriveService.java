@@ -18,23 +18,23 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Creation automatique du dossier Google Drive d'un projet, via un compte
- * de service membre du Drive partage de l'etablissement (pas de delegation
- * domaine-wide necessaire : le Drive partage est simplement partage avec
+ * Création automatique du dossier Google Drive d'un projet, via un compte
+ * de service membre du Drive partagé de l'établissement (pas de délégation
+ * domaine-wide nécessaire : le Drive partagé est simplement partagé avec
  * l'adresse du compte de service, comme avec n'importe quel collaborateur).
  * <p>
- * Best-effort volontaire : aucune methode ne leve jamais d'exception vers
- * l'appelant (ProjetService). Si l'integration est desactivee, mal
- * configuree, ou que l'appel Drive echoue, on retourne simplement
+ * Best-effort volontaire : aucune méthode ne lève jamais d'exception vers
+ * l'appelant (ProjetService). Si l'intégration est désactivée, mal
+ * configurée, ou que l'appel Drive échoue, on retourne simplement
  * Optional.empty() et l'enregistrement du projet continue normalement -
- * l'organisateur peut toujours coller le lien a la main ensuite.
+ * l'organisateur peut toujours coller le lien à la main ensuite.
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class GoogleDriveService {
 
-    private static final String APPLICATION_NAME = "Fiche Projet numérique - Collège Exemple";
+    private static final String APPLICATION_NAME = "Fiche Projet numérique";
     private static final List<String> SCOPES = List.of(DriveScopes.DRIVE_FILE);
 
     private final GoogleDriveProperties driveProperties;
@@ -68,8 +68,8 @@ public class GoogleDriveService {
             return Optional.of(lien);
         } catch (Exception e) {
             // Volontairement large : de nombreuses causes possibles (config
-            // absente, quota, reseau, credentials invalides) et aucune ne
-            // doit faire echouer la creation/duplication du projet.
+            // absente, quota, réseau, credentials invalides) et aucune ne
+            // doit faire échouer la création/duplication du projet.
             log.warn("Echec de la creation automatique du dossier Drive pour le projet {}", projetId, e);
             return Optional.empty();
         }

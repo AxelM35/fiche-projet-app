@@ -22,10 +22,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Fiche projet d'un voyage scolaire. Le champ "version" implemente le
- * verrouillage optimiste JPA : toute mise a jour concurrente sur une version
- * perimee leve une ObjectOptimisticLockingFailureException, geree par
- * ProjetController pour eviter qu'une validation n'ecrase silencieusement
+ * Fiche projet d'un voyage scolaire. Le champ "version" implémente le
+ * verrouillage optimiste JPA : toute mise à jour concurrente sur une version
+ * périmée lève une ObjectOptimisticLockingFailureException, gérée par
+ * ProjetController pour éviter qu'une validation n'écrasé silencieusement
  * une autre.
  */
 @Entity
@@ -42,7 +42,7 @@ public class Projet {
     @Version
     private Long version;
 
-    // --- Identite ---
+    // --- Identité ---
     @Column(nullable = false)
     private String nomProjet;
 
@@ -56,7 +56,7 @@ public class Projet {
     private String lieuRetour;
     private String transport;
 
-    // --- Organisme ou referent externe (optionnel) ---
+    // --- Organisme ou référent externe (optionnel) ---
     private String organismeNom;
     private String organismeTelephone;
     private String organismeEmail;
@@ -91,11 +91,11 @@ public class Projet {
     @Column(columnDefinition = "TEXT")
     private String commentaire;
 
-    // --- Pieces jointes (MVP) : simple lien vers un dossier Google Drive
-    // gere en dehors de l'application (cree/partage a la main), pas
-    // d'integration API Drive pour l'instant. Modifiable independamment du
+    // --- Pièces jointes (MVP) : simple lien vers un dossier Google Drive
+    // géré en dehors de l'application (créé/partagé à la main), pas
+    // d'intégration API Drive pour l'instant. Modifiable indépendamment du
     // reste du formulaire (voir ProjetService.modifierLienDrive), y compris
-    // par les roles de validation pendant l'instruction du dossier.
+    // par les rôles de validation pendant l'instruction du dossier.
     @Column(name = "lien_drive", length = 500)
     private String lienDrive;
 
@@ -113,8 +113,8 @@ public class Projet {
     private LocalDateTime dateValidationDirection;
 
     // --- Archivage (Admin) : retire le dossier du tableau de bord sans le
-    // supprimer, independamment de son statut de workflow. Reversible
-    // (desarchiver), contrairement a une suppression definitive.
+    // supprimer, indépendamment de son statut de workflow. Réversible
+    // (desarchiver), contrairement à une suppression définitive.
     @Column(nullable = false)
     private boolean archive = false;
 

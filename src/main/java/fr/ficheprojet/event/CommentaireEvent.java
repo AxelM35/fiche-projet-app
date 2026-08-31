@@ -5,10 +5,10 @@ import lombok.Getter;
 import java.util.List;
 
 /**
- * Evenement publie par CommentaireService a chaque nouveau commentaire sur
- * un dossier. Consomme uniquement par NotificationService pour notifier les
+ * Événement publié par CommentaireService à chaque nouveau commentaire sur
+ * un dossier. Consommé uniquement par NotificationService pour notifier les
  * autres participants du fil (voir CommentaireService.ajouter), en dehors du
- * thread de la requete web (voir @Async).
+ * thread de la requête web (voir @Async).
  */
 @Getter
 public class CommentaireEvent {

@@ -1,6 +1,6 @@
-# Force des fins de ligne LF pour les scripts executes dans des conteneurs
+# Force des fins de ligne LF pour les scripts exécutés dans des conteneurs
 # Linux (Docker), quelle que soit la config Git de la machine qui clone
-# (evite l'erreur "exit code: 127" quand mvnw est checkoute en CRLF sous Windows).
+# (évite l'erreur "exit code: 127" quand mvnw est checkouté en CRLF sous Windows).
 mvnw text eol=lf
 *.sh text eol=lf
 

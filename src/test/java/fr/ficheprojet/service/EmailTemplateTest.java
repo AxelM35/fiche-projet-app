@@ -12,10 +12,10 @@ import java.util.Locale;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Verifie le rendu du template email/notification.html utilise par
- * NotificationService pour les emails HTML : aucun test d'envoi reel (pas
+ * Vérifie le rendu du template email/notification.html utilisé par
+ * NotificationService pour les emails HTML : aucun test d'envoi réel (pas
  * de serveur SMTP en test), mais on s'assure que le HTML produit contient
- * bien les elements attendus selon les variables fournies.
+ * bien les éléments attendus selon les variables fournies.
  */
 @SpringBootTest
 @ActiveProfiles("test")

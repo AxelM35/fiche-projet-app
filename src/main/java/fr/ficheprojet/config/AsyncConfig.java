@@ -8,9 +8,9 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import java.util.concurrent.Executor;
 
 /**
- * Pool de threads dedie a l'envoi des emails de notification, pour que ces
- * envois (potentiellement lents) ne bloquent jamais le thread de la requete
- * web (voir NotificationService, methodes annotees @Async("mailExecutor")).
+ * Pool de threads dédié à l'envoi des emails de notification, pour que ces
+ * envois (potentiellement lents) ne bloquent jamais le thread de la requête
+ * web (voir NotificationService, méthodes annotées @Async("mailExecutor")).
  */
 @Configuration
 @EnableAsync

@@ -5,7 +5,7 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * Parametres utilises par NotificationService pour construire les emails
+ * Paramètres utilisés par NotificationService pour construire les emails
  * de notification du workflow de validation.
  */
 @Getter

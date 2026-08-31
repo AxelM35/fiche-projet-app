@@ -16,10 +16,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * Signalement volontaire depuis une page d'erreur (audit UX,
- * docs/CAHIER_DES_CHARGES.md S4bis) : transmis par email a l'administrateur
+ * docs/CAHIER_DES_CHARGES.md S4bis) : transmis par email à l'administrateur
  * (NotificationService.signalerErreur). Accessible sans authentification
- * (voir SecurityConfig), puisqu'une erreur peut survenir avant meme la
- * connexion (lien perime, session expiree...) - aucun @WithMockUser ici,
+ * (voir SecurityConfig), puisqu'une erreur peut survenir avant même la
+ * connexion (lien périmé, session expirée...) - aucun @WithMockUser ici,
  * intentionnellement.
  */
 @SpringBootTest

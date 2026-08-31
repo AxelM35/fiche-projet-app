@@ -8,9 +8,9 @@ import org.springframework.test.context.ActiveProfiles;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * En test (comme par defaut sans configuration), l'integration Drive est
- * desactivee : verifie que GoogleDriveService reste alors un no-op
- * silencieux plutot que de tenter un appel reseau vers l'API Google.
+ * En test (comme par défaut sans configuration), l'intégration Drive est
+ * désactivée : vérifie que GoogleDriveService reste alors un nô-op
+ * silencieux plutôt que de tenter un appel réseau vers l'API Google.
  */
 @SpringBootTest
 @ActiveProfiles("test")

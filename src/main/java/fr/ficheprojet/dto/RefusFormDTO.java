@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * DTO de la fenetre modale "Refuser" : ne transporte que le motif saisi.
+ * DTO de la fenêtre modale "Refuser" : ne transporte que le motif saisi.
  */
 @Getter
 @Setter

@@ -5,11 +5,14 @@ services:
     environment:
       POSTGRES_DB: ${DB_NAME:-fiche_projet}
       POSTGRES_USER: ${DB_USER:-fiche_projet_user}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:?la variable DB_PASSWORD doit etre definie dans .env}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?la variable DB_PASSWORD doit être définie dans .env}
     volumes:
       - db_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      # Publié uniquement sur la boucle locale du serveur : l'application
+      # joint la base par le réseau interne Docker (hôte "db"), ce port n'est
+      # exposé que pour un accès administrateur depuis le serveur lui-même.
+      - "127.0.0.1:5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-fiche_projet_user} -d ${DB_NAME:-fiche_projet}"]
       interval: 5s
@@ -32,20 +35,21 @@ services:
       DB_PORT: 5432
       DB_NAME: ${DB_NAME:-fiche_projet}
       DB_USER: ${DB_USER:-fiche_projet_user}
-      DB_PASSWORD: ${DB_PASSWORD:?la variable DB_PASSWORD doit etre definie dans .env}
+      DB_PASSWORD: ${DB_PASSWORD:?la variable DB_PASSWORD doit être définie dans .env}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
-      ALLOWED_EMAIL_DOMAIN: ${ALLOWED_EMAIL_DOMAIN:-exemple.fr}
-      ROLES_ADMIN: ${ROLES_ADMIN:-amorvan@exemple.fr}
-      ROLES_COMPTA: ${ROLES_COMPTA:-compta@exemple.fr}
-      ROLES_VIESCO: ${ROLES_VIESCO:-viesco@exemple.fr}
-      ROLES_DIRECTION: ${ROLES_DIRECTION:-direction@exemple.fr}
+      ETABLISSEMENT_NOM: ${ETABLISSEMENT_NOM:-}
+      ALLOWED_EMAIL_DOMAIN: ${ALLOWED_EMAIL_DOMAIN:?la variable ALLOWED_EMAIL_DOMAIN doit être définie dans .env}
+      ROLES_ADMIN: ${ROLES_ADMIN:-}
+      ROLES_COMPTA: ${ROLES_COMPTA:-}
+      ROLES_VIESCO: ${ROLES_VIESCO:-}
+      ROLES_DIRECTION: ${ROLES_DIRECTION:-}
       ROLES_LECTURE_SEULE: ${ROLES_LECTURE_SEULE:-}
       MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
       MAIL_PORT: ${MAIL_PORT:-587}
       MAIL_USERNAME: ${MAIL_USERNAME:-}
       MAIL_PASSWORD: ${MAIL_PASSWORD:-}
-      MAIL_FROM: ${MAIL_FROM:-noreply@exemple.fr}
+      MAIL_FROM: ${MAIL_FROM:-}
       APP_BASE_URL: ${APP_BASE_URL:-http://localhost:8080}
       RELANCES_SEUIL_JOURS: ${RELANCES_SEUIL_JOURS:-7}
       RELANCES_PERIODE_JOURS: ${RELANCES_PERIODE_JOURS:-7}
@@ -55,8 +59,8 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      # Lecture seule : uniquement pour que la page admin "Sante" affiche la
-      # date de la derniere sauvegarde. L'application n'ecrit jamais ici.
+      # Lecture seule : uniquement pour que la page admin "Santé" affiche la
+      # date de la dernière sauvegarde. L'application n'écrit jamais ici.
       - ./backups:/backups:ro
     logging:
       driver: json-file
@@ -76,7 +80,7 @@ services:
       POSTGRES_HOST: db
       POSTGRES_DB: ${DB_NAME:-fiche_projet}
       POSTGRES_USER: ${DB_USER:-fiche_projet_user}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:?la variable DB_PASSWORD doit etre definie dans .env}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?la variable DB_PASSWORD doit être définie dans .env}
       SCHEDULE: ${BACKUP_SCHEDULE:-@daily}
       BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS:-7}
       BACKUP_KEEP_WEEKS: ${BACKUP_KEEP_WEEKS:-4}

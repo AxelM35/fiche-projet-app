@@ -24,13 +24,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 
 /**
- * Verifie les statistiques consolidees (/admin/statistiques), calculees sur
- * l'ensemble des dossiers actifs de la base H2 partagee entre tests : les
- * assertions sur le taux de refus et le delai moyen comparent donc un
- * "avant/apres" (delta) plutot que des valeurs absolues, pour rester
- * fiables quel que soit ce que les autres tests ont deja cree. Le budget
- * par annee/classe utilise a l'inverse une annee et une classe tres
- * improbables ailleurs, pour pouvoir verifier une valeur exacte.
+ * Vérifie les statistiques consolidées (/admin/statistiques), calculées sur
+ * l'ensemble des dossiers actifs de la base H2 partagée entre tests : les
+ * assertions sur le taux de refus et le délai moyen comparent donc un
+ * "avant/après" (delta) plutôt que des valeurs absolues, pour rester
+ * fiables quel que soit ce que les autres tests ont déjà créé. Le budget
+ * par année/classe utilise à l'inverse une année et une classe très
+ * improbables ailleurs, pour pouvoir vérifier une valeur exacte.
  */
 @SpringBootTest
 @ActiveProfiles("test")
@@ -114,7 +114,7 @@ class StatistiquesServiceTest {
         dto.setCoutGlobal(new BigDecimal("3000"));
         Long idValide = validerCompletement(dto);
 
-        // Un brouillon avec la meme classe ne doit pas etre compte.
+        // Un brouillon avec la même classe ne doit pas être compte.
         connecterEnTantQue("martin@exemple.fr", "ROLE_PROF");
         ProjetFormDTO brouillon = dtoValide();
         brouillon.setClassesConcernees("ZZ-TEST-STATS");
@@ -122,7 +122,7 @@ class StatistiquesServiceTest {
         brouillon.setCoutGlobal(new BigDecimal("9999"));
         projetService.creerProjet(brouillon);
 
-        connecterEnTantQue("amorvan@exemple.fr", "ROLE_ADMIN");
+        connecterEnTantQue("admin@exemple.fr", "ROLE_ADMIN");
         StatistiquesDTO stats = statistiquesService.calculer();
 
         assertThat(trouver(stats.budgetParAnneeScolaire(), "2099-2100"))
@@ -130,7 +130,7 @@ class StatistiquesServiceTest {
         assertThat(trouver(stats.budgetParClasse(), "ZZ-TEST-STATS"))
                 .hasValueSatisfying(r -> assertThat(r.montant()).isEqualByComparingTo("3000"));
 
-        // Une fois archive, le dossier valide sort des statistiques.
+        // Une fois archivé, le dossier validé sort des statistiques.
         projetService.archiver(idValide);
         StatistiquesDTO statsApresArchivage = statistiquesService.calculer();
         assertThat(trouver(statsApresArchivage.budgetParAnneeScolaire(), "2099-2100")).isEmpty();
@@ -139,25 +139,25 @@ class StatistiquesServiceTest {
 
     @Test
     void leTauxDeRefusParEtapeCompteLesValidationsEtLesRefusDeCetteEtape() {
-        connecterEnTantQue("amorvan@exemple.fr", "ROLE_ADMIN");
+        connecterEnTantQue("admin@exemple.fr", "ROLE_ADMIN");
         StatistiquesDTO avant = statistiquesService.calculer();
         StatistiquesDTO.TauxRefusParEtape baseline = tauxPourEtape(avant, "Comptabilité");
 
-        // Un dossier valide par la Comptabilite...
+        // Un dossier validé par la Comptabilité...
         connecterEnTantQue("martin@exemple.fr", "ROLE_PROF");
         Long idValide = projetService.creerProjet(dtoValide()).getId();
         projetService.soumettre(idValide);
         connecterEnTantQue("compta@exemple.fr", "ROLE_COMPTA");
         projetService.validerCompta(idValide);
 
-        // ...et un dossier refuse par la Comptabilite.
+        // ...et un dossier refusé par la Comptabilité.
         connecterEnTantQue("martin@exemple.fr", "ROLE_PROF");
         Long idRefuse = projetService.creerProjet(dtoValide()).getId();
         projetService.soumettre(idRefuse);
         connecterEnTantQue("compta@exemple.fr", "ROLE_COMPTA");
         projetService.refuser(idRefuse, "Devis manquant.");
 
-        connecterEnTantQue("amorvan@exemple.fr", "ROLE_ADMIN");
+        connecterEnTantQue("admin@exemple.fr", "ROLE_ADMIN");
         StatistiquesDTO.TauxRefusParEtape apres = tauxPourEtape(statistiquesService.calculer(), "Comptabilité");
 
         assertThat(apres.nombreValidations()).isEqualTo(baseline.nombreValidations() + 1);
@@ -165,7 +165,7 @@ class StatistiquesServiceTest {
         double tauxAttendu = 100.0 * apres.nombreRefus() / (apres.nombreValidations() + apres.nombreRefus());
         assertThat(apres.tauxRefusPourcent()).isEqualTo(tauxAttendu, within(0.001));
 
-        // Le refus d'un dossier archive ne doit plus compter dans les stats.
+        // Le refus d'un dossier archivé ne doit plus compter dans les stats.
         projetService.archiver(idRefuse);
         StatistiquesDTO.TauxRefusParEtape apresArchivage = tauxPourEtape(statistiquesService.calculer(), "Comptabilité");
         assertThat(apresArchivage.nombreRefus()).isEqualTo(baseline.nombreRefus());
@@ -173,7 +173,7 @@ class StatistiquesServiceTest {
 
     @Test
     void leDelaiMoyenDeTraitementEstCalculeADepuisLesDatesDeValidation() {
-        connecterEnTantQue("amorvan@exemple.fr", "ROLE_ADMIN");
+        connecterEnTantQue("admin@exemple.fr", "ROLE_ADMIN");
         StatistiquesDTO avant = statistiquesService.calculer();
         StatistiquesDTO.DelaiParEtape baseline = delaiPourEtape(avant, "Comptabilité");
 
@@ -182,8 +182,8 @@ class StatistiquesServiceTest {
         projetService.soumettre(id);
 
         // Recule artificiellement la date de soumission de 4 jours pour
-        // obtenir un delai de traitement mesurable et precis, sans dependre
-        // du temps reel ecoule pendant le test.
+        // obtenir un délai de traitement mesurable et précis, sans dépendre
+        // du temps réel écoulé pendant le test.
         Projet projet = projetRepository.findById(id).orElseThrow();
         LocalDateTime dateSoumissionReculee = projet.getDateValidationProf().minusDays(4);
         projet.setDateValidationProf(dateSoumissionReculee);
@@ -192,7 +192,7 @@ class StatistiquesServiceTest {
         connecterEnTantQue("compta@exemple.fr", "ROLE_COMPTA");
         projetService.validerCompta(id);
 
-        connecterEnTantQue("amorvan@exemple.fr", "ROLE_ADMIN");
+        connecterEnTantQue("admin@exemple.fr", "ROLE_ADMIN");
         StatistiquesDTO.DelaiParEtape apres = delaiPourEtape(statistiquesService.calculer(), "Comptabilité");
 
         assertThat(apres.nombreDossiersMesures()).isEqualTo(baseline.nombreDossiersMesures() + 1);

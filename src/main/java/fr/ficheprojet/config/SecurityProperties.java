@@ -5,7 +5,7 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * Domaine email autorise a se connecter (transmis via la variable
+ * Domaine email autorisé à se connecter (transmis via la variable
  * d'environnement ALLOWED_EMAIL_DOMAIN).
  */
 @Getter

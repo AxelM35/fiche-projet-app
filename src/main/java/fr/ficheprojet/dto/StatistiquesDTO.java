@@ -4,8 +4,8 @@ import java.math.BigDecimal;
 import java.util.List;
 
 /**
- * Statistiques consolidees pour le dashboard Admin (/admin/statistiques),
- * calculees uniquement sur les dossiers actifs (hors archives).
+ * Statistiques consolidées pour le dashboard Admin (/admin/statistiques),
+ * calculées uniquement sur les dossiers actifs (hors archivés).
  */
 public record StatistiquesDTO(
         List<Repartition> budgetParAnneeScolaire,

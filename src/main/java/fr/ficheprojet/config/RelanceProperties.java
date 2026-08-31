@@ -5,9 +5,9 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * Parametres des relances automatiques sur les dossiers bloques (voir
- * RelanceService) : seuil avant la premiere relance, puis periode de
- * repetition tant que le dossier reste bloque.
+ * Paramètres des relances automatiques sur les dossiers bloqués (voir
+ * RelanceService) : seuil avant la première relance, puis période de
+ * répétition tant que le dossier reste bloqué.
  */
 @Getter
 @Setter

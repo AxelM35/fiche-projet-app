@@ -6,11 +6,11 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
- * Point d'entree de l'application Fiche Projet numérique (gestion et
- * validation des projets de voyages scolaires du Collège Exemple).
+ * Point d'entrée de l'application Fiche Projet numérique (gestion et
+ * validation des projets de voyages scolaires).
  * <p>
- * @EnableScheduling : necessaire pour RelanceService.relancerDossiersBloques()
- * (@Scheduled, relances automatiques quotidiennes des dossiers bloques).
+ * @EnableScheduling : nécessaire pour RelanceService.relancerDossiersBloques()
+ * (@Scheduled, relances automatiques quotidiennes des dossiers bloqués).
  */
 @SpringBootApplication
 @ConfigurationPropertiesScan

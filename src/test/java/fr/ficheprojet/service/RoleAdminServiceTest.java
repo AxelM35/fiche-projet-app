@@ -20,8 +20,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- * Verifie que la gestion des attributions de roles (dashboard admin) est
- * bien reservee a ROLE_ADMIN, et que les emails sont normalises / dedupliques.
+ * Vérifie que la gestion des attributions de rôles (dashboard admin) est
+ * bien réservée à ROLE_ADMIN, et que les emails sont normalisés / dedupliques.
  */
 @SpringBootTest
 @ActiveProfiles("test")
@@ -52,16 +52,16 @@ class RoleAdminServiceTest {
 
     @Test
     void unAdminPeutAjouterEtRetirerUneAttributionEtLEmailEstNormalise() {
-        connecterEnTantQue("amorvan@exemple.fr", "ROLE_ADMIN");
+        connecterEnTantQue("admin@exemple.fr", "ROLE_ADMIN");
 
-        roleAdminService.ajouter("  Secretariat@exemple.fr  ", RoleMetier.LECTURE_SEULE);
+        roleAdminService.ajouter("  Secretariat@Exemple.fr  ", RoleMetier.LECTURE_SEULE);
 
         Map<RoleMetier, List<RoleAttribution>> parRole = roleAdminService.listerParRole();
         assertThat(parRole.get(RoleMetier.LECTURE_SEULE))
                 .extracting(RoleAttribution::getEmail)
                 .containsExactly("secretariat@exemple.fr");
 
-        // Ajouter deux fois le meme couple email/role ne cree pas de doublon.
+        // Ajouter deux fois le même couple email/rôle ne crée pas de doublon.
         roleAdminService.ajouter("secretariat@exemple.fr", RoleMetier.LECTURE_SEULE);
         assertThat(roleAdminService.listerParRole().get(RoleMetier.LECTURE_SEULE)).hasSize(1);
 

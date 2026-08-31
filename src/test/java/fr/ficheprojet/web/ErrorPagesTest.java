@@ -16,18 +16,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Pages d'erreur personnalisees (audit UX, docs/CAHIER_DES_CHARGES.md S4bis) :
- * un utilisateur non technique qui tombe sur un lien perime ou une action non
- * autorisee doit voir un message clair en francais plutot que la page
- * Whitelabel de Spring Boot. Templates resolues par convention (Spring Boot
+ * Pages d'erreur personnalisées (audit UX, docs/CAHIER_DES_CHARGES.md S4bis) :
+ * un utilisateur non technique qui tombe sur un lien périmé ou une action non
+ * autorisée doit voir un message clair en français plutôt que la page
+ * Whitelabel de Spring Boot. Templates résolues par convention (Spring Boot
  * DefaultErrorViewResolver) via templates/error/{403,404,500}.html, sans
- * controleur dedie.
+ * contrôleur dédié.
  *
- * MockMvc ne simule pas le forward container vers /error declenche par un
- * vrai code d'erreur (contrairement a un serveur reellement demarre) : les
+ * MockMvc ne simule pas le forward container vers /error déclenché par un
+ * vrai code d'erreur (contrairement à un serveur réellement démarré) : les
  * tests de rendu appellent donc directement /error avec l'attribut de
- * requete que Spring Boot y lit normalement (jakarta.servlet.error.status_code),
- * comme le ferait le conteneur. La verification que /admin/roles renvoie
+ * requête que Spring Boot y lit normalement (jakarta.servlet.error.status_code),
+ * comme le ferait le conteneur. La vérification que /admin/rôles renvoie
  * bien 403 (sans reperformer le rendu) reste couverte par AdminControllerTest.
  */
 @SpringBootTest
@@ -46,7 +46,7 @@ class ErrorPagesTest {
     }
 
     // Accept: text/html requis pour chaque appel : BasicErrorController choisit
-    // sinon sa reponse JSON generique (comportement de negociation de contenu
+    // sinon sa réponse JSON générique (comportement de négociation de contenu
     // normal, un vrai navigateur envoie toujours cet en-tete).
 
     @Test
@@ -59,9 +59,9 @@ class ErrorPagesTest {
 
     /**
      * Formulaire de signalement (voir fragments/signalement-erreur.html) :
-     * present sur la page, avec le code de statut et le chemin d'origine
-     * deja renseignes dans des champs caches (pas a l'utilisateur de les
-     * retrouver lui-meme).
+     * présent sur la page, avec le code de statut et le chemin d'origine
+     * déjà renseignés dans des champs cachés (pas à l'utilisateur de les
+     * retrouver lui-même).
      */
     @Test
     void laPageDerreur403ProposeUnFormulaireDeSignalementAvecLeContexte() throws Exception {

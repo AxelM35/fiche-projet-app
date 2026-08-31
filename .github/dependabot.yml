@@ -1,6 +1,6 @@
 version: 2
 updates:
-  # Dependances Maven (pom.xml)
+  # Dépendances Maven (pom.xml)
   - package-ecosystem: "maven"
     directory: "/"
     schedule:
@@ -13,7 +13,7 @@ updates:
     schedule:
       interval: "weekly"
 
-  # Actions utilisees dans les workflows CI
+  # Actions utilisées dans les workflows CI
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

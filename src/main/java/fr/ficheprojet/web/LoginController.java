@@ -4,12 +4,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 /**
- * Page de connexion dediee, necessaire car Spring Security saute la page de
- * choix generee automatiquement (DefaultLoginPageGeneratingFilter) des lors
- * qu'un seul fournisseur OAuth2 (Google) est enregistre : sans page de
+ * Page de connexion dédiée, nécessaire car Spring Security saute la page de
+ * choix générée automatiquement (DefaultLoginPageGeneratingFilter) des lors
+ * qu'un seul fournisseur OAuth2 (Google) est enregistré : sans page de
  * connexion explicite (SecurityConfig.loginPage("/login")), GET /login ne
- * correspond a aucune route et renvoie un 404 (reproduit par exemple apres
- * une deconnexion, qui redirige vers /login?deconnexion).
+ * correspond à aucune route et renvoie un 404 (reproduit par exemple après
+ * une déconnexion, qui redirige vers /login?déconnexion).
  */
 @Controller
 public class LoginController {

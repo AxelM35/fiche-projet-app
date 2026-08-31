@@ -23,8 +23,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- * Verifie le fil de commentaires d'un dossier : autorisation d'ajout (meme
- * perimetre que la gestion du lien Drive), propriete du commentaire pour la
+ * Vérifie le fil de commentaires d'un dossier : autorisation d'ajout (même
+ * périmètre que la gestion du lien Drive), propriété du commentaire pour la
  * modification/suppression, et ordre chronologique du fil.
  */
 @SpringBootTest
@@ -113,7 +113,7 @@ class CommentaireServiceTest {
         Long id = creerProjet();
         Commentaire commentaire = commentaireService.ajouter(id, "Texte initial");
 
-        connecterEnTantQue("amorvan@exemple.fr", "ROLE_ADMIN");
+        connecterEnTantQue("admin@exemple.fr", "ROLE_ADMIN");
         assertThatThrownBy(() -> commentaireService.modifier(commentaire.getId(), "Modifié par un autre"))
                 .isInstanceOf(AccessDeniedException.class);
 
@@ -130,7 +130,7 @@ class CommentaireServiceTest {
         Long id = creerProjet();
         Commentaire commentaire = commentaireService.ajouter(id, "A supprimer");
 
-        connecterEnTantQue("amorvan@exemple.fr", "ROLE_ADMIN");
+        connecterEnTantQue("admin@exemple.fr", "ROLE_ADMIN");
         assertThatThrownBy(() -> commentaireService.supprimer(commentaire.getId()))
                 .isInstanceOf(AccessDeniedException.class);
 
@@ -145,7 +145,7 @@ class CommentaireServiceTest {
         Long id = creerProjet();
         commentaireService.ajouter(id, "Un commentaire");
 
-        connecterEnTantQue("amorvan@exemple.fr", "ROLE_ADMIN");
+        connecterEnTantQue("admin@exemple.fr", "ROLE_ADMIN");
         projetService.supprimerDefinitivement(id);
 
         assertThat(commentaireService.lister(id)).isEmpty();

@@ -30,8 +30,8 @@ class NotificationToggleServiceTest {
 
     @AfterEach
     void nettoyer() {
-        // Remet l'etat par defaut pour ne pas impacter d'autres tests (bean singleton).
-        connecterEnTantQue("amorvan@exemple.fr", "ROLE_ADMIN");
+        // Remet l'état par défaut pour ne pas impacter d'autres tests (bean singleton).
+        connecterEnTantQue("admin@exemple.fr", "ROLE_ADMIN");
         notificationToggleService.activer();
         SecurityContextHolder.clearContext();
     }
@@ -45,7 +45,7 @@ class NotificationToggleServiceTest {
 
     @Test
     void unAdminPeutDesactiverPuisReactiverLesNotifications() {
-        connecterEnTantQue("amorvan@exemple.fr", "ROLE_ADMIN");
+        connecterEnTantQue("admin@exemple.fr", "ROLE_ADMIN");
         assertThat(notificationToggleService.sontActives()).isTrue();
 
         notificationToggleService.desactiver();
