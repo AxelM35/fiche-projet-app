@@ -9,14 +9,23 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # 17 = version cible déclarée dans le pom (java.version), plancher
+        # supporté. 25 = version utilisée par les images du Dockerfile, donc
+        # celle qui compile et exécute réellement l'application en production.
+        # Les deux sont testées pour ne jamais livrer sur un JDK non couvert.
+        java: ['17', '25']
+    name: Tests (JDK ${{ matrix.java }})
     steps:
       - uses: actions/checkout@v7
-
       - name: JDK 17
         uses: actions/setup-java@v6.0.0
+
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: ${{ matrix.java }}
           cache: maven
 
       - name: Tests

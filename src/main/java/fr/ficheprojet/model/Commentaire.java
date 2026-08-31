@@ -13,9 +13,9 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 /**
- * Message du fil de commentaires d'un dossier (echanges entre organisateur
- * et valideurs, independants du motif de refus). Pas de relation JPA vers
- * Projet (simple projetId, comme JournalEntree) : la suppression est geree
+ * Message du fil de commentaires d'un dossier (échanges entre organisateur
+ * et valideurs, indépendants du motif de refus). Pas de relation JPA vers
+ * Projet (simple projetId, comme JournalEntree) : la suppression est gérée
  * explicitement par ProjetService.supprimerDefinitivement.
  */
 @Entity
@@ -36,9 +36,9 @@ public class Commentaire {
     private String auteurEmail;
 
     /**
-     * Libelle du role sous lequel l'auteur a poste (ex. "Direction",
-     * "Professeur") : capture au moment de l'ecriture, independant d'une
-     * eventuelle evolution ulterieure de ses attributions de role.
+     * Libellé du rôle sous lequel l'auteur a posté (ex. "Direction",
+     * "Professeur") : capture au moment de l'écriture, indépendant d'une
+     * éventuelle évolution ultérieure de ses attributions de rôle.
      */
     private String auteurRole;
 
@@ -49,8 +49,8 @@ public class Commentaire {
     private LocalDateTime dateCreation = LocalDateTime.now();
 
     /**
-     * Renseignee uniquement si le commentaire a ete modifie apres coup
-     * (affiche "modifie le ..." dans le fil), null sinon.
+     * Renseignée uniquement si le commentaire a été modifié après coup
+     * (affiche "modifié le ..." dans le fil), null sinon.
      */
     private LocalDateTime dateModification;
 }

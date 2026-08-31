@@ -9,8 +9,8 @@ import java.math.BigDecimal;
 
 /**
  * DTO du formulaire "Compléter le budget" (voir ProjetService.completerBudget) :
- * contrairement a ProjetFormDTO.coutGlobal/coutParEleve, obligatoires ici -
- * c'est precisement le formulaire qui sert a les renseigner.
+ * contrairement à ProjetFormDTO.coutGlobal/coutParEleve, obligatoires ici -
+ * c'est précisément le formulaire qui sert à les renseigner.
  */
 @Getter
 @Setter

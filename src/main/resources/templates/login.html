@@ -17,7 +17,8 @@
     <div class="card carte-formulaire shadow-sm login-card">
         <div class="card-body text-center p-4">
             <h1 class="h4 mb-1">Fiche Projet numérique</h1>
-            <p class="text-muted mb-4">Collège Exemple</p>
+            <p class="text-muted mb-4" th:if="${!#strings.isEmpty(nomEtablissement)}"
+               th:text="${nomEtablissement}">Établissement</p>
 
             <div class="alert alert-success" role="alert" th:if="${param.deconnexion != null}">
                 Vous avez été déconnecté avec succès.

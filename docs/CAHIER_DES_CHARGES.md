@@ -1,7 +1,9 @@
 # Cahier des charges — Fiche Projet numérique (gestion des projets de voyages scolaires)
 ### Collège Exemple — état des lieux, chantiers restants et pistes d'évolution
 
-*Document vivant : état des lieux, décisions prises et pistes encore ouvertes, mis à jour au fil du développement (voir aussi le suivi Git pour le détail commit par commit).*
+*Document vivant : état des lieux, décisions prises et pistes encore ouvertes,
+mis à jour au fil du développement. L'historique Git conserve le détail
+commit par commit.*
 
 ---
 
@@ -14,7 +16,7 @@
 - Notifications email asynchrones (`@Async` + `AFTER_COMMIT`) à chaque changement de statut, texte brut, échec catché sans casser le workflow.
 - CSRF géré automatiquement (thymeleaf-extras-springsecurity6 + formulaires `th:action`) — **déjà correct, rien à faire ici**.
 - UI Material 3 (Bootstrap 5 + variables `--bs-*`/`--md-*`), Kanban 5 colonnes, tuiles de stats, recherche côté client, vue consultation lecture seule, duplication en brouillon.
-- 88 tests (H2 en mémoire) couvrant services, contrôleurs et sécurité.
+- 110 tests (H2 en mémoire) couvrant services, contrôleurs et sécurité.
 
 ## 2. Chantiers techniques — mise en production
 
@@ -22,7 +24,7 @@ Ce qui est nécessaire avant un vrai lancement, par thème.
 
 ### 2.1 Emails
 - [ ] Tester l'envoi réel avec un serveur SMTP (jamais fait en conditions réelles) — vérifier délivrabilité, SPF/DKIM si domaine propre.
-- [x] Emails HTML : `NotificationService` construit desormais un `MimeMessage` (multipart texte brut + HTML) via `MimeMessageHelper`, rendu par le template Thymeleaf `templates/email/notification.html` (mise en page par tables, styles inline uniquement — pas de dépendance à `style.css` ni aux CDN, pour la compatibilité Outlook/Gmail). Couvre les 7 notifications de workflow et l'email de test admin ; motif de refus mis en évidence, bouton "Consulter le dossier" masqué si aucun lien (email de test). Testé via `EmailTemplateTest` (rendu du template) — **l'envoi réel avec un vrai client mail reste à valider par toi** (rendu visuel Gmail/Outlook), voir point precedent.
+- [x] Emails HTML : `NotificationService` construit desormais un `MimeMessage` (multipart texte brut + HTML) via `MimeMessageHelper`, rendu par le template Thymeleaf `templates/email/notification.html` (mise en page par tables, styles inline uniquement — pas de dépendance à `style.css` ni aux CDN, pour la compatibilité Outlook/Gmail). Couvre les 7 notifications de workflow et l'email de test admin ; motif de refus mis en évidence, bouton "Consulter le dossier" masqué si aucun lien (email de test). Testé via `EmailTemplateTest` (rendu du template) — **l'envoi réel avec un vrai client mail reste à valider par l'établissement** (rendu visuel Gmail/Outlook), voir point precedent.
 - [x] Notification de l'organisateur à chaque étape franchie (pas seulement validation finale/refus) : à `EN_ATTENTE_VIE_SCOLAIRE` et `EN_ATTENTE_DIRECTION`, l'organisateur reçoit désormais aussi un email ("votre dossier a été validé par X, en attente de Y"), en plus de la notification au rôle valideur suivant — 2 emails indépendants par transition (chacun avec son propre `try/catch`, un échec sur l'un n'empêche pas l'autre). Couvre tout le cycle de vie côté organisateur : soumission (déjà via `dateValidationProf`, pas d'email dédié), Compta, Vie Scolaire, Direction, validation finale, refus.
 
 ### 2.2 Configuration réelle
@@ -34,7 +36,7 @@ Ce qui est nécessaire avant un vrai lancement, par thème.
 ### 2.3 Déploiement
 - [ ] HTTPS via reverse proxy (nginx/Caddy/Traefik) — obligatoire pour OAuth2 en production et pour la confidentialité des données. Marche à suivre détaillée (dont un exemple Caddy minimal) dans [`docs/GUIDE_DEPLOIEMENT.md`](GUIDE_DEPLOIEMENT.md#5-étape-3--https-obligatoire), destiné au responsable informatique en charge du déploiement.
 - [x] Migration vers Flyway : migration baseline `V1__init.sql` correspondant au schéma généré par `ddl-auto=update`, `ddl-auto` passé en `validate`. **À tester sur une base vide (`docker compose down -v && docker compose up --build`) avant de considérer que c'est acquis.**
-- [x] Stratégie de sauvegarde PostgreSQL : service `db-backup` (dumps quotidiens compressés, rétention configurable, voir `docs/SAUVEGARDE.md`). **Le test de restauration réel reste à faire par toi** — la procédure est documentée mais je ne peux pas l'exécuter depuis mon environnement (pas de Docker).
+- [x] Stratégie de sauvegarde PostgreSQL : service `db-backup` (dumps quotidiens compressés, rétention configurable, voir `docs/SAUVEGARDE.md`). **Le test de restauration réel reste à faire par l'établissement** — la procédure est documentée mais n'a pas pu être exécutée depuis l'environnement de développement (pas de Docker).
 - [x] CI GitHub Actions (`.github/workflows/ci.yml`) : lance `./mvnw test` sur chaque push/PR vers `main`.
 - [x] Endpoint de santé (`spring-boot-starter-actuator`) : `/actuator/health` public (pas d'authentification, voir `SecurityConfig`), seul endpoint exposé (`management.endpoints.web.exposure.include=health`), `show-details=never` (ne renvoie que `{"status":"UP"}`, jamais le détail des composants à un appelant anonyme). Indicateur mail désactivé (`management.health.mail.enabled=false`) : un incident SMTP ne doit pas faire passer tout le conteneur pour en panne. `Dockerfile` : `HEALTHCHECK` intégré à l'image (curl installé dans le runtime), `docker compose ps` / `depends_on: condition: service_healthy` en profiteront automatiquement (utile pour un futur reverse proxy HTTPS). Testé via `ActuatorHealthTest`.
 
@@ -46,7 +48,7 @@ Ce qui est nécessaire avant un vrai lancement, par thème.
   - Styles : les ~18 attributs `style="..."` (hors `templates/email/notification.html`, volontairement inline pour la compatibilité Gmail/Outlook, hors de portée de cette CSP) sont remplacés par des classes utilitaires dans `style.css` (`.pb-footer-sticky`, `.pb-page`, `.text-pre-wrap`, `.stat-value-compact`, `.kanban-col`).
   - Scripts : les 2 blocs `<script>` inline (`dashboard.html`, `formulaire.html`) déplacés vers `static/js/dashboard.js` et `static/js/formulaire.js`. Les attributs `onclick`/`onsubmit` (ajout/retrait d'accompagnateur, confirmation de suppression) remplacés par des écouteurs d'événements (délégation d'événements pour le cas des lignes ajoutées dynamiquement) ; la confirmation de suppression généralisée via un attribut `data-confirm` + `static/js/confirmation.js` réutilisable partout.
   - CSP finale : `script-src 'self' https://cdn.jsdelivr.net; style-src 'self' https://cdn.jsdelivr.net https://fonts.googleapis.com` (plus de `'unsafe-inline'`).
-  - Vérifié par un lancement réel de l'appli (profil H2 test) : en-tête CSP sans `'unsafe-inline'`, fichiers JS servis, plus aucun `onclick`/`onsubmit`/`style=` dans les templates. **Le clic réel sur les boutons concernés (ajout/retrait accompagnateur, confirmation de suppression, recherche dashboard, modales) reste à valider par toi dans un vrai navigateur** — je n'ai pas d'outil de navigateur dans cet environnement pour l'automatiser.
+  - Vérifié par un lancement réel de l'appli (profil H2 test) : en-tête CSP sans `'unsafe-inline'`, fichiers JS servis, plus aucun `onclick`/`onsubmit`/`style=` dans les templates. **Le clic réel sur les boutons concernés (ajout/retrait accompagnateur, confirmation de suppression, recherche dashboard, modales) reste à valider dans un vrai navigateur** — aucun navigateur n'était disponible dans l'environnement de développement pour l'automatiser.
 - [x] **Vérification des secrets et des logs** :
   - Aucun secret commité : `.env` ignoré (jamais présent dans l'historique git), seul `.env.example` (valeurs vides/placeholders) est versionné. Recherche de motifs de clés/tokens (clé privée, clé AWS, token Slack...) dans tout le code : aucune trouvée.
   - Logs applicatifs relus un par un (`log.info/warn/error/debug`, une douzaine d'occurrences) : aucun mot de passe, jeton OAuth2/session, ni donnée de santé/sensible au sens RGPD. Quelques données personnelles apparaissent dans des logs de sécurité légitimes (email de connexion refusée/acceptée dans `CustomOAuth2UserService`, adresse IP dans `LoginRateLimitingFilter`, adresses email de destinataires en cas d'échec d'envoi dans `NotificationService`) — usage proportionné (traçabilité de sécurité/support), mais suppose des logs eux-mêmes protégés (accès restreint au serveur) et non conservés indéfiniment.
@@ -106,7 +108,7 @@ Idées à évaluer, aucune n'est engagée — à trier selon la valeur perçue.
   - ✅ **Recherche admin avancée** (`/admin/recherche`) : par nom, organisateur, classe, statut, archivage (tous statuts et archivés confondus, contrairement au dashboard). **Export CSV** (`/admin/recherche/export.csv`) des résultats filtrés.
   - ✅ **Email de test SMTP + interrupteur temporaire des notifications** (`/admin/notifications`) : envoi d'un email de test immédiat (échec remonté à l'écran, contrairement au flux normal qui l'avale), et un interrupteur volontairement non persisté (redémarrage = notifications réactivées).
   - ✅ **Tableau "santé"** (`/admin/sante`) : nombre de dossiers en base, version déployée (MANIFEST du jar), date de la dernière sauvegarde (lue dans `./backups/last/`, monté en lecture seule dans le conteneur `app`). Pas de bouton "sauvegarder maintenant" dans l'appli (délibéré, voir `docs/SAUVEGARDE.md`) — exécuter un processus système ou donner accès au conteneur `db-backup` depuis le serveur web est une surface d'attaque évitable ; commande documentée à lancer soi-même à la place.
-  - ⬜ Autres fonctions à discuter avec le client. --> **Décision : laissé ouvert pour l'instant**, à reprendre après le lancement selon les retours terrain.
+  - ⬜ Autres fonctions à arbitrer avec l'établissement. --> **Décision : laissé ouvert pour l'instant**, à reprendre après le lancement selon les retours terrain.
 
 ## 4. Pistes UX/UI
 
@@ -116,7 +118,7 @@ Idées à évaluer, aucune n'est engagée — à trier selon la valeur perçue.
 - ✅ **Responsive mobile** — fait.
   - **Bug corrigé** : la navbar utilisait `navbar-expand-lg` sans bouton hamburger ni `<div class="collapse">` (voir `fragments/navbar.html`) — sous 992px, elle n'avait donc aucun moyen de se replier et débordait. Ajout du couple bouton `.navbar-toggler` + `.collapse.navbar-collapse` standard Bootstrap. Testé (`laNavbarEstRepliableSurMobile`).
   - **Kanban** : défilement horizontal déjà fonctionnel (`overflow-auto`), complété par un `scroll-snap` (une colonne s'accroche à l'écran plutôt que de s'arrêter n'importe où) et, sous 576px, une largeur de colonne en `vw` (une colonne visible + aperçu de la suivante) plutôt que la largeur fixe pensée pour desktop. Marges latérales réduites et barre de recherche en pleine largeur sur très petit écran.
-  - **Non testé dans un vrai navigateur** (pas d'outil de navigateur dans mon environnement) : le rendu visuel réel sur mobile (Chrome DevTools ou téléphone) reste à valider par toi.
+  - **Non testé dans un vrai navigateur** (aucun navigateur disponible dans l'environnement de développement) : le rendu visuel réel sur mobile (Chrome DevTools ou téléphone) reste à valider sur un appareil de l'établissement.
 - ✅ **Feedback visuel** sur les boutons de validation/refus/soumission — fait. `static/js/boutons-validation.js` : un seul écouteur délégué sur l'événement `submit` (via `event.submitter`, identifie le bouton réellement à l'origine même pour un bouton associé par l'attribut `form="..."` comme "Soumettre pour validation"), désactive le bouton et affiche un spinner Bootstrap + "Traitement..." dès que le formulaire est réellement soumis (jamais avant une validation HTML5 bloquante, ex. champ requis vide). Classe marqueur `js-bouton-validation` posée sur : Soumettre, Valider Budget/Vie Scolaire/Direction, Confirmer le refus (dashboard et formulaire), Confirmer et soumettre (récapitulatif). Volontairement pas étendu à "Enregistrer"/"Dupliquer"/"Archiver"/"Supprimer" (hors du périmètre demandé).
 - **Aide contextuelle** pour les nouveaux professeurs à la première connexion (tooltip ou courte visite guidée expliquant le workflow).
 
@@ -223,7 +225,7 @@ formulaire en échec de validation, dashboard vu par un compte Prof, fiche `A_CO
   pattern tolérant au vide que `organismeTelephone` (`^$|^[0-9+ .-]{6,20}$`) : `@NotBlank` porte seul le
   message "obligatoire" pour un champ vide, la regex ne double plus le message sur le format en même temps.
 - ⬜ **Couleurs officielles du collège** — reprend la piste déjà notée en §2.5/§4, dépend toujours de
-  la charte graphique à confirmer avec le client (§6).
+  la charte graphique à confirmer avec l'établissement (§6).
 - ✅ **Budget non connu à la création** — fait (P3), étendu sur demande du porteur du projet au-delà du
   point initial ("Subvention sans valeur par défaut"). Un enseignant planifie souvent un projet avant
   d'avoir les chiffres définitifs, à compléter plus tard avec la Comptabilité :
@@ -252,7 +254,7 @@ formulaire en échec de validation, dashboard vu par un compte Prof, fiche `A_CO
 |---|---|---|
 | **P1 — fort impact quotidien** | 1. ✅ Vue "Mes dossiers" par défaut sur le dashboard (fait) · 2. ✅ Aide contextuelle / onboarding première connexion (fait) · 3. ✅ Clarté du formulaire (fait) | Ce qui touche le plus souvent un prof occasionnel, dès sa première utilisation — **P1 entièrement livrée** |
 | **P2 — confiance et clarté avant ouverture large** | 4. ✅ Pages d'erreur personnalisées 403/404/500 (fait) · 5. ✅ Hiérarchie Enregistrer / Soumettre sur un dossier `A_CORRIGER` (fait) | À traiter avant que tout le personnel utilise l'outil sans accompagnement — **P2 entièrement livrée** |
-| **P3 — confort, peut attendre les retours terrain** | 6. ✅ Message de validation téléphone redondant (fait) · 7. Couleurs officielles du collège (bloqué sur confirmation client, §6) · 8. ✅ Budget non connu à la création, étendu sur demande (fait) | Améliorations mineures, aucune urgence — seul le point 7 reste ouvert (bloqué côté client) |
+| **P3 — confort, peut attendre les retours terrain** | 6. ✅ Message de validation téléphone redondant (fait) · 7. Couleurs officielles du collège (en attente de confirmation de l'établissement, §6) · 8. ✅ Budget non connu à la création, étendu sur demande (fait) | Améliorations mineures, aucune urgence — seul le point 7 reste ouvert (bloqué côté client) |
 
 ## 5. Priorisation proposée (à valider)
 
@@ -262,9 +264,9 @@ formulaire en échec de validation, dashboard vu par un compte Prof, fiche `A_CO
 | **2 — Confort** | CI ✅, couleurs officielles (toujours ouvert, §2.5/§6), emails HTML ✅, stepper visuel du workflow ✅ | Finitions avant l'ouverture aux utilisateurs réels |
 | **3 — Itératif avant le lancement** | Pièces jointes ✅ (MVP lien Drive), export PDF ✅, relances automatiques ✅, archivage par année scolaire ✅, fil de commentaires ✅, statistiques consolidées ✅, filtres avancés dashboard ✅ — tous livrés (§3). Restent : intégration Drive complète (reportée après lancement) et autres fonctions dashboard admin (ouvert, retours terrain) | Amélioration continue selon les retours terrain |
 
-## 6. Questions ouvertes (besoin de ta décision)
+## 6. Questions ouvertes (arbitrages de l'établissement)
 
-1. Le collège a-t-il des couleurs officielles/une charte graphique à utiliser à la place du violet M3 générique ? --> Oui à  confirmer avec le client pour les couleurs exactes.
+1. Le collège a-t-il des couleurs officielles/une charte graphique à utiliser à la place du violet M3 générique ? --> Oui, couleurs exactes à confirmer avec l'établissement.
 2. Pièces jointes : si on les ajoute un jour, préférence de stockage — disque du serveur, bucket compatible S3, ou Google Drive via API (vu l'écosystème Google déjà en place) ? --> Google Drive. Fait : lien par projet + création automatique du dossier (compte de service + Drive partagé, le collège étant confirmé sur Google Workspace avec accès admin). Une intégration complète (upload/liste depuis l'appli) reste possible plus tard si besoin.
 3. Volumétrie attendue (nombre de voyages/an) — utile pour dimensionner archivage et pagination du dashboard. --> une cinquantaine par an
 4. Un rôle "lecture seule" (secrétariat, autre) est-il pertinent à moyen terme ? --> Oui

@@ -22,27 +22,27 @@ import java.util.Locale;
 import java.util.Set;
 
 /**
- * Google est enregistre avec le scope "openid" (voir application.properties)
+ * Google est enregistré avec le scope "openid" (voir application.properties)
  * : la connexion emprunte donc le flux OpenID Connect, pas un simple OAuth2.
  * C'est pourquoi ce service surcharge OidcUserService (et non
- * DefaultOAuth2UserService, qui ne serait jamais invoque pour un flux OIDC)
- * et est branche via userInfoEndpoint().oidcUserService(...) dans
+ * DefaultOAuth2UserService, qui ne serait jamais invoqué pour un flux OIDC)
+ * et est branché via userInfoEndpoint().oidcUserService(...) dans
  * SecurityConfig. Il applique :
  * 1. le filtre de domaine (rejet si l'email n'appartient pas au domaine
- *    autorise, variable d'environnement ALLOWED_EMAIL_DOMAIN) ;
- * 2. l'attribution des roles RBAC : ROLE_PROF par defaut, puis
+ *    autorisé, variable d'environnement ALLOWED_EMAIL_DOMAIN) ;
+ * 2. l'attribution des rôles RBAC : ROLE_PROF par défaut, puis
  *    ROLE_COMPTA / ROLE_VIESCO / ROLE_DIRECTION / ROLE_ADMIN selon
- *    l'union de deux sources : les listes d'emails configurees (.env,
- *    RolesProperties) et les attributions gerees depuis le dashboard admin
+ *    l'union de deux sources : les listés d'emails configurées (.env,
+ *    RolesProperties) et les attributions gérées depuis le dashboard admin
  *    (RoleAttribution, en base). La base ne fait jamais que s'ajouter aux
  *    listes d'environnement, jamais les remplacer : une erreur de
  *    manipulation dans le dashboard admin ne peut donc jamais retirer
- *    l'acces attribue via .env (voir ROLES_ADMIN, filet de securite contre
- *    un verrouillage total). Un utilisateur peut cumuler plusieurs roles.
- *    Exception : un email figurant dans la liste "lecture seule" recoit
- *    ROLE_LECTURE_SEULE a la place de ROLE_PROF (jamais les deux), pour
- *    un observateur (ex. secretariat) qui doit tout consulter sans jamais
- *    pouvoir creer ni soumettre de dossier.
+ *    l'accès attribué via .env (voir ROLES_ADMIN, filet de sécurité contre
+ *    un verrouillage total). Un utilisateur peut cumuler plusieurs rôles.
+ *    Exception : un email figurant dans la liste "lecture seule" reçoit
+ *    ROLE_LECTURE_SEULE à la place de ROLE_PROF (jamais les deux), pour
+ *    un observateur (ex. secrétariat) qui doit tout consulter sans jamais
+ *    pouvoir créer ni soumettre de dossier.
  */
 @Slf4j
 @Service
@@ -85,7 +85,7 @@ public class CustomOAuth2UserService extends OidcUserService {
         String emailNormalise = email.toLowerCase(Locale.ROOT);
         Set<GrantedAuthority> authorities = new HashSet<>();
 
-        // Tout utilisateur autorise a se connecter recoit le role de base,
+        // Tout utilisateur autorisé à se connecter reçoit le rôle de base,
         // sauf s'il est inscrit comme simple observateur (lecture seule).
         if (possedeRole(rolesProperties.getLectureSeule(), RoleMetier.LECTURE_SEULE, emailNormalise)) {
             authorities.add(new SimpleGrantedAuthority("ROLE_LECTURE_SEULE"));

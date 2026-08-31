@@ -32,10 +32,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Couche web : ne manipule que des DTO valides (jamais l'entite Projet
- * directement), conformement au pattern DTO impose pour eviter le Mass
- * Assignment. Le controle d'autorisation metier (qui a le droit de valider
- * quoi) est applique dans ProjetService via @PreAuthorize ; sec:authorize
+ * Couche web : ne manipule que des DTO valides (jamais l'entité Projet
+ * directement), conformément au pattern DTO impose pour éviter le Mass
+ * Assignment. Le contrôle d'autorisation métier (qui a le droit de valider
+ * quoi) est appliqué dans ProjetService via @PreAuthorize ; sec:authorize
  * dans les vues n'est qu'un confort d'affichage.
  */
 @Controller
@@ -62,11 +62,11 @@ public class ProjetController {
     }
 
     /**
-     * Le filtre "Mes dossiers uniquement" du dashboard est coche par defaut
-     * pour un Prof qui n'a aucun role de validation : c'est le seul public
-     * pour qui le Kanban complet de l'etablissement n'est jamais le point de
-     * depart utile (Compta/VieSco/Direction/Admin ont besoin de voir les
-     * dossiers de tout le monde des la premiere seconde pour faire leur
+     * Le filtre "Mes dossiers uniquement" du dashboard est coché par défaut
+     * pour un Prof qui n'a aucun rôle de validation : c'est le seul public
+     * pour qui le Kanban complet de l'établissement n'est jamais le point de
+     * départ utile (Compta/VieSco/Direction/Admin ont besoin de voir les
+     * dossiers de tout le monde dès la première seconde pour faire leur
      * travail de validation).
      */
     private boolean afficherMesDossiersParDefaut(Authentication authentication) {
@@ -98,16 +98,16 @@ public class ProjetController {
         model.addAttribute("peutCommenter", projetService.peutGererLienDrive(projet));
         model.addAttribute("emailUtilisateurConnecte", authentication != null ? authentication.getName() : null);
 
-        // Un dossier definitivement valide n'est plus modifiable (sauf par un
-        // Admin, correction exceptionnelle apres coup), un observateur en
-        // lecture seule ne doit jamais voir un formulaire editable (meme sans
+        // Un dossier définitivement validé n'est plus modifiable (sauf par un
+        // Admin, correction exceptionnelle après coup), un observateur en
+        // lecture seule ne doit jamais voir un formulaire éditable (même sans
         // bouton actif), et un Prof qui n'est ni l'organisateur du dossier ni
-        // un role de validation (COMPTA/VIESCO/DIRECTION/ADMIN, via
-        // peutGererLienDrive qui porte deja exactement cette semantique) ne
+        // un rôle de validation (COMPTA/VIESCO/DIRECTION/ADMIN, via
+        // peutGererLienDrive qui porte déjà exactement cette sémantique) ne
         // doit voir que la consultation : sans ce dernier cas, n'importe quel
-        // Prof pouvait ouvrir le dossier d'un collegue et se retrouver face a
-        // un formulaire d'apparence editable (champs non verrouilles), alors
-        // que l'enregistrement aurait de toute facon ete refuse cote service.
+        // Prof pouvait ouvrir le dossier d'un collègue et se retrouver face à
+        // un formulaire d'apparence éditable (champs non verrouillés), alors
+        // que l'enregistrement aurait de toute façon été refusé côté service.
         boolean estValide = projet.getStatut() == StatutProjet.VALIDE;
         if ((estValide && !possedeRole(authentication, "ROLE_ADMIN"))
                 || estEnLectureSeule(authentication)
@@ -250,12 +250,12 @@ public class ProjetController {
     }
 
     /**
-     * Enregistre les modifications en cours (identique a modifier()) puis
-     * redirige vers le recapitulatif plutot que vers la fiche : la relecture
-     * avant soumission porte ainsi exactement sur ce qui vient d'etre
-     * sauvegarde, meme si l'organisateur a tape des changements sans passer
-     * par "Enregistrer" au prealable (voir le bouton "Soumettre pour
-     * validation" dans formulaire.html, qui poste ici via formaction).
+     * Enregistré les modifications en cours (identique à modifier()) puis
+     * redirige vers le récapitulatif plutôt que vers la fiche : la relecture
+     * avant soumission porte ainsi exactement sur ce qui vient d'être
+     * sauvegarde, même si l'organisateur a tapé des changements sans passer
+     * par "Enregistrer" au préalable (voir le bouton "Soumettre pour
+     * validation" dans formulaire.html, qui posté ici via formaction).
      */
     @PostMapping("/projets/{id}/preparer-soumission")
     public String preparerSoumission(@PathVariable Long id, @Valid @ModelAttribute("projet") ProjetFormDTO dto,
@@ -275,7 +275,7 @@ public class ProjetController {
     public String recapitulatifSoumission(@PathVariable Long id, Model model) {
         Projet projet = projetService.trouverParId(id);
         if (projet.getStatut() != StatutProjet.BROUILLON && projet.getStatut() != StatutProjet.A_CORRIGER) {
-            // Deja engage dans le circuit (ou valide) : plus rien a relire avant
+            // Déjà engagé dans le circuit (ou validé) : plus rien à relire avant
             // soumission, on revient simplement sur la fiche.
             return "redirect:/projets/" + id;
         }
@@ -285,9 +285,9 @@ public class ProjetController {
     }
 
     /**
-     * Export PDF de la fiche (recapitulatif + historique de validation).
-     * Accessible a tout utilisateur pouvant deja consulter le dossier
-     * (aucune restriction de role supplementaire, memes regles d'acces que
+     * Export PDF de la fiche (récapitulatif + historique de validation).
+     * Accessible à tout utilisateur pouvant déjà consulter le dossier
+     * (aucune restriction de rôle supplémentaire, mêmes règles d'accès que
      * GET /projets/{id}).
      */
     @GetMapping("/projets/{id}/export-pdf")
@@ -388,10 +388,10 @@ public class ProjetController {
     }
 
     /**
-     * coutGlobal/coutParEleve restent obligatoires par defaut, sauf si
-     * l'organisateur coche "Je ne connais pas encore le budget" (dossier
-     * soumissible malgre tout : voir ProjetService.completerBudget, qui
-     * permet a la Comptabilite ou a l'organisateur de le renseigner plus
+     * coutGlobal/coutParEleve restent obligatoires par défaut, sauf si
+     * l'organisateur coché "Je ne connais pas encore le budget" (dossier
+     * soumissible malgré tout : voir ProjetService.completerBudget, qui
+     * permet à la Comptabilité ou à l'organisateur de le renseigner plus
      * tard, et ProjetService.validerCompta, qui bloque la validation tant
      * qu'il manque).
      */
@@ -411,11 +411,11 @@ public class ProjetController {
     private static final String[] ICONES_ETAPES_WORKFLOW = {"bi-send", "bi-cash-coin", "bi-people", "bi-mortarboard"};
 
     /**
-     * Etape (1 a 4) mise en evidence dans le stepper. Pour un dossier
-     * A_CORRIGER, il s'agit de l'etape qui a refuse le dossier : c'est
+     * Étape (1 à 4) mise en évidence dans le stepper. Pour un dossier
+     * A_CORRIGER, il s'agit de l'étape qui a refusé le dossier : c'est
      * exactement celle par laquelle la resoumission repassera (voir
-     * ProjetService.determinerEtapeDeReprise, meme logique basee sur les
-     * dates de validation deja acquises).
+     * ProjetService.determinerEtapeDeReprise, même logique basée sur les
+     * dates de validation déjà acquises).
      */
     private int calculerEtapeCourante(Projet projet) {
         return switch (projet.getStatut()) {

@@ -1,53 +1,80 @@
 # fiche-projet-app
 
-Fiche Projet numérique : application web de gestion et de validation des projets de voyages scolaires du Collège Exemple, en remplacement du workflow historique base sur Google Sheets.
+Fiche Projet numérique : application web de gestion et de validation des projets de voyages scolaires, en remplacement d'un workflow sur tableur.
+
+L'application est conçue pour être déployée telle quelle par n'importe quel établissement du second degré : aucun nom d'établissement, domaine ou adresse n'est écrit en dur. Tout se configure dans `.env` (voir `.env.example`), et chaque déploiement dispose de sa propre instance et de sa propre base.
+
+## Aperçu
+
+<!--
+Captures d'écran à déposer dans docs/img/ puis à référencer ci-dessous
+(voir docs/img/README.md pour les cadrages attendus) :
+
+![Tableau de bord Kanban](docs/img/dashboard.png)
+![Fiche projet](docs/img/fiche-projet.png)
+![Dashboard administrateur](docs/img/admin.png)
+-->
 
 ## Stack technique
 
 - **Backend** : Java 17, Spring Boot 4 (Web, Data JPA, Security, Mail, Validation)
-- **Base de donnees** : PostgreSQL, pilotee via Hibernate
+- **Base de données** : PostgreSQL, schéma versionné avec Flyway (Hibernate en `ddl-auto=validate`, il ne modifie jamais le schéma lui-même)
 - **Frontend** : Thymeleaf + Bootstrap 5 (CDN)
-- **Securite** : Spring Security avec authentification Google OAuth2, RBAC par role
+- **Sécurité** : Spring Security avec authentification Google OAuth2, RBAC par rôle
 - **Infrastructure** : Docker / Docker Compose
+
+Le `pom.xml` cible Java 17 (version plancher supportée), tandis que les images Docker de build et d'exécution utilisent le JDK 25. La chaîne d'intégration continue teste les deux versions, afin de ne jamais livrer sur un JDK qui n'aurait pas été couvert par les tests.
 
 ## Fonctionnement
 
-Chaque projet de voyage suit un workflow lineaire de validation :
+Chaque projet de voyage suit un workflow linéaire de validation :
 
 ```
 BROUILLON -> EN_ATTENTE_COMPTA -> EN_ATTENTE_VIE_SCOLAIRE -> EN_ATTENTE_DIRECTION -> VALIDE
 ```
 
-A tout moment durant une etape d'attente, le dossier peut etre **refuse** : il repasse au statut `A_CORRIGER` et le motif est enregistre. Les validations deja obtenues aux etapes anterieures sont conservees : le professeur corrige puis resoumet le dossier, qui reprend directement a l'etape qui a refuse, sans faire revalider ceux qui avaient deja donne leur accord.
+À tout moment durant une étape d'attente, le dossier peut être **refusé** : il repasse au statut `A_CORRIGER` et le motif est enregistré. Les validations déjà obtenues aux étapes antérieures sont conservées : le professeur corrige puis resoumet le dossier, qui reprend directement à l'étape qui a refusé, sans faire revalider ceux qui avaient déjà donné leur accord.
 
-Un tableau de bord Kanban (`/dashboard`) affiche les projets regroupes par etape. Chaque fiche projet (`/projets/{id}`) presente le detail du dossier organise en cartes thematiques (Le Voyage, Le Responsable, Le Groupe, Le Budget) avec des actions contextuelles selon le role de l'utilisateur connecte.
+Un tableau de bord Kanban (`/dashboard`) affiche les projets regroupés par étape. Chaque fiche projet (`/projets/{id}`) présente le détail du dossier organisé en cartes thématiques (Le Voyage, Le Responsable, Le Groupe, Le Budget) avec des actions contextuelles selon le rôle de l'utilisateur connecté.
 
-## Roles (RBAC)
+## Rôles (RBAC)
 
-Tout utilisateur Google authentifie avec une adresse du domaine autorise recoit `ROLE_PROF`. Des listes d'emails configurees dans `application.properties` (ou via variables d'environnement) attribuent en plus :
+Tout utilisateur Google authentifié avec une adresse du domaine autorisé (`ALLOWED_EMAIL_DOMAIN`) reçoit `ROLE_PROF`. Des listes d'emails configurées dans `application.properties` (ou via variables d'environnement) attribuent en plus :
 
-- `ROLE_COMPTA` : validation budgetaire
+- `ROLE_COMPTA` : validation budgétaire
 - `ROLE_VIESCO` : validation vie scolaire
 - `ROLE_DIRECTION` : validation finale
 - `ROLE_ADMIN` : administration
 
-Un utilisateur peut cumuler plusieurs roles, à une exception près : un email
+Un utilisateur peut cumuler plusieurs rôles, à une exception près : un email
 inscrit dans `ROLES_LECTURE_SEULE` reçoit `ROLE_LECTURE_SEULE` **à la place**
 de `ROLE_PROF` (jamais les deux). Ce rôle est destiné à un observateur (ex.
 secrétariat) qui consulte tous les dossiers sans jamais pouvoir en créer,
 modifier ou valider un seul.
 
-Un `ROLE_ADMIN` peut aussi attribuer des roles directement depuis
+Un `ROLE_ADMIN` peut aussi attribuer des rôles directement depuis
 l'application (`/admin/roles`, lien "Administration" dans la barre de
 navigation), sans redémarrage. Ces attributions sont stockées en base et
 s'ajoutent toujours aux listes `.env` (jamais ne les remplacent) : retirer
 quelqu'un ajouté via `.env` nécessite toujours de modifier `.env`.
 
-## Demarrage local avec Docker Compose
+## Configuration d'un établissement
+
+Tout ce qui identifie l'établissement se règle dans `.env` :
+
+| Variable | Rôle |
+|---|---|
+| `ETABLISSEMENT_NOM` | Nom affiché dans la barre de navigation, sur la page de connexion et dans les emails. Vide : la mention est masquée. |
+| `ALLOWED_EMAIL_DOMAIN` | Seul domaine Google autorisé à se connecter. **Sans cette variable, aucune connexion n'est possible** (refus par défaut). |
+| `ROLES_ADMIN` / `ROLES_COMPTA` / `ROLES_VIESCO` / `ROLES_DIRECTION` | Adresses des valideurs de chaque étape. |
+| `MAIL_FROM`, `APP_BASE_URL` | Expéditeur des notifications et URL publique de l'instance. |
+
+## Démarrage local avec Docker Compose
 
 ```bash
 cp .env.example .env
-# completer .env : mot de passe DB, identifiants Google OAuth2, SMTP...
+# compléter .env : nom de l'établissement, domaine autorisé, mot de passe DB,
+# identifiants Google OAuth2, SMTP...
 docker compose up --build
 ```
 
@@ -61,9 +88,9 @@ avant ouverture aux utilisateurs...), voir le guide dédié
 [docs/GUIDE_DEPLOIEMENT.md](docs/GUIDE_DEPLOIEMENT.md), écrit pour un profil
 administrateur infrastructure plutôt que développeur.
 
-## Demarrage sans Docker (developpement)
+## Démarrage sans Docker (développement)
 
-Necessite un PostgreSQL local et le JDK 17+.
+Nécessite un PostgreSQL local et le JDK 17 ou supérieur.
 
 ```bash
 export DB_PASSWORD=changeme
@@ -78,7 +105,7 @@ export GOOGLE_CLIENT_SECRET=...
 ./mvnw test
 ```
 
-Les tests d'integration utilisent une base H2 en memoire (voir `src/test/resources/application-test.properties`) et ne necessitent ni PostgreSQL ni identifiants OAuth2/SMTP reels.
+Les tests d'intégration utilisent une base H2 en mémoire (voir `src/test/resources/application-test.properties`) et ne nécessitent ni PostgreSQL ni identifiants OAuth2/SMTP réels.
 
 ## Fonctionnalités complémentaires
 
@@ -97,28 +124,29 @@ Le détail de chaque fonctionnalité (décisions, fichiers concernés, tests) es
 
 ```
 src/main/java/fr/ficheprojet/
-├── FicheProjetApplication.java Point d'entree Spring Boot (@EnableScheduling pour les relances)
-├── config/                     Securite (SecurityConfig), Async, proprietes (@ConfigurationProperties :
-│                                roles, notifications, relances, Drive, securite)
+├── FicheProjetApplication.java Point d'entrée Spring Boot (@EnableScheduling pour les relances)
+├── config/                     Sécurité (SecurityConfig), Async, propriétés (@ConfigurationProperties :
+│                                établissement, rôles, notifications, relances, Drive, sécurité)
 ├── security/                   CustomOAuth2UserService (authentification + RBAC), LoginRateLimitingFilter
-├── model/                      Entites JPA : Projet, Commentaire, JournalEntree, RoleAttribution,
+├── model/                      Entités JPA : Projet, Commentaire, JournalEntree, RoleAttribution,
 │                                enums StatutProjet / RoleMetier
 ├── repository/                 Spring Data JPA : ProjetRepository, CommentaireRepository,
 │                                JournalEntreeRepository, RoleAttributionRepository
 ├── dto/                        DTO de formulaire (ProjetFormDTO, RefusFormDTO, CommentaireFormDTO...) et
 │                                de lecture (ProjetConsultationDTO, StatistiquesDTO, TableauDeBordStatsDTO...)
 ├── service/                    ProjetService (workflow), CommentaireService, StatistiquesService,
-│                                JournalService, NotificationService (emails async), RelanceService,
-│                                GoogleDriveService, PdfExportService, RoleAdminService, SanteService,
-│                                AnneeScolaireUtil
+│                                JournalService, NotificationService (emails async), NotificationToggleService,
+│                                RelanceService, GoogleDriveService, PdfExportService, RoleAdminService,
+│                                SanteService, AnneeScolaireUtil
 ├── event/                      ProjetEvent, CommentaireEvent
-├── exception/                  Exceptions metier
+├── exception/                  Exceptions métier
 └── web/                        ProjetController (fiches), AdminController (dashboard admin),
-                                 LoginController, GlobalExceptionHandler, GlobalModelAttributes
+                                 LoginController, SignalementErreurController, GlobalExceptionHandler,
+                                 GlobalModelAttributes
 
 src/main/resources/
 ├── application.properties
-├── db/migration/               Migrations Flyway (V1 baseline, puis une par evolution de schema)
+├── db/migration/               Migrations Flyway (V1 baseline, puis une par évolution de schéma)
 └── templates/                  dashboard.html (Kanban), formulaire.html / consultation.html (fiche),
                                  admin-*.html (dashboard admin), pdf/ (export PDF), fragments/ (navbar,
                                  stepper, commentaires)

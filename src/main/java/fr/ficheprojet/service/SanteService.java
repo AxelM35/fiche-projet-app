@@ -15,11 +15,11 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
- * Chiffres cles pour la page admin "Sante" : nombre de dossiers, version
- * deployee, date de la derniere sauvegarde. La derniere sauvegarde est lue
- * directement sur le dossier partage avec le service db-backup (docker-
+ * Chiffres clés pour la page admin "Santé" : nombre de dossiers, version
+ * déployée, date de la dernière sauvegarde. La dernière sauvegarde est lue
+ * directement sur le dossier partagé avec le service db-backup (docker-
  * compose.yml monte ./backups en lecture seule dans le conteneur app) :
- * aucun acces au conteneur db-backup lui-meme, juste une lecture de fichier.
+ * aucun accès au conteneur db-backup lui-même, juste une lecture de fichier.
  */
 @Slf4j
 @Service
@@ -35,9 +35,9 @@ public class SanteService {
     }
 
     /**
-     * Renvoie la version du jar en cours d'execution (Implementation-Version
-     * du MANIFEST, renseignee par spring-boot-maven-plugin au packaging).
-     * Vide en dehors d'un jar execute (ex. mvn spring-boot:run en dev).
+     * Renvoie la version du jar en cours d'exécution (Implementation-Version
+     * du MANIFEST, renseignée par spring-boot-maven-plugin au packaging).
+     * Vide en dehors d'un jar exécuté (ex. mvn spring-boot:run en dev).
      */
     public String versionApplication() {
         String version = getClass().getPackage().getImplementationVersion();

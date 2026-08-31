@@ -5,11 +5,11 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * Configuration de l'integration Google Drive (creation automatique du
- * dossier de pieces jointes d'un projet, via un compte de service membre
- * d'un Drive partage de l'etablissement). Desactivee par defaut : sans
- * configuration, GoogleDriveService reste un no-op silencieux et le lien
- * Drive se saisit alors uniquement a la main (voir ProjetService.modifierLienDrive).
+ * Configuration de l'intégration Google Drive (création automatique du
+ * dossier de pièces jointes d'un projet, via un compte de service membre
+ * d'un Drive partagé de l'établissement). Désactivée par défaut : sans
+ * configuration, GoogleDriveService reste un nô-op silencieux et le lien
+ * Drive se saisit alors uniquement à la main (voir ProjetService.modifierLienDrive).
  */
 @Getter
 @Setter
@@ -18,9 +18,9 @@ public class GoogleDriveProperties {
 
     private boolean enabled = false;
 
-    /** Identifiant du Drive partage (Shared Drive) dans lequel creer les dossiers. */
+    /** Identifiant du Drive partagé (Shared Drive) dans lequel créer les dossiers. */
     private String sharedDriveId = "";
 
-    /** Cle JSON du compte de service, encodee en base64 (evite un fichier a monter en volume). */
+    /** Clé JSON du compte de service, encodée en base64 (évite un fichier à monter en volume). */
     private String credentialsJsonBase64 = "";
 }

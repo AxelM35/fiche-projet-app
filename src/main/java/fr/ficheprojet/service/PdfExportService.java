@@ -22,13 +22,13 @@ import java.util.Locale;
 import java.util.Set;
 
 /**
- * Genere le PDF recapitulatif d'un dossier (bouton "Exporter en PDF" sur la
+ * Génère le PDF récapitulatif d'un dossier (bouton "Exporter en PDF" sur la
  * fiche projet, formulaire.html et consultation.html) : rend le template
- * Thymeleaf pdf/fiche-projet-pdf.html (recapitulatif + historique de
+ * Thymeleaf pdf/fiche-projet-pdf.html (récapitulatif + historique de
  * validation + fil de commentaires) en HTML, puis le convertit en PDF via
  * openhtmltopdf. Le HTML rendu par Thymeleaf n'est pas garanti strictement
- * XHTML (attributs booleens, balises non fermees...) : on passe par Jsoup
- * pour le reparser en document XML bien forme avant de le donner a
+ * XHTML (attributs booléens, balises non fermées...) : on passe par Jsoup
+ * pour le reparser en document XML bien formé avant de le donner à
  * openhtmltopdf, qui l'exige.
  */
 @Service
@@ -37,11 +37,11 @@ public class PdfExportService {
 
     /**
      * Sous-ensemble du journal d'audit correspondant au fil de validation du
-     * workflow (par etape) : on exclut volontairement les actions
-     * administratives (archivage, reaffectation, lien Drive...) qui ne font
+     * workflow (par étape) : on exclut volontairement les actions
+     * administratives (archivage, réaffectation, lien Drive...) qui ne font
      * pas partie de l'historique de validation attendu dans l'export. Les
-     * refus sont qualifies par etape ("Refus (Comptabilité)", etc., voir
-     * ProjetService.refuser) : filtre par prefixe plutot que par egalite.
+     * refus sont qualifiés par étape ("Refus (Comptabilité)", etc., voir
+     * ProjetService.refuser) : filtre par préfixe plutôt que par égalité.
      */
     private static final Set<String> ACTIONS_HISTORIQUE_VALIDATION = Set.of(
             "Création", "Soumission", "Resoumission",

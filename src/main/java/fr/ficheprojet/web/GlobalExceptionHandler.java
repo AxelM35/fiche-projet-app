@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
- * Traduit les exceptions metier en messages utilisateur lisibles plutot que
+ * Traduit les exceptions métier en messages utilisateur lisibles plutôt que
  * de laisser remonter une page d'erreur technique. Redirige vers la page
- * d'origine (Referer) quand elle est connue, sinon vers le tableau de bord.
+ * d'origine (Référer) quand elle est connue, sinon vers le tableau de bord.
  */
 @Slf4j
 @ControllerAdvice

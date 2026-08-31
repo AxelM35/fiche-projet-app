@@ -1,5 +1,6 @@
 package fr.ficheprojet.service;
 
+import fr.ficheprojet.config.EtablissementProperties;
 import fr.ficheprojet.config.NotificationProperties;
 import fr.ficheprojet.config.RolesProperties;
 import fr.ficheprojet.event.CommentaireEvent;
@@ -23,16 +24,16 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Envoie les emails de notification a chaque changement de statut, au
+ * Envoie les emails de notification à chaque changement de statut, au
  * format HTML (template Thymeleaf email/notification.html) avec repli en
  * texte brut pour les clients mail qui ne rendent pas le HTML.
  * <p>
  * - @TransactionalEventListener(AFTER_COMMIT) : l'email ne part que si la
- *   transaction qui a change le statut a bien ete validee (pas de
- *   notification pour un changement finalement annule / rollback).
- * - @Async("mailExecutor") : l'envoi (I/O reseau potentiellement lent) est
- *   delegue a un pool de threads dedie et ne bloque jamais le thread de la
- *   requete web qui a declenche l'action.
+ *   transaction qui a changé le statut a bien été validée (pas de
+ *   notification pour un changement finalement annulé / rollback).
+ * - @Async("mailExecutor") : l'envoi (I/O réseau potentiellement lent) est
+ *   délégué à un pool de threads dédié et ne bloque jamais le thread de la
+ *   requête web qui a déclenché l'action.
  */
 @Slf4j
 @Service
@@ -44,6 +45,7 @@ public class NotificationService {
     private final NotificationProperties notificationProperties;
     private final NotificationToggleService notificationToggleService;
     private final TemplateEngine templateEngine;
+    private final EtablissementProperties etablissementProperties;
 
     @Async("mailExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -94,9 +96,9 @@ public class NotificationService {
 
     /**
      * Notifie les autres participants du fil de commentaires (voir
-     * CommentaireService.ajouter) qu'un nouveau message a ete poste :
-     * uniquement ceux qui ont deja ecrit dans ce fil, jamais l'auteur du
-     * nouveau commentaire lui-meme (deja filtre en amont).
+     * CommentaireService.ajouter) qu'un nouveau message a été posté :
+     * uniquement ceux qui ont déjà écrit dans ce fil, jamais l'auteur du
+     * nouveau commentaire lui-même (déjà filtré en amont).
      */
     @Async("mailExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -113,20 +115,24 @@ public class NotificationService {
     }
 
     /**
-     * Chaque appel est independant des autres (certains statuts notifient a
+     * Chaque appel est indépendant des autres (certains statuts notifient à
      * la fois le valideur suivant et l'organisateur, voir EN_ATTENTE_VIE_SCOLAIRE
      * / EN_ATTENTE_DIRECTION ci-dessus) : un incident d'envoi pour l'un des
-     * deux destinataires ne doit ni empecher l'autre, ni faire echouer le
-     * workflow metier (le changement de statut est deja valide et persiste
-     * au moment ou ce listener s'execute, phase AFTER_COMMIT).
+     * deux destinataires ne doit ni empêcher l'autre, ni faire échouer le
+     * workflow métier (le changement de statut est déjà validé et persiste
+     * au moment où ce listener s'exécute, phase AFTER_COMMIT).
      * <p>
-     * Visibilite package (pas private) : reutilise telle quelle par
-     * RelanceService pour les relances automatiques, meme construction
-     * d'email (HTML + repli texte) et meme resilience aux echecs d'envoi.
+     * Visibilité package (pas private) : réutilise telle quelle par
+     * RelanceService pour les relances automatiques, même construction
+     * d'email (HTML + repli texte) et même résilience aux échecs d'envoi.
      */
     void notifier(List<String> destinataires, String sujet, String message, String motifRefus, String lienDossier) {
         if (destinataires == null || destinataires.isEmpty()) {
             log.warn("Aucun destinataire configure pour la notification : {}", sujet);
+            return;
+        }
+        if (!expediteurConfigure()) {
+            log.warn("Aucune adresse d'expediteur configuree (MAIL_FROM) : notification \"{}\" non envoyee", sujet);
             return;
         }
 
@@ -138,12 +144,18 @@ public class NotificationService {
     }
 
     /**
-     * Envoi synchrone (pas @Async, pas de catch) declenche depuis le
-     * dashboard admin pour verifier la configuration SMTP : contrairement a
-     * notifier(), l'appelant doit voir immediatement si l'envoi a echoue.
+     * Envoi synchrone (pas @Async, pas de catch) déclenché depuis le
+     * dashboard admin pour vérifier la configuration SMTP : contrairement à
+     * notifier(), l'appelant doit voir immédiatement si l'envoi a échoué.
      */
     @PreAuthorize("hasRole('ADMIN')")
     public void envoyerEmailTest(String destinataire) {
+        if (!expediteurConfigure()) {
+            // Envoi synchrone : l'administrateur doit lire une cause exploitable
+            // plutot que l'AddressException brute de Jakarta Mail sur une adresse vide.
+            throw new MailPreparationException(
+                    "Aucune adresse d'expediteur n'est configuree : renseignez MAIL_FROM dans .env.");
+        }
         mailSender.send(construireMessage(List.of(destinataire), "Email de test - Fiche Projet numérique",
                 "Ceci est un email de test envoyé depuis le dashboard admin de l'application "
                         + "Fiche Projet numérique, pour vérifier la configuration SMTP.",
@@ -174,6 +186,18 @@ public class NotificationService {
         notifier(rolesProperties.getAdmin(), sujet, corps, null, null);
     }
 
+    /**
+     * L'adresse d'expediteur n'a pas de valeur par defaut : chaque
+     * etablissement renseigne la sienne (MAIL_FROM). Sans elle,
+     * MimeMessageHelper.setFrom("") echouerait sur une AddressException peu
+     * parlante ; les notifications sont donc simplement passees, comme
+     * lorsqu'aucun destinataire n'est configure.
+     */
+    private boolean expediteurConfigure() {
+        String expediteur = notificationProperties.getEmailExpediteur();
+        return expediteur != null && !expediteur.isBlank();
+    }
+
     private MimeMessage construireMessage(List<String> destinataires, String sujet, String message,
                                            String motifRefus, String lienDossier) {
         MimeMessage mimeMessage = mailSender.createMimeMessage();
@@ -186,8 +210,8 @@ public class NotificationService {
                     construireHtml(sujet, message, motifRefus, lienDossier));
             return mimeMessage;
         } catch (MessagingException e) {
-            // MimeMessageHelper leve une exception checked que JavaMailSender.send(...)
-            // n'attend pas : on la convertit en MailException (comme le fait deja
+            // MimeMessageHelper lève une exception checked que JavaMailSender.send(...)
+            // n'attend pas : on la convertit en MailException (comme le fait déjà
             // Spring en interne) pour que les catch existants (AdminController,
             // surChangementDeStatut ci-dessus) continuent de fonctionner sans changement.
             throw new MailPreparationException("Échec de la préparation de l'email : " + sujet, e);
@@ -200,6 +224,7 @@ public class NotificationService {
         contexte.setVariable("message", message);
         contexte.setVariable("motifRefus", motifRefus);
         contexte.setVariable("lienDossier", lienDossier);
+        contexte.setVariable("nomEtablissement", etablissementProperties.getNom());
         return templateEngine.process("email/notification", contexte);
     }
 

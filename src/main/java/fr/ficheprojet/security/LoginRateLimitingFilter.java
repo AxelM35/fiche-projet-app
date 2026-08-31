@@ -17,27 +17,27 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Limite le nombre de requetes par adresse IP sur les routes d'authentification
+ * Limite le nombre de requêtes par adresse IP sur les routes d'authentification
  * (page de connexion, redirection vers Google, retour de Google) : ralentit un
- * script tentant d'abuser du flux OAuth2 (DoS applicatif, tentatives repetees
- * avec des comptes Google differents pour sonder quelles adresses sont
- * autorisees sur le domaine). Fenetre fixe simple (pas de bibliotheque
- * dediee : la regle est volontairement basique) reinitialisee par IP toutes
+ * script tentant d'abuser du flux OAuth2 (DoS applicatif, tentatives répétées
+ * avec des comptes Google différents pour sonder quelles adresses sont
+ * autorisées sur le domaine). Fenêtre fixe simple (pas de bibliothèque
+ * dédiée : la règle est volontairement basique) réinitialisée par IP toutes
  * les LARGEUR_FENETRE.
  * <p>
  * Limite connue : request.getRemoteAddr() suppose qu'aucun reverse proxy ne
- * s'intercale entre le client et l'application. Le jour ou un reverse proxy
+ * s'intercale entre le client et l'application. Le jour où un reverse proxy
  * HTTPS sera mis en place (voir docs/CAHIER_DES_CHARGES.md), il faudra soit
  * activer server.forward-headers-strategy=native avec une liste de proxies
  * de confiance, soit lire X-Forwarded-For explicitement - jamais le faire
- * sans liste de confiance, un en-tete client est sinon trivialement
- * falsifiable et rendrait cette limite inoperante.
+ * sans liste de confiance, un en-tête client est sinon trivialement
+ * falsifiable et rendrait cette limite inopérante.
  * <p>
  * Volontairement pas un bean Spring (@Component/@Bean) : instancie
- * directement dans SecurityConfig et ajoute au filter chain via
- * addFilterBefore. Un filtre expose comme bean serait sinon *en plus*
- * enregistre par Spring Boot comme filtre servlet generique (applique a
- * toutes les routes), executant la logique deux fois par requete.
+ * directement dans SecurityConfig et ajouté au filter chain via
+ * addFilterBefore. Un filtre exposé comme bean serait sinon *en plus*
+ * enregistré par Spring Boot comme filtre servlet générique (appliqué à
+ * toutes les routes), exécutant la logique deux fois par requête.
  */
 @Slf4j
 public class LoginRateLimitingFilter extends OncePerRequestFilter {
@@ -48,14 +48,14 @@ public class LoginRateLimitingFilter extends OncePerRequestFilter {
     private static final int LIMITE_REQUETES = 20;
     private static final Duration LARGEUR_FENETRE = Duration.ofMinutes(1);
 
-    /** Purge des compteurs inactifs pour ne pas laisser grossir la map indefiniment sur un serveur de longue duree. */
+    /** Purge des compteurs inactifs pour ne pas laisser grossir la map indéfiniment sur un serveur de longue duree. */
     private static final Duration DUREE_INACTIVITE_AVANT_PURGE = Duration.ofHours(1);
 
     private final ConcurrentHashMap<String, Compteur> compteursParIp = new ConcurrentHashMap<>();
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        // getRequestURI() plutot que getServletPath() : ce dernier depend de la
+        // getRequestURI() plutôt que getServletPath() : ce dernier dépend de la
         // configuration de mapping du DispatcherServlet (vide dans certains
         // contextes, notamment MockMvc en test) et n'est pas fiable ici.
         return !CHEMINS_LIMITES.contains(request.getRequestURI());
@@ -80,7 +80,7 @@ public class LoginRateLimitingFilter extends OncePerRequestFilter {
     }
 
     private void purgerCompteursInactifsOccasionnellement() {
-        // Purge opportuniste (pas de tache planifiee dediee) : declenchee au fil
+        // Purge opportuniste (pas de tâche planifiée dédiée) : déclenchée au fil
         // de l'eau, suffisant vu le trafic attendu sur ces routes precises.
         if (compteursParIp.size() < 1000) {
             return;

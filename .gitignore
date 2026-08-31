@@ -31,7 +31,7 @@ target/
 *.iml
 .vscode/
 
-# Secrets locaux (jamais commiter les vraies valeurs)
+# Secrets locaux (ne jamais committer les vraies valeurs)
 .env
 
 # Sauvegardes PostgreSQL locales (service db-backup)

@@ -5,9 +5,9 @@ import org.springframework.stereotype.Service;
 
 /**
  * Interrupteur temporaire des notifications email, pilotable par un Admin
- * depuis le dashboard (utile en periode de demo/test). Volontairement en
- * memoire (pas de persistance) : redemarrer l'application reactive les
- * notifications par defaut, c'est le comportement attendu pour un reglage
+ * depuis le dashboard (utile en période de demo/test). Volontairement en
+ * mémoire (pas de persistance) : redémarrer l'application réactive les
+ * notifications par défaut, c'est le comportement attendu pour un réglage
  * "temporaire".
  */
 @Service

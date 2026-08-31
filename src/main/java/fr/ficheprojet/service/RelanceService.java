@@ -18,13 +18,13 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Relance automatique par email des dossiers bloques depuis trop longtemps
- * a une etape de validation (Compta/Vie Scolaire/Direction). S'appuie sur
- * ProjetService.listerDossiersBloques() (meme logique que la page admin
- * "Dossiers bloques") et sur le journal d'audit pour savoir si/quand une
- * relance a deja ete envoyee durant le blocage courant : pas de nouveau
- * champ sur Projet, la derniere entree "Relance" posterieure a la date
- * d'entree dans le statut fait foi.
+ * Relance automatique par email des dossiers bloqués depuis trop longtemps
+ * à une étape de validation (Compta/Vie Scolaire/Direction). S'appuie sur
+ * ProjetService.listerDossiersBloques() (même logique que la page admin
+ * "Dossiers bloqués") et sur le journal d'audit pour savoir si/quand une
+ * relance a déjà été envoyée durant le blocage courant : pas de nouveau
+ * champ sur Projet, la dernière entrée "Relance" postérieure à la date
+ * d'entrée dans le statut fait foi.
  */
 @Slf4j
 @Service

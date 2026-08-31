@@ -32,9 +32,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 /**
- * Tests d'integration verifiant que les vues Thymeleaf (dashboard,
- * formulaire) se rendent correctement et que le workflow de creation
- * fonctionne de bout en bout, sur une base H2 en memoire.
+ * Tests d'intégration vérifiant que les vues Thymeleaf (dashboard,
+ * formulaire) se rendent correctement et que le workflow de création
+ * fonctionne de bout en bout, sur une base H2 en mémoire.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -60,10 +60,10 @@ class ProjetControllerTest {
 
     /**
      * Avec un seul fournisseur OAuth2 (Google), Spring Security saute la
-     * page de connexion generee automatiquement et redirige directement
+     * page de connexion générée automatiquement et redirige directement
      * vers /oauth2/authorization/google : sans page /login explicite
      * (SecurityConfig.loginPage + LoginController), cette URL n'existe
-     * plus du tout (404), notamment apres une deconnexion qui y redirige.
+     * plus du tout (404), notamment après une déconnexion qui y redirige.
      */
     @Test
     void laPageDeConnexionSAfficheSansAuthentification() throws Exception {
@@ -81,10 +81,10 @@ class ProjetControllerTest {
     }
 
     /**
-     * Regression : la navbar utilisait navbar-expand-lg sans bouton
+     * Régression : la navbar utilisait navbar-expand-lg sans bouton
      * hamburger ni <div class="collapse">, donc sans aucun moyen de la
-     * replier sous 992px (voir fragments/navbar.html) - verifie que le
-     * couple toggler/collapse est bien present.
+     * replier sous 992px (voir fragments/navbar.html) - vérifie que le
+     * couple toggler/collapse est bien présent.
      */
     @Test
     @WithMockUser(username = "prof@exemple.fr", authorities = "ROLE_PROF")
@@ -104,9 +104,9 @@ class ProjetControllerTest {
     }
 
     /**
-     * Aide contextuelle (onboarding) : le bouton "Comment ca marche ?" et la
-     * modale associee ne s'affichent qu'a un Prof (public vise, cf. cahier
-     * des charges) - un role de validation sans PROF ne doit rien en voir.
+     * Aide contextuelle (onboarding) : le bouton "Comment ça marche ?" et la
+     * modale associée ne s'affichent qu'a un Prof (public visé, cf. cahier
+     * des charges) - un rôle de validation sans PROF ne doit rien en voir.
      */
     @Test
     @WithMockUser(username = "prof@exemple.fr", authorities = "ROLE_PROF")
@@ -129,9 +129,9 @@ class ProjetControllerTest {
     }
 
     /**
-     * Filtres avances du dashboard (classe, organisateur, periode de
-     * depart) : verifie que les champs de filtre sont bien presents et que
-     * chaque carte porte les attributs data-* necessaires au filtrage cote
+     * Filtres avancés du dashboard (classe, organisateur, période de
+     * départ) : vérifie que les champs de filtre sont bien présents et que
+     * chaque carte porte les attributs data-* nécessaires au filtrage côté
      * client (voir dashboard.js).
      */
     @Test
@@ -153,10 +153,10 @@ class ProjetControllerTest {
     }
 
     /**
-     * Le filtre "Mes dossiers uniquement" est coche par defaut pour un Prof
-     * sans role de validation (le seul public pour qui le Kanban complet de
-     * l'etablissement n'est jamais le point de depart utile), mais pas pour
-     * un role de validation qui doit voir tous les dossiers des l'arrivee.
+     * Le filtre "Mes dossiers uniquement" est coché par défaut pour un Prof
+     * sans rôle de validation (le seul public pour qui le Kanban complet de
+     * l'établissement n'est jamais le point de départ utile), mais pas pour
+     * un rôle de validation qui doit voir tous les dossiers dès l'arrivée.
      */
     @Test
     @WithMockUser(username = "prof@exemple.fr", authorities = "ROLE_PROF")
@@ -179,16 +179,16 @@ class ProjetControllerTest {
     }
 
     /**
-     * Regression : les formulaires "Archiver" et "Supprimer définitivement"
-     * de la modale de gestion admin n'avaient pas de th:action (l'URL reelle
-     * est posee par dashboard.js au clic) - sans th:action, l'extension
+     * Régression : les formulaires "Archiver" et "Supprimer définitivement"
+     * de la modale de gestion admin n'avaient pas de th:action (l'URL réelle
+     * est posée par dashboard.js au clic) - sans th:action, l'extension
      * Thymeleaf Spring Security n'injecte pas le jeton CSRF automatiquement,
-     * ce qui faisait echouer la soumission en 403 dans un vrai navigateur
-     * (MockMvc + .with(csrf()) ne l'aurait pas detecte, d'ou cette assertion
+     * ce qui faisait échouer la soumission en 403 dans un vrai navigateur
+     * (MockMvc + .with(csrf()) ne l'aurait pas détecté, d'où cette assertion
      * directe sur le HTML rendu).
      */
     @Test
-    @WithMockUser(username = "amorvan@exemple.fr", authorities = {"ROLE_PROF", "ROLE_ADMIN"})
+    @WithMockUser(username = "admin@exemple.fr", authorities = {"ROLE_PROF", "ROLE_ADMIN"})
     void lesFormulairesDeGestionAdminContiennentLeJetonCsrf() throws Exception {
         MvcResult resultat = mockMvc.perform(get("/dashboard"))
                 .andExpect(status().isOk())
@@ -237,8 +237,8 @@ class ProjetControllerTest {
     }
 
     /**
-     * "Je ne connais pas encore le budget" (audit UX S4bis) : la creation
-     * reussit sans coutGlobal/coutParEleve quand la case est cochee, mais
+     * "Je ne connais pas encore le budget" (audit UX S4bis) : la création
+     * réussit sans coutGlobal/coutParEleve quand la case est cochée, mais
      * ces deux champs redeviennent obligatoires sans elle (voir
      * ProjetController.validerCoherenceBudget).
      */
@@ -286,9 +286,9 @@ class ProjetControllerTest {
     }
 
     /**
-     * Une fois le dossier engage dans le circuit (plus de bouton
-     * "Enregistrer"), la carte "Compléter le budget" permet a la
-     * Comptabilite de renseigner le budget manquant (audit UX S4bis).
+     * Une fois le dossier engagé dans le circuit (plus de bouton
+     * "Enregistrer"), la carte "Compléter le budget" permet à la
+     * Comptabilité de renseigner le budget manquant (audit UX S4bis).
      */
     @Test
     @WithMockUser(username = "prof@exemple.fr", authorities = "ROLE_PROF")
@@ -322,9 +322,9 @@ class ProjetControllerTest {
     }
 
     /**
-     * Clarte du formulaire (audit UX, docs/CAHIER_DES_CHARGES.md S4bis) :
-     * legende des champs obligatoires toujours visible, et resume d'erreurs
-     * en haut de page uniquement affiche apres un echec de soumission (pas
+     * Clarté du formulaire (audit UX, docs/CAHIER_DES_CHARGES.md S4bis) :
+     * légende des champs obligatoires toujours visible, et résumé d'erreurs
+     * en haut de page uniquement affiche après un échec de soumission (pas
      * sur un formulaire vierge).
      */
     @Test
@@ -350,11 +350,11 @@ class ProjetControllerTest {
     }
 
     /**
-     * Reproduit le scenario signale en test manuel : ouvrir la fiche d'un
-     * projet DEJA enregistre (et non un formulaire vierge) declenchait un
+     * Reproduit le scénario signalé en test manuel : ouvrir la fiche d'un
+     * projet DÉJÀ enregistré (et non un formulaire vierge) déclenchait un
      * org.hibernate.LazyInitializationException sur la collection
-     * accompagnateurs, chargee en lazy, car trouverParId(id) et versDTO(...)
-     * s'executaient dans deux transactions distinctes.
+     * accompagnateurs, chargée en lazy, car trouverParId(id) et versDTO(...)
+     * s'exécutaient dans deux transactions distinctes.
      */
     @Test
     @WithMockUser(username = "prof@exemple.fr", authorities = "ROLE_PROF")
@@ -394,9 +394,9 @@ class ProjetControllerTest {
         connecterEnTantQue("prof@exemple.fr", "ROLE_PROF");
         Long id = projetService.creerProjet(dtoBase()).getId();
 
-        // La bascule de role ci-dessus (necessaire pour creer le projet en
-        // tant que prof) a "ecrase" le contexte pose par @WithMockUser : on
-        // le restaure avant la requete HTTP, comme dans creerEtValiderCompletement().
+        // La bascule de rôle ci-dessus (nécessaire pour créer le projet en
+        // tant que prof) a "écrasé" le contexte posé par @WithMockUser : on
+        // le restaure avant la requête HTTP, comme dans creerEtValiderCompletement().
         connecterEnTantQue("secretariat@exemple.fr", "ROLE_LECTURE_SEULE");
         mockMvc.perform(get("/projets/{id}", id))
                 .andExpect(status().isOk())
@@ -404,10 +404,10 @@ class ProjetControllerTest {
     }
 
     /**
-     * Regression : avant correctif, un Prof qui n'etait ni l'organisateur du
-     * dossier ni un role de validation recevait quand meme le formulaire
-     * editable (champs non verrouilles) d'un dossier d'un collegue, alors que
-     * l'enregistrement aurait de toute facon ete refuse cote service
+     * Régression : avant correctif, un Prof qui n'était ni l'organisateur du
+     * dossier ni un rôle de validation recevait quand même le formulaire
+     * éditable (champs non verrouillés) d'un dossier d'un collègue, alors que
+     * l'enregistrement aurait de toute façon été refusé côté service
      * (verifierDroitModification). Seule la consultation doit s'afficher.
      */
     @Test
@@ -425,9 +425,9 @@ class ProjetControllerTest {
     }
 
     /**
-     * Le bouton "Soumettre pour validation" poste desormais (via formaction)
-     * vers preparer-soumission, qui enregistre le formulaire puis redirige
-     * vers le recapitulatif : verifie ce redirect, que la page s'affiche, et
+     * Le bouton "Soumettre pour validation" posté désormais (via formaction)
+     * vers préparer-soumission, qui enregistré le formulaire puis redirige
+     * vers le récapitulatif : vérifie ce redirect, que la page s'affiche, et
      * que "Confirmer et soumettre" fait bien avancer le statut.
      */
     @Test
@@ -477,11 +477,11 @@ class ProjetControllerTest {
     }
 
     /**
-     * Hierarchie visuelle Enregistrer / Soumettre pour validation (audit UX,
+     * Hiérarchie visuelle Enregistrer / Soumettre pour validation (audit UX,
      * docs/CAHIER_DES_CHARGES.md S4bis) : sur un dossier A_CORRIGER, les deux
      * boutons avaient un poids visuel comparable, sans rien pour indiquer
-     * lequel des deux referme reellement la correction. "Enregistrer" passe
-     * en style secondaire discret dans ce statut precis, "Soumettre pour
+     * lequel des deux referme réellement la correction. "Enregistrer" passe
+     * en style secondaire discret dans ce statut précis, "Soumettre pour
      * validation" reste seul en btn-success.
      */
     @Test
@@ -515,9 +515,9 @@ class ProjetControllerTest {
     }
 
     /**
-     * Un dossier deja engage dans le circuit de validation n'a plus rien a
-     * relire avant soumission : le recapitulatif redirige simplement vers la
-     * fiche plutot que d'afficher une page vide de sens pour ce statut.
+     * Un dossier déjà engagé dans le circuit de validation n'a plus rien à
+     * relire avant soumission : le récapitulatif redirige simplement vers la
+     * fiche plutôt que d'afficher une page vide de sens pour ce statut.
      */
     @Test
     @WithMockUser(username = "prof@exemple.fr", authorities = "ROLE_PROF")
@@ -532,7 +532,7 @@ class ProjetControllerTest {
     /**
      * Le bouton "Exporter en PDF" doit fonctionner quel que soit le statut du
      * dossier (ici un simple brouillon) et renvoyer un vrai document PDF en
-     * piece jointe.
+     * pièce jointe.
      */
     @Test
     @WithMockUser(username = "prof@exemple.fr", authorities = "ROLE_PROF")
@@ -605,7 +605,7 @@ class ProjetControllerTest {
         String redirectedUrl = duplication.getResponse().getRedirectedUrl();
         assertThat(redirectedUrl).isNotNull().isNotEqualTo("/projets/" + idOriginal);
 
-        // La copie est bien une fiche editable independante, en brouillon.
+        // La copie est bien une fiche éditable indépendante, en brouillon.
         mockMvc.perform(get(redirectedUrl))
                 .andExpect(status().isOk())
                 .andExpect(view().name("formulaire"));
@@ -620,7 +620,7 @@ class ProjetControllerTest {
 
     /**
      * Fait progresser un projet jusqu'a VALIDE en manipulant directement le
-     * service (bascule de role via SecurityContextHolder, comme dans
+     * service (bascule de rôle via SecurityContextHolder, comme dans
      * ProjetServiceTest), pour tester ensuite le routage HTTP sur ce statut.
      */
     private Long creerEtValiderCompletement() throws Exception {
@@ -652,8 +652,8 @@ class ProjetControllerTest {
         connecterEnTantQue("direction@exemple.fr", "ROLE_DIRECTION");
         projetService.validerDirection(id);
 
-        // Remet le contexte de securite du prof pour la suite du test HTTP,
-        // @WithMockUser ayant ete "ecrase" par les bascules de role ci-dessus.
+        // Remet le contexte de sécurité du prof pour la suite du test HTTP,
+        // @WithMockUser ayant été "écrasé" par les bascules de rôle ci-dessus.
         connecterEnTantQue("prof@exemple.fr", "ROLE_PROF");
 
         return id;

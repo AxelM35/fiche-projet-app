@@ -11,12 +11,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * Journal d'audit du dashboard admin. Chaque entree est ecrite de maniere
- * synchrone, dans la meme transaction que l'action qu'elle documente (pas de
+ * Journal d'audit du dashboard admin. Chaque entrée est écrite de manière
+ * synchrone, dans la même transaction que l'action qu'elle documente (pas de
  * @TransactionalEventListener/@Async comme NotificationService) : l'auteur
  * vient du SecurityContextHolder du thread courant, qui ne serait plus
  * disponible dans un thread de pool asynchrone, et un rollback de l'action
- * doit aussi annuler l'entree de journal correspondante.
+ * doit aussi annuler l'entrée de journal correspondante.
  */
 @Service
 @RequiredArgsConstructor
@@ -30,9 +30,9 @@ public class JournalService {
     }
 
     /**
-     * Variante pour les actions declenchees hors d'une requete authentifiee
-     * (ex. RelanceService, tache planifiee) : SecurityContextHolder n'a
-     * alors aucun utilisateur connecte a journaliser comme auteur.
+     * Variante pour les actions déclenchées hors d'une requête authentifiée
+     * (ex. RelanceService, tâche planifiée) : SecurityContextHolder n'a
+     * alors aucun utilisateur connecté à journaliser comme auteur.
      */
     @Transactional
     public void enregistrer(String action, Long projetId, String projetNom, String detail, String auteurEmail) {
