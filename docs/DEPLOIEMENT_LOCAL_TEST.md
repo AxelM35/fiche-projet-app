@@ -215,6 +215,47 @@ indiquent `Aucune adresse d'expediteur configuree (MAIL_FROM)`. Pour tester
 réellement les envois, renseignez `MAIL_FROM` et un SMTP, en veillant à ce que
 les destinataires (les listes `ROLES_*`) soient votre propre adresse.
 
+**`Schema validation: missing table [commentaires]` (ou toute autre table), et l'application redémarre en boucle**
+Le schéma de la base n'a pas été créé. Depuis la version publiée ici, il est
+géré par **Flyway** (`src/main/resources/db/migration`), qui applique les
+migrations au démarrage avant qu'Hibernate ne valide le schéma
+(`ddl-auto=validate`, il ne crée jamais rien lui-même). Le message nomme la
+première table manquante rencontrée, pas nécessairement la seule.
+
+Regardez le tout début des logs : entre l'ouverture du pool de connexions
+(`HikariPool-1 - Start completed`) et Hibernate, vous devez voir Flyway
+annoncer ses migrations (`Migrating schema "public" to version "1 - init"`,
+jusqu'à la version 6). **Si aucune ligne Flyway n'apparaît**, c'est que le
+code compilé est une version antérieure à l'adoption de Flyway : le dossier
+de travail n'est pas un clone de ce dépôt, mais une copie plus ancienne du
+projet. Vérifiez-le d'un coup d'œil :
+
+```powershell
+dir src\main\java\fr
+```
+
+Le seul sous-dossier attendu est `ficheprojet`. Toute autre arborescence
+signale un code plus ancien. La correction consiste à repartir d'un clone
+propre et d'une base vierge :
+
+```powershell
+docker compose down -v          # supprime la base de test incomplète
+cd ..
+git clone https://github.com/AxelM35/fiche-projet-app.git fiche-projet-test
+cd fiche-projet-test
+# recopier le .env, puis :
+docker compose build --no-cache
+docker compose up
+```
+
+`--no-cache` évite de réutiliser une couche Docker construite à partir de
+l'ancien code. Pour inspecter ce que contient réellement la base (adaptez
+l'utilisateur et le nom de base à votre `.env`) :
+
+```powershell
+docker compose exec db psql -U fiche_projet_user -d fiche_projet -c "\dt"
+```
+
 **Le build échoue ou Docker ne démarre pas**
 Vérifiez que Docker Desktop est bien lancé (*Engine running*) et que la
 virtualisation WSL 2 est active. En cas de doute, `docker run hello-world`
