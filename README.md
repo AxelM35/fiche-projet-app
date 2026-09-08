@@ -83,6 +83,16 @@ L'application est alors disponible sur http://localhost:8080.
 Un service `db-backup` sauvegarde automatiquement la base PostgreSQL (voir
 [docs/SAUVEGARDE.md](docs/SAUVEGARDE.md) pour la configuration et la procédure de restauration).
 
+L'authentification passe exclusivement par Google : même en local, l'URI
+`http://localhost:8080/login/oauth2/code/google` doit être déclarée dans les
+identifiants OAuth2 du projet Google Cloud.
+
+Pour monter une instance de test sur un poste (Windows notamment) à partir
+d'un `.env` existant, voir
+[docs/DEPLOIEMENT_LOCAL_TEST.md](docs/DEPLOIEMENT_LOCAL_TEST.md) : il détaille
+les réglages à neutraliser pour ne pas envoyer de vrais emails ni écrire dans
+le Drive de l'établissement pendant les tests.
+
 Pour un déploiement réel (HTTPS, identifiants Google/SMTP réels, checklist
 avant ouverture aux utilisateurs...), voir le guide dédié
 [docs/GUIDE_DEPLOIEMENT.md](docs/GUIDE_DEPLOIEMENT.md), écrit pour un profil

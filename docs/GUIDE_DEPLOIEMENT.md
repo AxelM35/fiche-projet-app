@@ -12,6 +12,7 @@ Deux autres documents complètent celui-ci si besoin :
 - [`README.md`](../README.md) : présentation technique rapide, pour un profil développeur.
 - [`docs/CAHIER_DES_CHARGES.md`](CAHIER_DES_CHARGES.md) : détail de chaque fonctionnalité, décisions prises, état d'avancement.
 - [`docs/SAUVEGARDE.md`](SAUVEGARDE.md) : procédure complète de sauvegarde/restauration (référencée en détail au §7 ci-dessous).
+- [`docs/DEPLOIEMENT_LOCAL_TEST.md`](DEPLOIEMENT_LOCAL_TEST.md) : monter une instance de test sur un poste local, sans serveur ni HTTPS.
 
 ---
 
