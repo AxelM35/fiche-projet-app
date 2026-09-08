@@ -216,45 +216,58 @@ réellement les envois, renseignez `MAIL_FROM` et un SMTP, en veillant à ce que
 les destinataires (les listes `ROLES_*`) soient votre propre adresse.
 
 **`Schema validation: missing table [commentaires]` (ou toute autre table), et l'application redémarre en boucle**
-Le schéma de la base n'a pas été créé. Depuis la version publiée ici, il est
-géré par **Flyway** (`src/main/resources/db/migration`), qui applique les
-migrations au démarrage avant qu'Hibernate ne valide le schéma
-(`ddl-auto=validate`, il ne crée jamais rien lui-même). Le message nomme la
-première table manquante rencontrée, pas nécessairement la seule.
+Le schéma de la base n'a pas été créé. Il est géré par **Flyway**
+(`src/main/resources/db/migration`), qui applique les migrations au démarrage
+avant qu'Hibernate ne valide le schéma (`ddl-auto=validate`, il ne crée jamais
+rien lui-même). Le message nomme la première table manquante rencontrée, pas
+nécessairement la seule.
 
-Regardez le tout début des logs : entre l'ouverture du pool de connexions
-(`HikariPool-1 - Start completed`) et Hibernate, vous devez voir Flyway
-annoncer ses migrations (`Migrating schema "public" to version "1 - init"`,
-jusqu'à la version 6). **Si aucune ligne Flyway n'apparaît**, c'est que le
-code compilé est une version antérieure à l'adoption de Flyway : le dossier
-de travail n'est pas un clone de ce dépôt, mais une copie plus ancienne du
-projet. Vérifiez-le d'un coup d'œil :
+Le point de contrôle est le tout début des logs : entre l'ouverture du pool de
+connexions (`HikariPool-1 - Start completed`) et Hibernate, Flyway doit
+annoncer ses migrations :
+
+```
+o.f.core.internal.command.DbMigrate : Migrating schema "public" to version "1 - init"
+...
+o.f.core.internal.command.DbMigrate : Successfully applied 6 migrations to schema "public"
+```
+
+**Si aucune ligne Flyway n'apparaît**, Flyway ne s'exécute pas et le schéma
+reste vide. C'était le cas des versions publiées entre le passage à Spring
+Boot 4 (juillet 2026) et le correctif : `flyway-core` était bien au classpath,
+mais Spring Boot 4 a déplacé les auto-configurations dans un module par
+technologie, et le module `spring-boot-flyway` manquait au `pom.xml`. Aucun
+message n'en avertissait. Si vous exécutez une version antérieure à ce
+correctif, mettez à jour le dépôt puis repartez d'une base vierge :
+
+```powershell
+git pull
+docker compose down -v
+docker compose up --build
+```
+
+Pour inspecter ce que contient réellement la base (adaptez l'utilisateur et le
+nom de base à votre `.env`) :
+
+```powershell
+docker compose exec db psql -U fiche_projet_user -d fiche_projet -c "\dt"
+```
+
+Une base correctement migrée contient six tables, dont
+`flyway_schema_history` et `commentaires`.
+
+**L'application démarre mais le code semble ancien**
+Vérifiez l'arborescence des sources du dossier que vous compilez :
 
 ```powershell
 dir src\main\java\fr
 ```
 
 Le seul sous-dossier attendu est `ficheprojet`. Toute autre arborescence
-signale un code plus ancien. La correction consiste à repartir d'un clone
-propre et d'une base vierge :
-
-```powershell
-docker compose down -v          # supprime la base de test incomplète
-cd ..
-git clone https://github.com/AxelM35/fiche-projet-app.git fiche-projet-test
-cd fiche-projet-test
-# recopier le .env, puis :
-docker compose build --no-cache
-docker compose up
-```
-
-`--no-cache` évite de réutiliser une couche Docker construite à partir de
-l'ancien code. Pour inspecter ce que contient réellement la base (adaptez
-l'utilisateur et le nom de base à votre `.env`) :
-
-```powershell
-docker compose exec db psql -U fiche_projet_user -d fiche_projet -c "\dt"
-```
+signale une copie plus ancienne du projet, antérieure à sa publication ;
+repartez alors d'un clone du dépôt, avec `docker compose build --no-cache`
+pour ne pas réutiliser une couche Docker construite à partir de cet ancien
+code.
 
 **Le build échoue ou Docker ne démarre pas**
 Vérifiez que Docker Desktop est bien lancé (*Engine running*) et que la

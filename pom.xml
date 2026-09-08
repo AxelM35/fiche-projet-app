@@ -49,7 +49,17 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
-        <!-- Migrations de schema versionnees (remplace ddl-auto=update) -->
+        <!-- Migrations de schema versionnees (remplace ddl-auto=update).
+             spring-boot-flyway porte l'auto-configuration : depuis Spring Boot 4,
+             les auto-configurations sont decoupees en modules par technologie et
+             ne sont plus dans spring-boot-autoconfigure. Sans ce module, Flyway
+             est bien present au classpath mais n'est jamais execute au demarrage :
+             le schema n'est pas cree et Hibernate (ddl-auto=validate) echoue sur
+             une base vierge avec "Schema validation: missing table". -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-flyway</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
